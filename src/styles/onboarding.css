@@ -1,0 +1,207 @@
+.onboarding-screen {
+  display: flex;
+  width: 100%;
+  max-width: none;
+  min-height: 100svh;
+  flex-direction: column;
+  padding: 22px 18px 18px;
+}
+
+.onboarding-screen .app-header,
+.onboarding-screen .intro-section,
+.onboarding-screen .profile-form {
+  width: min(100%, 520px);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.onboarding-screen .intro-section {
+  padding: 30px 0 8px;
+}
+
+.onboarding-screen .intro-section h1 {
+  max-width: 420px;
+  font-size: 36px;
+  line-height: 1.1;
+}
+
+.onboarding-screen .intro-section p {
+  max-width: 390px;
+  font-size: 16px;
+}
+
+.onboarding-screen .profile-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.onboarding-screen .form-grid {
+  display: contents;
+}
+
+.step-progress {
+  margin-top: 10px;
+}
+
+.step-progress-bar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ddf0e2;
+}
+
+.step-progress-fill {
+  display: block;
+  width: 14%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--app-green);
+  transition: width 180ms ease;
+}
+
+.step-progress-text {
+  display: block;
+  margin-top: 10px;
+  color: var(--app-green-dark);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.onboarding-screen .field {
+  position: relative;
+  flex: 1;
+  display: none;
+  min-height: 42svh;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 0;
+  border: 0;
+  background: transparent;
+}
+
+.onboarding-screen .field.is-active {
+  display: flex;
+}
+
+.onboarding-screen .field span {
+  max-width: 420px;
+  color: var(--app-text);
+  font-size: 32px;
+  line-height: 1.16;
+  font-weight: 900;
+}
+
+.field-help {
+  max-width: 390px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.onboarding-screen .field input,
+.onboarding-screen .field select {
+  width: 100%;
+  min-height: 78px;
+  margin-top: 12px;
+  border: 0;
+  border-bottom: 3px solid var(--app-line);
+  border-radius: 0;
+  outline: 0;
+  color: var(--app-green-dark);
+  background: transparent;
+  font-size: 44px;
+  font-weight: 900;
+}
+
+.onboarding-screen .field select {
+  font-size: 26px;
+}
+
+.onboarding-screen .field input:focus,
+.onboarding-screen .field select:focus {
+  border-color: var(--app-green);
+}
+
+.onboarding-screen .field small {
+  position: absolute;
+  right: 0;
+  bottom: 62px;
+  color: var(--app-green-dark);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.form-note {
+  min-height: 24px;
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.form-note.is-error {
+  color: var(--app-danger);
+}
+
+.step-actions {
+  display: grid;
+  grid-template-columns: 0.72fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.step-button,
+.auth-button {
+  min-height: 58px;
+  border-radius: 16px;
+  font-weight: 900;
+}
+
+.step-button,
+.auth-button {
+  color: var(--app-green-dark);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--app-line);
+  box-shadow: var(--app-soft-shadow);
+}
+
+.step-button.primary {
+  color: #ffffff;
+  background: var(--app-green);
+  box-shadow: 0 16px 30px rgba(25, 169, 87, 0.22);
+}
+
+.step-button:disabled {
+  color: #9ab9a2;
+  background: #edf7ef;
+  box-shadow: none;
+  cursor: default;
+}
+
+.auth-actions {
+  display: none;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.profile-form.is-auth-step .auth-actions {
+  display: grid;
+  padding-top: 20px;
+}
+
+.profile-form.is-auth-step .step-actions {
+  grid-template-columns: 1fr;
+}
+
+.auth-icon {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 50%;
+  color: #ffffff;
+  background: var(--app-green);
+  font-size: 13px;
+}

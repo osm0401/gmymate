@@ -1,0 +1,249 @@
+:root {
+  --app-bg: #f6fbf7;
+  --app-surface: #ffffff;
+  --app-mint: #e9f8ed;
+  --app-mint-strong: #d6f2de;
+  --app-green: #19a957;
+  --app-green-dark: #06723a;
+  --app-text: #17351f;
+  --app-muted: #65806d;
+  --app-line: #d6eadb;
+  --app-danger: #c94c43;
+  --app-shadow: 0 18px 46px rgba(28, 112, 61, 0.11);
+  --app-soft-shadow: 0 10px 28px rgba(28, 112, 61, 0.07);
+}
+
+body {
+  color: var(--app-text);
+  background: linear-gradient(180deg, #ffffff 0%, #f0faf3 44%, #f8fcf9 100%);
+}
+
+h1,
+h2,
+h3,
+p,
+button,
+.field span,
+.info-list strong,
+.settings-list span,
+.routine-card p {
+  word-break: keep-all;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input[type="number"] {
+  appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+button {
+  border: 0;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.skip-link {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 100;
+  padding: 10px 14px;
+  border-radius: 12px;
+  color: #ffffff;
+  background: var(--app-green-dark);
+  font-weight: 900;
+  transform: translateY(-140%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.phone-screen {
+  width: min(100%, 440px);
+  padding: 22px 18px;
+}
+
+.brand {
+  color: var(--app-green-dark);
+}
+
+.brand-mark {
+  border-radius: 14px;
+  color: #ffffff;
+  background: var(--app-green);
+  box-shadow: 0 10px 24px rgba(25, 169, 87, 0.22);
+}
+
+.app-header,
+.main-header {
+  min-height: 48px;
+}
+
+.intro-section h1,
+.page-heading h1,
+.today-hero h1 {
+  color: var(--app-green-dark);
+  letter-spacing: 0;
+}
+
+.intro-section p,
+.page-heading p,
+.today-hero p,
+.field-help {
+  color: var(--app-muted);
+}
+
+.page-heading {
+  margin-top: 24px;
+}
+
+.page-heading h1 {
+  max-width: 380px;
+  margin: 8px 0 0;
+  font-size: 31px;
+  line-height: 1.12;
+}
+
+.screen-label,
+.soft-label {
+  color: var(--app-green-dark);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.content-section {
+  margin-top: 28px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-title h2 {
+  margin: 0;
+  color: var(--app-text);
+  font-size: 21px;
+}
+
+.text-button,
+.section-title a {
+  color: var(--app-green-dark);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.primary-action {
+  display: grid;
+  width: 100%;
+  min-height: 58px;
+  place-items: center;
+  border-radius: 16px;
+  color: #ffffff;
+  background: var(--app-green);
+  box-shadow: 0 16px 30px rgba(25, 169, 87, 0.22);
+  font-weight: 900;
+}
+
+.summary-panel div,
+.daily-metrics div,
+.calendar-stats div,
+.quick-actions button,
+.info-list div,
+.settings-list label,
+.workout-form,
+.habit-list,
+.week-strip,
+.calendar-grid,
+.log-list li,
+.workout-log-panel,
+.exercise-log-card,
+.empty-log-card,
+.exercise-picker-sheet {
+  border: 1px solid var(--app-line);
+  background: var(--app-surface);
+  box-shadow: var(--app-soft-shadow);
+}
+
+.summary-panel span,
+.daily-metrics span,
+.calendar-stats span,
+.quick-actions span,
+.info-list span,
+.settings-list span,
+.workout-form span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--app-muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.summary-panel strong,
+.daily-metrics strong,
+.calendar-stats strong,
+.quick-actions strong,
+.info-list strong,
+.routine-card h3 {
+  color: var(--app-green-dark);
+}
+
+.icon-button {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 13px;
+  color: var(--app-green-dark);
+  background: var(--app-mint);
+}
+
+.icon-button svg {
+  width: 21px;
+  height: 21px;
+  fill: currentColor;
+}
+
+.auth-button:focus-visible,
+.step-button:focus-visible,
+.primary-action:focus-visible,
+.nav-item:focus-visible,
+.profile-button:focus-visible,
+.circle-button:focus-visible,
+.text-button:focus-visible,
+.quick-actions button:focus-visible {
+  outline: 3px solid rgba(25, 169, 87, 0.25);
+  outline-offset: 3px;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(25, 169, 87, 0.32);
+  outline-offset: 3px;
+}
+
+.large-touch-mode button,
+.large-touch-mode .nav-item,
+.large-touch-mode .set-check {
+  min-height: 52px;
+}

@@ -1,0 +1,53 @@
+@media (max-width: 360px) {
+  .phone-screen {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .onboarding-screen .intro-section h1,
+  .today-hero h1,
+  .page-heading h1 {
+    font-size: 30px;
+  }
+
+  .onboarding-screen .field span {
+    font-size: 28px;
+  }
+
+  .onboarding-screen .field input,
+  .onboarding-screen .field select {
+    font-size: 34px;
+  }
+
+  .quick-actions,
+  .mini-inputs,
+  .daily-metrics,
+  .calendar-stats,
+  .workout-insight-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rest-timer-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .set-row {
+    grid-template-columns: 30px minmax(0, 1fr) 38px;
+    gap: 6px;
+  }
+
+  .set-input-control {
+    grid-template-columns: minmax(22px, 1fr) auto auto;
+    padding: 0 6px;
+  }
+
+  .set-quick-button {
+    min-width: 24px;
+    padding: 0 4px;
+    font-size: 10px;
+  }
+
+  .set-check {
+    width: 38px;
+  }
+}

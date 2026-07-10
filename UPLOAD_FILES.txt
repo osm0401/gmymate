@@ -1,0 +1,17 @@
+Upload these files and folders to public_html.
+
+Required:
+- index.html
+- onboarding.html
+- main.html
+- src/app.css
+- src/app.js
+- src/core/
+- src/features/
+- src/styles/
+
+Do not upload these old or temporary files:
+- cleanup-files.mjs
+- src/style.css
+- src/script.js
+- src/app.legacy.js

@@ -1,0 +1,87 @@
+.calendar-stats {
+  margin-top: 0;
+}
+
+.week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  padding: 12px;
+  border-radius: 20px;
+}
+
+.week-strip button,
+.calendar-grid span {
+  display: grid;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--app-muted);
+  background: var(--app-mint);
+  font-weight: 900;
+}
+
+.week-strip .done,
+.calendar-grid .checked {
+  color: #ffffff;
+  background: var(--app-green);
+}
+
+.week-strip .today,
+.calendar-grid .today {
+  color: var(--app-green-dark);
+  outline: 2px solid var(--app-green);
+  background: #ffffff;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  padding: 12px;
+  border-radius: 20px;
+}
+
+.history-list {
+  display: grid;
+  gap: 10px;
+}
+
+.history-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--app-line);
+  border-radius: 18px;
+  background: var(--app-surface);
+  box-shadow: var(--app-soft-shadow);
+}
+
+.history-card strong {
+  display: block;
+  color: var(--app-green-dark);
+  font-size: 16px;
+}
+
+.history-card span,
+.empty-history {
+  display: block;
+  margin-top: 4px;
+  color: var(--app-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.history-card > div:last-child {
+  text-align: right;
+}
+
+.empty-history {
+  margin: 0;
+  padding: 18px;
+  border: 1px solid var(--app-line);
+  border-radius: 18px;
+  background: var(--app-surface);
+}

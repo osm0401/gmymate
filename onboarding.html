@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>gmymate - 시작하기</title>
+  <link rel="stylesheet" href="./src/app.css">
+</head>
+<body>
+  <main class="phone-screen onboarding-screen">
+    <header class="app-header">
+      <a class="brand" href="./onboarding.html" aria-label="gmymate home">
+        <span class="brand-mark">g</span>
+        <span>gmymate</span>
+      </a>
+    </header>
+
+    <section class="intro-section">
+      <h1>쉽게 시작해요.</h1>
+      <p>딱 필요한 정보만 하나씩 물어볼게요. 나중에 언제든 바꿀 수 있어요.</p>
+    </section>
+
+    <form class="profile-form" id="onboardingForm">
+      <div class="form-grid two-columns">
+        <label class="field">
+          <span>키를 알려주세요</span>
+          <p class="field-help">운동 기록과 몸 변화 기준을 잡는 데 사용돼요.</p>
+          <input name="height" type="number" inputmode="numeric" min="100" max="230" placeholder="175">
+          <small>cm</small>
+        </label>
+
+        <label class="field">
+          <span>나이를 알려주세요</span>
+          <p class="field-help">무리 없는 운동 강도를 잡는 데 도움이 돼요.</p>
+          <input name="age" type="number" inputmode="numeric" min="10" max="100" placeholder="25">
+          <small>세</small>
+        </label>
+      </div>
+
+      <div class="form-grid two-columns">
+        <label class="field">
+          <span>현재 몸무게는 얼마인가요?</span>
+          <p class="field-help">정확하지 않아도 괜찮아요. 대략 입력해도 시작할 수 있어요.</p>
+          <input name="weight" type="number" inputmode="decimal" min="30" max="250" step="0.1" placeholder="72">
+          <small>kg</small>
+        </label>
+
+        <label class="field">
+          <span>목표 몸무게는 얼마인가요?</span>
+          <p class="field-help">목표는 나중에 천천히 바꿔도 돼요.</p>
+          <input name="targetWeight" type="number" inputmode="decimal" min="30" max="250" step="0.1" placeholder="68">
+          <small>kg</small>
+        </label>
+      </div>
+
+      <label class="field">
+        <span>헬스 경력은 어느 정도인가요?</span>
+        <p class="field-help">처음이어도 괜찮아요. 쉬운 루틴부터 보여드릴게요.</p>
+        <select name="experience">
+          <option value="">선택해주세요</option>
+          <option value="beginner">처음 시작</option>
+          <option value="under-6-months">6개월 이하</option>
+          <option value="under-2-years">2년 이하</option>
+          <option value="over-2-years">2년 이상</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>가장 큰 목표는 무엇인가요?</span>
+        <p class="field-help">목표에 맞춰 오늘 할 운동을 더 쉽게 추천할게요.</p>
+        <select name="goal">
+          <option value="">선택해주세요</option>
+          <option value="fat-loss">체지방 감량</option>
+          <option value="muscle-gain">근육 증가</option>
+          <option value="strength">근력 향상</option>
+          <option value="habit">운동 습관 만들기</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>일주일에 몇 번 운동할까요?</span>
+        <p class="field-help">현실적으로 가능한 횟수를 고르는 게 가장 좋아요.</p>
+        <select name="weeklyWorkout">
+          <option value="">선택해주세요</option>
+          <option value="2">주 2회</option>
+          <option value="3">주 3회</option>
+          <option value="4">주 4회</option>
+          <option value="5">주 5회 이상</option>
+        </select>
+      </label>
+
+      <p class="form-note" id="formNote">하나씩 입력하면 바로 시작할 수 있어요.</p>
+
+      <div class="auth-actions">
+        <button class="auth-button" type="submit" data-provider="google">
+          <span class="auth-icon">G</span>
+          Google로 시작하기
+        </button>
+        <button class="auth-button" type="submit" data-provider="apple">
+          <span class="auth-icon">A</span>
+          Apple로 시작하기
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

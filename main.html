@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>gmymate - 메인</title>
+  <link rel="stylesheet" href="./src/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">본문으로 바로가기</a>
+  <main class="phone-screen main-screen" id="mainContent">
+    <header class="main-header">
+      <a class="brand compact-brand" href="./main.html" aria-label="gmymate home">
+        <span class="brand-mark">g</span>
+        <span>gmymate</span>
+      </a>
+      <button class="profile-button" type="button" data-tab="profile" aria-label="내 정보 보기">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.4 0-8 2.1-8 4.7V20h16v-1.3c0-2.6-3.6-4.7-8-4.7Z"/>
+        </svg>
+      </button>
+    </header>
+
+    <section class="app-view active" data-view="home">
+      <section class="today-hero">
+        <div>
+          <p class="screen-label">오늘 운동</p>
+          <h1>오늘 할 일만 쉽게 볼게요.</h1>
+          <p>복잡한 건 줄이고, 지금 바로 할 운동부터 보여드릴게요.</p>
+        </div>
+        <button class="primary-action" type="button" data-start-workout>운동 시작</button>
+      </section>
+
+      <section class="summary-panel" aria-label="내 목표 요약">
+        <div>
+          <span>현재</span>
+          <strong id="currentWeight">-- kg</strong>
+        </div>
+        <div>
+          <span>목표</span>
+          <strong id="targetWeight">-- kg</strong>
+        </div>
+        <div>
+          <span>계획</span>
+          <strong id="weeklyWorkout">-- 회</strong>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-title">
+          <h2>오늘 현황</h2>
+          <button class="text-button" type="button" data-tab="log">기록하기</button>
+        </div>
+
+        <div class="daily-metrics">
+          <div>
+            <span>완료 세트</span>
+            <strong id="homeDoneSets">0/0</strong>
+          </div>
+          <div>
+            <span>운동 볼륨</span>
+            <strong id="homeVolume">0kg</strong>
+          </div>
+          <div>
+            <span>연속 운동</span>
+            <strong id="homeStreak">0일</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-title">
+          <h2>오늘 할 일</h2>
+          <button class="text-button" type="button" data-tab="routine">바꾸기</button>
+        </div>
+
+        <article class="routine-card">
+          <div>
+            <span class="routine-type">초보도 쉬운 루틴</span>
+            <h3>상체 가볍게 시작</h3>
+            <p>가슴, 어깨, 팔을 무리 없이 움직이는 기본 운동 3개</p>
+          </div>
+          <button class="circle-button" type="button" data-start-workout aria-label="루틴 시작">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5v14l11-7Z"/>
+            </svg>
+          </button>
+        </article>
+      </section>
+
+      <section class="content-section">
+        <div class="section-title">
+          <h2>빠른 기록</h2>
+        </div>
+
+        <div class="quick-actions">
+          <button type="button" data-tab="log">
+            <span>운동</span>
+            <strong>세트 기록</strong>
+          </button>
+          <button type="button" data-tab="profile">
+            <span>몸무게</span>
+            <strong>오늘 기록</strong>
+          </button>
+          <button type="button" data-tab="calendar">
+            <span>달력</span>
+            <strong>출석 확인</strong>
+          </button>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-title">
+          <h2>작은 습관</h2>
+        </div>
+        <div class="habit-list">
+          <label>
+            <input type="checkbox" data-habit="protein">
+            <span>운동 후 단백질 챙기기</span>
+          </label>
+          <label>
+            <input type="checkbox" data-habit="water">
+            <span>물 2L 마시기</span>
+          </label>
+          <label>
+            <input type="checkbox" data-habit="stretch">
+            <span>스트레칭 5분 하기</span>
+          </label>
+        </div>
+      </section>
+    </section>
+
+    <section class="app-view" data-view="calendar">
+      <section class="page-heading">
+        <p class="screen-label">달력</p>
+        <h1>꾸준함을 쉽게 확인해요.</h1>
+      </section>
+
+      <section class="content-section">
+        <div class="calendar-stats">
+          <div>
+            <span>연속 운동</span>
+            <strong id="calendarStreak">0일</strong>
+          </div>
+          <div>
+            <span>이번 달</span>
+            <strong id="calendarMonthCount">0일</strong>
+          </div>
+          <div>
+            <span>누적 기록</span>
+            <strong id="calendarTotalSessions">0회</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="week-strip" id="weekStrip" aria-label="이번 주 출석">
+          <button type="button" class="done">월</button>
+          <button type="button" class="done">화</button>
+          <button type="button">수</button>
+          <button type="button" class="today">목</button>
+          <button type="button">금</button>
+          <button type="button">토</button>
+          <button type="button">일</button>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-title">
+          <h2>이번 달</h2>
+          <span class="soft-label" id="monthWorkoutLabel">운동한 날 0일</span>
+        </div>
+        <div class="calendar-grid" id="calendarGrid" aria-label="월간 운동 기록">
+          <span></span><span></span><span>1</span><span class="checked">2</span><span>3</span><span>4</span><span>5</span>
+          <span class="checked">6</span><span>7</span><span>8</span><span class="checked">9</span><span>10</span><span>11</span><span>12</span>
+          <span>13</span><span class="checked">14</span><span>15</span><span>16</span><span class="today">17</span><span>18</span><span>19</span>
+          <span>20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span>
+          <span>27</span><span>28</span><span>29</span><span>30</span><span>31</span><span></span><span></span>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-title">
+          <h2>최근 기록</h2>
+        </div>
+        <div class="history-list" id="historyList" aria-live="polite"></div>
+      </section>
+    </section>
+
+    <section class="app-view" data-view="log">
+      <section class="page-heading">
+        <p class="screen-label">기록</p>
+        <h1>운동을 고르고 세트만 체크해요.</h1>
+      </section>
+
+      <section class="workout-insight-grid" aria-label="오늘 운동 요약">
+        <div>
+          <span>진행</span>
+          <strong id="workoutProgress">0/0</strong>
+        </div>
+        <div>
+          <span>볼륨</span>
+          <strong id="workoutVolume">0kg</strong>
+        </div>
+        <div>
+          <span>휴식</span>
+          <strong id="restStatus">대기</strong>
+        </div>
+      </section>
+
+      <section class="workout-log-panel">
+        <div class="workout-toolbar">
+          <div>
+            <span class="soft-label">오늘 기록</span>
+            <strong id="workoutSummary">운동 0개</strong>
+          </div>
+          <button class="add-exercise-button" type="button" data-open-exercise-picker>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6Z"/></svg>
+            운동 추가
+          </button>
+        </div>
+
+        <div class="active-workouts" id="logList" aria-live="polite"></div>
+
+        <label class="workout-note-field">
+          <span>오늘 메모</span>
+          <textarea id="workoutNote" rows="2" placeholder="컨디션, 통증, 느낌"></textarea>
+        </label>
+
+        <button class="primary-action finish-workout-button" type="button" data-finish-workout>오늘 운동 완료</button>
+      </section>
+
+      <section class="rest-timer-card" aria-label="휴식 타이머">
+        <div>
+          <span class="soft-label">휴식 타이머</span>
+          <strong id="restTimerDisplay">00:00</strong>
+        </div>
+        <div class="rest-progress" aria-hidden="true">
+          <span id="restTimerBar"></span>
+        </div>
+        <div class="rest-timer-actions">
+          <button type="button" data-start-rest="60">60초</button>
+          <button type="button" data-start-rest="90">90초</button>
+          <button type="button" data-start-rest="settings">내 설정</button>
+          <button type="button" data-reset-rest>정지</button>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-title">
+          <h2>기록 관리</h2>
+          <button class="text-button" type="button" data-clear-logs>비우기</button>
+        </div>
+        <p class="log-help">자주 하는 운동은 위쪽 최근 운동에 먼저 보여요. 세트는 체크하면 바로 저장돼요.</p>
+      </section>
+    </section>
+
+    <section class="exercise-picker" id="exercisePicker" aria-hidden="true">
+      <div class="exercise-picker-backdrop" data-close-exercise-picker></div>
+      <div class="exercise-picker-sheet" role="dialog" aria-modal="true" aria-labelledby="exercisePickerTitle">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="section-title">
+          <div>
+            <span class="soft-label">운동 선택</span>
+            <h2 id="exercisePickerTitle">추가할 운동을 골라요.</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-exercise-picker aria-label="닫기">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 12.6 12.6-1.4 1.4L5 6.4Zm12.6 1.4L6.4 19 5 17.6 17.6 5Z"/></svg>
+          </button>
+        </div>
+
+        <label class="exercise-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 4a6.5 6.5 0 0 1 5.2 10.4l4 4-1.4 1.4-4-4A6.5 6.5 0 1 1 10.5 4Zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z"/></svg>
+          <input id="exerciseSearch" type="search" placeholder="운동 검색">
+        </label>
+
+        <div class="picker-section" id="recentExerciseSection">
+          <span class="soft-label">최근 운동</span>
+          <div class="exercise-chip-list" id="recentExerciseList"></div>
+        </div>
+
+        <div class="picker-section">
+          <span class="soft-label">운동 리스트</span>
+          <div class="exercise-list" id="exerciseList"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="app-view" data-view="routine">
+      <section class="page-heading">
+        <p class="screen-label">루틴</p>
+        <h1>어렵지 않은 루틴부터 시작해요.</h1>
+      </section>
+
+      <div class="routine-list">
+        <article class="routine-card">
+          <div>
+            <span class="routine-type">상체</span>
+            <h3>가볍게 밀기</h3>
+            <p>체스트프레스, 숄더프레스, 케이블 푸시다운</p>
+          </div>
+          <button class="circle-button" type="button" data-start-workout aria-label="상체 루틴 시작">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>
+          </button>
+        </article>
+        <article class="routine-card">
+          <div>
+            <span class="routine-type">하체</span>
+            <h3>무리 없는 하체</h3>
+            <p>레그프레스, 레그컬, 카프레이즈</p>
+          </div>
+          <button class="circle-button" type="button" data-start-workout aria-label="하체 루틴 시작">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>
+          </button>
+        </article>
+        <article class="routine-card">
+          <div>
+            <span class="routine-type">전신</span>
+            <h3>처음 온 날 루틴</h3>
+            <p>러닝 10분, 머신 3종, 스트레칭 5분</p>
+          </div>
+          <button class="circle-button" type="button" data-start-workout aria-label="전신 루틴 시작">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>
+          </button>
+        </article>
+      </div>
+    </section>
+
+    <section class="app-view" data-view="profile">
+      <section class="page-heading">
+        <p class="screen-label">내 정보</p>
+        <h1>내 몸 상태를 쉽게 관리해요.</h1>
+      </section>
+
+      <section class="content-section">
+        <div class="section-title">
+          <h2>기본 정보</h2>
+          <a href="./onboarding.html">수정</a>
+        </div>
+
+        <div class="info-list">
+          <div><span>키</span><strong id="heightValue">-- cm</strong></div>
+          <div><span>나이</span><strong id="ageValue">-- 세</strong></div>
+          <div><span>경력</span><strong id="experienceValue">미입력</strong></div>
+          <div><span>목표</span><strong id="goalValue">미입력</strong></div>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-title">
+          <h2>설정</h2>
+        </div>
+        <div class="settings-list">
+          <label>
+            <span>쉬운 말로 보기</span>
+            <input id="easyWordsSetting" type="checkbox" checked>
+          </label>
+          <label>
+            <span>운동 시작 알림</span>
+            <input id="workoutAlertSetting" type="checkbox">
+          </label>
+          <label>
+            <span>초보자 모드</span>
+            <input id="beginnerModeSetting" type="checkbox" checked>
+          </label>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-title">
+          <h2>운동 설정</h2>
+        </div>
+        <div class="settings-list settings-controls">
+          <label class="setting-field">
+            <span>무게 k</span>
+            <input id="weightStepSetting" type="number" min="0.5" max="20" step="0.5" inputmode="decimal">
+          </label>
+          <label class="setting-field">
+            <span>휴식 시간</span>
+            <input id="restTimerSetting" type="number" min="15" max="300" step="15" inputmode="numeric">
+          </label>
+          <label>
+            <span>큰 버튼</span>
+            <input id="largeTouchSetting" type="checkbox">
+          </label>
+        </div>
+        <div class="settings-actions">
+          <button class="text-button" type="button" data-export-data>데이터 복사</button>
+          <button class="text-button danger-text" type="button" data-reset-today>오늘 기록 초기화</button>
+        </div>
+      </section>
+    </section>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <nav class="bottom-nav" aria-label="하단 메뉴">
+      <button class="nav-item active" type="button" data-tab="home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20h-5v-6H9v6H4Z"/></svg>
+        <span>홈</span>
+      </button>
+      <button class="nav-item" type="button" data-tab="calendar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h2v3h6V2h2v3h3v17H4V5h3Zm11 8H6v10h12Z"/></svg>
+        <span>달력</span>
+      </button>
+      <button class="nav-item" type="button" data-tab="log">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h12v3H6Zm0 5h12v3H6Zm0 5h8v3H6Z"/></svg>
+        <span>기록</span>
+      </button>
+      <button class="nav-item" type="button" data-tab="routine">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v4H5Zm0 6h14v3H5Zm0 5h10v3H5Z"/></svg>
+        <span>루틴</span>
+      </button>
+      <button class="nav-item" type="button" data-tab="profile">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.4 0-8 2.1-8 4.7V20h16v-1.3c0-2.6-3.6-4.7-8-4.7Z"/></svg>
+        <span>내정보</span>
+      </button>
+    </nav>
+  </main>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
