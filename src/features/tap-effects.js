@@ -1,4 +1,5 @@
-export function setupTapEffects() {
+(function attachTapEffects(app) {
+function setupTapEffects() {
   const targetSelector = [
     "button",
     ".exercise-option",
@@ -33,3 +34,6 @@ export function setupTapEffects() {
     ripple.addEventListener("animationend", () => ripple.remove(), { once: true });
   });
 }
+
+app.setupTapEffects = setupTapEffects;
+})(window.Gmymate = window.Gmymate || {});

@@ -1,5 +1,5 @@
-import { profileLabels, weeklyLabels } from "../core/data.js";
-import { getProfile, readJson, setText, showToast, writeJson } from "../core/storage.js";
+(function attachMain(app) {
+const { profileLabels, weeklyLabels, getProfile, readJson, setText, showToast, writeJson } = app;
 
 const DEFAULT_SETTINGS = {
   weightStepKg: 1,
@@ -12,7 +12,7 @@ const DEFAULT_SETTINGS = {
 
 const dayLabels = ["일", "월", "화", "수", "목", "금", "토"];
 
-export function setupMain() {
+function setupMain() {
   const main = document.querySelector(".main-screen");
 
   if (!main) {
@@ -351,3 +351,6 @@ function formatHistoryDate(value) {
 function formatNumber(value) {
   return Math.round(Number(value) || 0).toLocaleString("ko-KR");
 }
+
+app.setupMain = setupMain;
+})(window.Gmymate = window.Gmymate || {});

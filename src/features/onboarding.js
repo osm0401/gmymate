@@ -1,7 +1,7 @@
-import { onboardingRules } from "../core/data.js";
-import { getProfile, writeJson } from "../core/storage.js";
+(function attachOnboarding(app) {
+const { onboardingRules, getProfile, writeJson } = app;
 
-export function setupOnboarding() {
+function setupOnboarding() {
   const form = document.querySelector("#onboardingForm");
   const note = document.querySelector("#formNote");
 
@@ -194,4 +194,8 @@ export function setupOnboarding() {
   });
 
   showStep(0);
+  form.classList.add("is-step-mode");
 }
+
+app.setupOnboarding = setupOnboarding;
+})(window.Gmymate = window.Gmymate || {});

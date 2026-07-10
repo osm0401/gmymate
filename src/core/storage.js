@@ -1,4 +1,5 @@
-export function readJson(key, fallback) {
+(function attachStorage(app) {
+function readJson(key, fallback) {
   try {
     return JSON.parse(localStorage.getItem(key)) || fallback;
   } catch {
@@ -6,15 +7,15 @@ export function readJson(key, fallback) {
   }
 }
 
-export function writeJson(key, value) {
+function writeJson(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-export function getProfile() {
+function getProfile() {
   return readJson("gmymateProfile", {});
 }
 
-export function setText(id, value) {
+function setText(id, value) {
   const element = document.querySelector(`#${id}`);
 
   if (element) {
@@ -22,7 +23,7 @@ export function setText(id, value) {
   }
 }
 
-export function showToast(message) {
+function showToast(message) {
   const toast = document.querySelector("#toast");
 
   if (!toast) {
@@ -34,7 +35,7 @@ export function showToast(message) {
   window.setTimeout(() => toast.classList.remove("show"), 1800);
 }
 
-export function escapeHtml(value) {
+function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -42,3 +43,13 @@ export function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+
+Object.assign(app, {
+  readJson,
+  writeJson,
+  getProfile,
+  setText,
+  showToast,
+  escapeHtml
+});
+})(window.Gmymate = window.Gmymate || {});

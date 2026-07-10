@@ -71,8 +71,8 @@
 .onboarding-screen .field {
   position: relative;
   flex: 1;
-  display: none;
-  min-height: 42svh;
+  display: flex;
+  min-height: auto;
   flex-direction: column;
   justify-content: center;
   gap: 12px;
@@ -81,7 +81,12 @@
   background: transparent;
 }
 
-.onboarding-screen .field.is-active {
+.onboarding-screen .profile-form.is-step-mode .field {
+  display: none;
+  min-height: 42svh;
+}
+
+.onboarding-screen .profile-form.is-step-mode .field.is-active {
   display: flex;
 }
 
@@ -181,12 +186,16 @@
 }
 
 .auth-actions {
-  display: none;
+  display: grid;
   gap: 10px;
   margin-top: auto;
 }
 
-.profile-form.is-auth-step .auth-actions {
+.profile-form.is-step-mode .auth-actions {
+  display: none;
+}
+
+.profile-form.is-step-mode.is-auth-step .auth-actions {
   display: grid;
   padding-top: 20px;
 }

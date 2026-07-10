@@ -1,7 +1,7 @@
-import { exerciseCatalog } from "../core/data.js";
-import { escapeHtml, readJson, showToast, writeJson } from "../core/storage.js";
+(function attachWorkoutLog(app) {
+const { exerciseCatalog, escapeHtml, readJson, showToast, writeJson } = app;
 
-export function setupWorkoutLog() {
+function setupWorkoutLog() {
   const list = document.querySelector("#logList");
   const summary = document.querySelector("#workoutSummary");
   const picker = document.querySelector("#exercisePicker");
@@ -544,3 +544,6 @@ export function setupWorkoutLog() {
   renderLogs();
   renderRestTimer();
 }
+
+app.setupWorkoutLog = setupWorkoutLog;
+})(window.Gmymate = window.Gmymate || {});

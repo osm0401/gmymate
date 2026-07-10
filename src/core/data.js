@@ -1,4 +1,5 @@
-export const profileLabels = {
+(function attachData(app) {
+const profileLabels = {
   "beginner": "처음 시작",
   "under-6-months": "6개월 이하",
   "under-2-years": "2년 이하",
@@ -9,14 +10,14 @@ export const profileLabels = {
   "habit": "운동 습관 만들기"
 };
 
-export const weeklyLabels = {
+const weeklyLabels = {
   "2": "주 2회",
   "3": "주 3회",
   "4": "주 4회",
   "5": "주 5회+"
 };
 
-export const onboardingRules = [
+const onboardingRules = [
   { name: "height", label: "키", min: 100, max: 230 },
   { name: "age", label: "나이", min: 10, max: 100 },
   { name: "weight", label: "몸무게", min: 30, max: 250 },
@@ -26,7 +27,7 @@ export const onboardingRules = [
   { name: "weeklyWorkout", label: "주 운동 횟수" }
 ];
 
-export const exerciseCatalog = [
+const exerciseCatalog = [
   { id: "bench-press", name: "벤치프레스", category: "가슴", weight: 20, reps: 10, sets: 3 },
   { id: "squat", name: "스쿼트", category: "하체", weight: 90, reps: 5, sets: 3 },
   { id: "deadlift", name: "데드리프트", category: "등/하체", weight: 80, reps: 5, sets: 3 },
@@ -38,3 +39,11 @@ export const exerciseCatalog = [
   { id: "push-up", name: "푸시업", category: "가슴", weight: 0, reps: 15, sets: 3 },
   { id: "plank", name: "플랭크", category: "코어", weight: 0, reps: 60, sets: 3 }
 ];
+
+Object.assign(app, {
+  profileLabels,
+  weeklyLabels,
+  onboardingRules,
+  exerciseCatalog
+});
+})(window.Gmymate = window.Gmymate || {});
