@@ -94,6 +94,7 @@ textarea {
 
 .phone-screen {
   width: min(100%, 440px);
+  margin: 0 auto;
   padding: 22px 18px;
 }
 

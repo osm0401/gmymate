@@ -543,3 +543,589 @@
   font-weight: 900;
   text-align: center;
 }
+
+/* Compact mobile workout flow */
+.app-view[data-view="log"] {
+  padding-bottom: 92px;
+}
+
+.app-view[data-view="log"] .page-heading h1 {
+  max-width: 330px;
+  font-size: 25px;
+  line-height: 1.2;
+}
+
+.workout-log-panel {
+  gap: 12px;
+  padding: 0;
+  border-radius: 0;
+}
+
+.workout-toolbar strong {
+  font-size: 17px;
+}
+
+.exercise-log-card {
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--app-line);
+  border-radius: 8px;
+  background: var(--app-surface);
+  box-shadow: 0 6px 18px rgba(28, 112, 61, 0.06);
+}
+
+.exercise-card-header.compact {
+  grid-template-columns: 28px 38px minmax(0, 1fr) auto;
+  gap: 7px;
+}
+
+.drag-handle {
+  display: grid;
+  width: 28px;
+  height: 44px;
+  place-items: center;
+  border-radius: 6px;
+  color: #789282;
+  background: transparent;
+  touch-action: none;
+  cursor: grab;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-handle svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+.compact-avatar,
+.compact-avatar svg {
+  width: 38px;
+  height: 38px;
+}
+
+.exercise-card-header.compact .exercise-title-block strong {
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+}
+
+.exercise-card-header.compact .exercise-title-block span {
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compact-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.set-count-control {
+  display: grid;
+  grid-template-columns: 28px 26px 28px;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--app-line);
+  border-radius: 7px;
+  background: #f3faf5;
+}
+
+.set-count-control button {
+  width: 28px;
+  height: 34px;
+  color: var(--app-green-dark);
+  background: transparent;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.set-count-control button:disabled {
+  color: #b3c3b7;
+}
+
+.set-count-control strong {
+  text-align: center;
+  font-size: 13px;
+}
+
+.delete-workout-button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 7px;
+  color: #8a9d90;
+  background: #f3f7f4;
+}
+
+.delete-workout-button svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.set-summary-list {
+  display: grid;
+  border-top: 1px solid #e4f0e7;
+}
+
+.set-summary-row {
+  display: grid;
+  min-height: 48px;
+  grid-template-columns: 28px minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #edf4ef;
+  border-radius: 0;
+  color: var(--app-text);
+  background: transparent;
+  text-align: left;
+}
+
+.set-summary-row:last-child {
+  border-bottom: 0;
+}
+
+.set-summary-row .set-number {
+  grid-area: auto;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+.set-summary-value {
+  min-width: 0;
+}
+
+.set-summary-value strong,
+.set-summary-value small {
+  display: block;
+}
+
+.set-summary-value strong {
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.set-summary-value small {
+  margin-top: 2px;
+  color: var(--app-muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.set-summary-check {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  color: #ffffff;
+  background: #d0dbd3;
+}
+
+.set-summary-check svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.set-summary-row.is-done {
+  color: var(--app-green-dark);
+  background: #f4fbf6;
+}
+
+.set-summary-row.is-done .set-summary-check {
+  background: var(--app-green);
+}
+
+.exercise-log-card.is-dragging {
+  z-index: 2;
+  border-color: var(--app-green);
+  box-shadow: 0 12px 28px rgba(25, 169, 87, 0.18);
+  opacity: 0.92;
+}
+
+.exercise-category-list {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.exercise-category-list::-webkit-scrollbar {
+  display: none;
+}
+
+.exercise-category-list button {
+  min-height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid var(--app-line);
+  border-radius: 7px;
+  padding: 0 13px;
+  color: var(--app-muted);
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.exercise-category-list button[aria-pressed="true"] {
+  border-color: var(--app-green);
+  color: #ffffff;
+  background: var(--app-green);
+}
+
+.exercise-option {
+  grid-template-columns: 46px 1fr 30px;
+  min-height: 62px;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.exercise-option.selected {
+  border-color: var(--app-green);
+  background: #f1faf4;
+}
+
+.exercise-option.already-added {
+  opacity: 0.48;
+}
+
+.exercise-select-check {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid var(--app-line);
+  border-radius: 7px;
+  color: transparent;
+  background: #ffffff;
+}
+
+.exercise-option.selected .exercise-select-check {
+  border-color: var(--app-green);
+  color: #ffffff;
+  background: var(--app-green);
+}
+
+.exercise-select-check svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.exercise-chip.selected {
+  border-color: var(--app-green);
+  background: var(--app-mint);
+}
+
+.picker-selection-bar {
+  position: sticky;
+  bottom: -24px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+  margin: 0 -18px -24px;
+  padding: 12px 18px calc(14px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--app-line);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.picker-selection-bar span {
+  color: var(--app-green-dark);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.picker-selection-bar button {
+  min-height: 50px;
+  border-radius: 8px;
+  color: #ffffff;
+  background: var(--app-green);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.picker-selection-bar button:disabled {
+  color: #8aa493;
+  background: #e5eee8;
+}
+
+.set-editor {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.set-editor.show {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.set-editor-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(13, 37, 20, 0.38);
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.set-editor.show .set-editor-backdrop {
+  opacity: 1;
+}
+
+.set-editor-sheet {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  width: min(100%, 440px);
+  max-height: 88svh;
+  gap: 16px;
+  margin: 0 auto;
+  padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
+  border-radius: 20px 20px 0 0;
+  overflow-y: auto;
+  background: #ffffff;
+  box-shadow: 0 -20px 50px rgba(20, 63, 34, 0.18);
+  transform: translateY(105%);
+  transition: transform 220ms ease;
+}
+
+.set-editor.show .set-editor-sheet {
+  transform: translateY(0);
+}
+
+.set-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.set-editor-header span {
+  color: var(--app-muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.set-editor-header h2 {
+  margin: 3px 0 0;
+  font-size: 21px;
+}
+
+.set-editor-field {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--app-line);
+  border-radius: 8px;
+  background: #f8fcf9;
+}
+
+.set-editor-field > label {
+  color: var(--app-green-dark);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.set-editor-value {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+}
+
+.set-editor-value input {
+  width: 150px;
+  border: 0;
+  border-bottom: 2px solid var(--app-line);
+  outline: 0;
+  color: var(--app-text);
+  background: transparent;
+  font-size: 38px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.set-editor-value input:focus {
+  border-color: var(--app-green);
+}
+
+.set-editor-value span {
+  color: var(--app-green-dark);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.set-adjust-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.set-adjust-grid button {
+  min-height: 46px;
+  border: 1px solid var(--app-line);
+  border-radius: 7px;
+  color: var(--app-green-dark);
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.set-complete-button {
+  min-height: 56px;
+  border-radius: 8px;
+  color: #ffffff;
+  background: var(--app-green);
+  font-size: 17px;
+  font-weight: 900;
+  box-shadow: 0 12px 24px rgba(25, 169, 87, 0.2);
+}
+
+.set-complete-button.is-done {
+  color: var(--app-green-dark);
+  background: var(--app-mint);
+  box-shadow: none;
+}
+
+.workout-timer-dock {
+  position: fixed;
+  right: 12px;
+  bottom: 79px;
+  left: 12px;
+  z-index: 9;
+  display: grid;
+  width: min(calc(100% - 24px), 416px);
+  min-height: 68px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin: 0 auto;
+  overflow: hidden;
+  padding: 10px 12px 13px;
+  border: 1px solid var(--app-line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 -8px 28px rgba(28, 112, 61, 0.13);
+  backdrop-filter: blur(14px);
+}
+
+.timer-dock-copy {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+
+.timer-dock-copy span {
+  color: var(--app-green-dark);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.timer-dock-copy strong {
+  color: var(--app-text);
+  font-size: 25px;
+  line-height: 1;
+}
+
+.workout-timer-dock[data-mode="rest"] .timer-dock-copy strong {
+  color: var(--app-green);
+}
+
+.timer-dock-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.timer-dock-actions button {
+  min-height: 40px;
+  border-radius: 7px;
+  padding: 0 10px;
+  color: var(--app-green-dark);
+  background: var(--app-mint);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.timer-dock-actions .timer-next-button {
+  color: #ffffff;
+  background: var(--app-green);
+}
+
+.timer-progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background: #e1eee4;
+}
+
+.timer-progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--app-green);
+  transition: width 300ms linear;
+}
+
+body:has(.app-view[data-view="log"].active) .toast {
+  bottom: 158px;
+}
+
+@media (max-width: 370px) {
+  .exercise-card-header.compact {
+    grid-template-columns: 24px 34px minmax(0, 1fr) auto;
+    gap: 5px;
+  }
+
+  .compact-avatar,
+  .compact-avatar svg {
+    width: 34px;
+    height: 34px;
+  }
+
+  .set-count-control {
+    grid-template-columns: 25px 22px 25px;
+  }
+
+  .set-count-control button {
+    width: 25px;
+  }
+
+  .delete-workout-button {
+    width: 30px;
+  }
+
+  .timer-dock-copy strong {
+    font-size: 22px;
+  }
+
+  .timer-dock-actions button {
+    padding: 0 8px;
+    font-size: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .set-editor-backdrop,
+  .set-editor-sheet,
+  .timer-progress span {
+    transition: none;
+  }
+}

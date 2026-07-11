@@ -230,28 +230,27 @@
         <button class="primary-action finish-workout-button" type="button" data-finish-workout>오늘 운동 완료</button>
       </section>
 
-      <section class="rest-timer-card" aria-label="휴식 타이머">
-        <div>
-          <span class="soft-label">휴식 타이머</span>
-          <strong id="restTimerDisplay">00:00</strong>
-        </div>
-        <div class="rest-progress" aria-hidden="true">
-          <span id="restTimerBar"></span>
-        </div>
-        <div class="rest-timer-actions">
-          <button type="button" data-start-rest="60">60초</button>
-          <button type="button" data-start-rest="90">90초</button>
-          <button type="button" data-start-rest="settings">내 설정</button>
-          <button type="button" data-reset-rest>정지</button>
-        </div>
-      </section>
-
       <section class="content-section">
         <div class="section-title">
           <h2>기록 관리</h2>
           <button class="text-button" type="button" data-clear-logs>비우기</button>
         </div>
         <p class="log-help">자주 하는 운동은 위쪽 최근 운동에 먼저 보여요. 세트는 체크하면 바로 저장돼요.</p>
+      </section>
+
+      <section class="workout-timer-dock" id="workoutTimerDock" data-mode="set" aria-label="세트와 휴식 타이머">
+        <div class="timer-dock-copy">
+          <span id="timerModeLabel">세트</span>
+          <strong id="restTimerDisplay">00:00</strong>
+        </div>
+        <div class="timer-dock-actions">
+          <button type="button" data-add-rest hidden>+15초</button>
+          <button type="button" data-skip-rest hidden>건너뛰기</button>
+          <button class="timer-next-button" type="button" data-open-next-set>다음 세트</button>
+        </div>
+        <div class="timer-progress" aria-hidden="true">
+          <span id="restTimerBar"></span>
+        </div>
       </section>
     </section>
 
@@ -274,6 +273,8 @@
           <input id="exerciseSearch" type="search" placeholder="운동 검색">
         </label>
 
+        <div class="exercise-category-list" id="exerciseCategoryList" aria-label="운동 부위"></div>
+
         <div class="picker-section" id="recentExerciseSection">
           <span class="soft-label">최근 운동</span>
           <div class="exercise-chip-list" id="recentExerciseList"></div>
@@ -283,6 +284,52 @@
           <span class="soft-label">운동 리스트</span>
           <div class="exercise-list" id="exerciseList"></div>
         </div>
+
+        <div class="picker-selection-bar">
+          <span id="exerciseSelectionCount">0개 선택</span>
+          <button type="button" data-add-selected-exercises disabled>선택한 운동 추가</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="set-editor" id="setEditor" aria-hidden="true">
+      <div class="set-editor-backdrop" data-close-set-editor></div>
+      <div class="set-editor-sheet" role="dialog" aria-modal="true" aria-labelledby="setEditorTitle">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="set-editor-header">
+          <div>
+            <span id="setEditorExercise">운동</span>
+            <h2 id="setEditorTitle">1세트 수정</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-set-editor aria-label="세트 편집 닫기">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 12.6 12.6-1.4 1.4L5 6.4Zm12.6 1.4L6.4 19 5 17.6 17.6 5Z"/></svg>
+          </button>
+        </div>
+
+        <div class="set-editor-field">
+          <label for="setEditorWeight">무게</label>
+          <div class="set-editor-value">
+            <input id="setEditorWeight" type="number" min="0" step="0.5" inputmode="decimal">
+            <span>kg</span>
+          </div>
+          <div class="set-adjust-grid" id="weightAdjustGrid"></div>
+        </div>
+
+        <div class="set-editor-field">
+          <label for="setEditorReps">횟수</label>
+          <div class="set-editor-value">
+            <input id="setEditorReps" type="number" min="1" step="1" inputmode="numeric">
+            <span id="setEditorUnit">회</span>
+          </div>
+          <div class="set-adjust-grid">
+            <button type="button" data-editor-adjust="reps:-5">-5</button>
+            <button type="button" data-editor-adjust="reps:-1">-1</button>
+            <button type="button" data-editor-adjust="reps:1">+1</button>
+            <button type="button" data-editor-adjust="reps:5">+5</button>
+          </div>
+        </div>
+
+        <button class="set-complete-button" type="button" data-complete-active-set>세트 완료</button>
       </div>
     </section>
 

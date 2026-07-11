@@ -51,6 +51,8 @@ function setupNavigation() {
       item.toggleAttribute("aria-current", item.dataset.tab === tabName);
     });
 
+    window.dispatchEvent(new CustomEvent("gmymate:view-changed", { detail: { view: tabName } }));
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 

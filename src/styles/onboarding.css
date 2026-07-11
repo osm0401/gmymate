@@ -21,7 +21,7 @@
 
 .onboarding-screen .intro-section h1 {
   max-width: 420px;
-  font-size: 36px;
+  font-size: 32px;
   line-height: 1.1;
 }
 
@@ -74,11 +74,13 @@
   display: flex;
   min-height: auto;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
   gap: 12px;
   padding: 24px 0;
   border: 0;
   background: transparent;
+  text-align: center;
 }
 
 .onboarding-screen .profile-form.is-step-mode .field {
@@ -93,7 +95,7 @@
 .onboarding-screen .field span {
   max-width: 420px;
   color: var(--app-text);
-  font-size: 32px;
+  font-size: 28px;
   line-height: 1.16;
   font-weight: 900;
 }
@@ -103,6 +105,7 @@
   margin: 0;
   font-size: 15px;
   line-height: 1.5;
+  text-align: center;
 }
 
 .onboarding-screen .field input,
@@ -116,8 +119,9 @@
   outline: 0;
   color: var(--app-green-dark);
   background: transparent;
-  font-size: 44px;
+  font-size: 40px;
   font-weight: 900;
+  text-align: center;
 }
 
 .onboarding-screen .field select {

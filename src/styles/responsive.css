@@ -22,9 +22,26 @@
   .quick-actions,
   .mini-inputs,
   .daily-metrics,
-  .calendar-stats,
-  .workout-insight-grid {
+  .calendar-stats {
     grid-template-columns: 1fr;
+  }
+
+  .app-view[data-view="log"] .page-heading h1 {
+    font-size: 24px;
+  }
+
+  .workout-insight-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .workout-insight-grid div {
+    min-height: 70px;
+    padding: 10px 8px;
+  }
+
+  .workout-insight-grid strong {
+    font-size: 16px;
   }
 
   .rest-timer-actions {
