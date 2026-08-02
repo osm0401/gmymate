@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>gmymate - 시작하기</title>
-  <link rel="stylesheet" href="./src/app.css">
+  <title>GAINMUSCLE - 시작하기</title>
+  <link rel="stylesheet" href="./src/app.css?v=20260717-4">
 </head>
 <body>
   <main class="phone-screen onboarding-screen">
     <header class="app-header">
-      <a class="brand" href="./onboarding.html" aria-label="gmymate home">
-        <span class="brand-mark">g</span>
-        <span>gmymate</span>
+      <a class="brand" href="./onboarding.html" aria-label="GAINMUSCLE 홈">
+        <span class="brand-mark">G</span>
+        <span>GAINMUSCLE</span>
       </a>
     </header>
 
@@ -92,20 +92,14 @@
       <p class="form-note" id="formNote">하나씩 입력하면 바로 시작할 수 있어요.</p>
 
       <div class="auth-actions">
-        <button class="auth-button" type="submit" data-provider="google">
-          <span class="auth-icon">G</span>
-          Google로 시작하기
-        </button>
-        <button class="auth-button" type="submit" data-provider="apple">
-          <span class="auth-icon">A</span>
-          Apple로 시작하기
-        </button>
+        <button class="auth-button" type="submit">정보 저장하고 시작하기</button>
       </div>
     </form>
   </main>
 
   <script defer src="./src/core/data.js"></script>
   <script defer src="./src/core/storage.js"></script>
+  <script defer src="./src/core/auth-guard.js"></script>
   <script defer src="./src/features/onboarding.js"></script>
   <script defer src="./src/features/tap-effects.js"></script>
   <script defer src="./src/app.js"></script>

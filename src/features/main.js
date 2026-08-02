@@ -1,5 +1,5 @@
 (function attachMain(app) {
-const { profileLabels, weeklyLabels, getProfile, readJson, setText, showToast, writeJson } = app;
+const { escapeHtml, getWorkoutHistory, profileLabels, weeklyLabels, getProfile, readJson, setText, showToast, writeJson } = app;
 
 const DEFAULT_SETTINGS = {
   weightStepKg: 1,
@@ -20,6 +20,7 @@ function setupMain() {
   }
 
   setupProfile();
+  window.addEventListener("gmymate:profile-loaded", setupProfile);
   setupNavigation();
   setupHabits();
   setupSettings();
@@ -76,6 +77,7 @@ function setupHabits() {
     input.addEventListener("change", () => {
       savedHabits[input.dataset.habit] = input.checked;
       writeJson("gmymateHabits", savedHabits);
+      app.cloudSync?.saveHabits(savedHabits);
       showToast(input.checked ? "작은 습관 완료!" : "체크를 해제했어요.");
     });
   });
@@ -87,6 +89,7 @@ function getSettings() {
 
 function saveSettings(settings) {
   writeJson("gmymateSettings", settings);
+  app.cloudSync?.saveSettings(settings);
   applySettings(settings);
   window.dispatchEvent(new CustomEvent("gmymate:settings-changed", { detail: settings }));
 }
@@ -148,7 +151,7 @@ function setupSettings() {
 
   bindSettingToggle(largeTouchInput, "largeTouch");
   bindSettingToggle(easyWordsInput, "easyWords");
-  bindSettingToggle(workoutAlertInput, "workoutAlert");
+  bindWorkoutAlertToggle(workoutAlertInput);
   bindSettingToggle(beginnerModeInput, "beginnerMode");
   applySettings(settings);
 
@@ -157,8 +160,36 @@ function setupSettings() {
   resetTodayButton?.addEventListener("click", () => {
     writeJson("gmymateWorkoutLogsV2", []);
     writeJson("gmymateWorkoutNote", "");
+    localStorage.removeItem("gmymateActiveWorkoutV1");
+    localStorage.removeItem("gmymateTimerState");
     window.dispatchEvent(new CustomEvent("gmymate:workouts-changed"));
     showToast("오늘 기록을 비웠어요.");
+  });
+}
+
+function bindWorkoutAlertToggle(input) {
+  if (!input) {
+    return;
+  }
+
+  input.checked = Boolean(getSettings().workoutAlert);
+  input.addEventListener("change", async () => {
+    const nextSettings = getSettings();
+    nextSettings.workoutAlert = input.checked;
+
+    if (input.checked && "Notification" in window && Notification.permission === "default") {
+      try {
+        await Notification.requestPermission();
+      } catch {
+        // Sound and vibration still work when notification permission is unavailable.
+      }
+    }
+
+    saveSettings(nextSettings);
+    const browserNoticeReady = "Notification" in window && Notification.permission === "granted";
+    showToast(input.checked
+      ? browserNoticeReady ? "휴식 종료 소리, 진동, 알림을 켰어요." : "휴식 종료 소리와 진동을 켰어요."
+      : "휴식 종료 알림을 껐어요.");
   });
 }
 
@@ -183,6 +214,7 @@ async function exportData() {
     history: readJson("gmymateWorkoutHistory", []),
     settings: getSettings(),
     habits: readJson("gmymateHabits", {}),
+    activeWorkout: readJson("gmymateActiveWorkoutV1", null),
     exportedAt: new Date().toISOString()
   };
   const text = JSON.stringify(data, null, 2);
@@ -197,7 +229,7 @@ async function exportData() {
 
 function renderAppStats() {
   const todayWorkouts = readJson("gmymateWorkoutLogsV2", []);
-  const history = readJson("gmymateWorkoutHistory", []);
+  const history = getWorkoutHistory();
   const todayStats = getWorkoutStats(todayWorkouts);
   const dateKeys = getCompletedDateKeys(history, todayStats.doneSets > 0);
   const streak = getStreak(dateKeys);
@@ -213,6 +245,7 @@ function renderAppStats() {
 
   renderWeekStrip(dateKeys);
   renderMonthGrid(dateKeys);
+  app.renderProgressDashboard(history);
   renderHistory(history);
 }
 
@@ -334,7 +367,7 @@ function renderHistory(history) {
   list.innerHTML = history.slice(0, 6).map((session) => `
     <article class="history-card">
       <div>
-        <strong>${session.title || "운동 기록"}</strong>
+        <strong>${escapeHtml(session.title || "운동 기록")}</strong>
         <span>${formatHistoryDate(session.finishedAt)} · ${session.exerciseCount || 0}개 운동</span>
       </div>
       <div>

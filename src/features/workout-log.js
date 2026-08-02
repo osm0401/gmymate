@@ -1,5 +1,15 @@
 (function attachWorkoutLog(app) {
-const { exerciseCatalog, escapeHtml, readJson, showToast, writeJson } = app;
+const {
+  createSetsFromPrevious,
+  exerciseCatalog,
+  escapeHtml,
+  findPreviousExerciseWorkout,
+  getPreviousCompletedSets,
+  readJson,
+  showToast,
+  writeJson
+} = app;
+const { formatNumber, formatTime, formatSavedTime, exerciseIcon } = app.workoutLogUtils;
 
 function setupWorkoutLog() {
   const list = document.querySelector("#logList");
@@ -12,9 +22,18 @@ function setupWorkoutLog() {
   const recentList = document.querySelector("#recentExerciseList");
   const selectionCount = document.querySelector("#exerciseSelectionCount");
   const addSelectedButton = document.querySelector("[data-add-selected-exercises]");
+  const replacementPicker = document.querySelector("#exerciseReplacementPicker");
+  const replacementSearch = document.querySelector("#replacementExerciseSearch");
+  const replacementList = document.querySelector("#replacementExerciseList");
+  const replacementTitle = document.querySelector("#replacementPickerTitle");
+  const replacementCategoryLabel = document.querySelector("#replacementCategoryLabel");
   const clearButton = document.querySelector("[data-clear-logs]");
   const noteInput = document.querySelector("#workoutNote");
   const finishButton = document.querySelector("[data-finish-workout]");
+  const recoveryBanner = document.querySelector("#workoutRecoveryBanner");
+  const recoveryTitle = document.querySelector("#workoutRecoveryTitle");
+  const recoveryDetail = document.querySelector("#workoutRecoveryDetail");
+  const saveStatus = document.querySelector("#workoutSaveStatus");
   const timerDock = document.querySelector("#workoutTimerDock");
   const timerModeLabel = document.querySelector("#timerModeLabel");
   const timerDisplay = document.querySelector("#restTimerDisplay");
@@ -30,6 +49,8 @@ function setupWorkoutLog() {
   const editorReps = document.querySelector("#setEditorReps");
   const editorUnit = document.querySelector("#setEditorUnit");
   const weightAdjustGrid = document.querySelector("#weightAdjustGrid");
+  const previousSetSuggestion = document.querySelector("#previousSetSuggestion");
+  const previousSetValue = document.querySelector("#previousSetValue");
   const completeSetButton = document.querySelector("[data-complete-active-set]");
 
   if (!list || !picker || !exerciseList || !recentList || !editor) {
@@ -42,9 +63,14 @@ function setupWorkoutLog() {
   const selectedExerciseIds = new Set();
   let selectedCategory = "전체";
   let activeEditor = null;
+  let replacementWorkoutId = null;
   let dragState = null;
-  let timerIntervalId = null;
-  let timerState = restoreTimerState();
+  const timer = app.createWorkoutTimer({
+    readJson, writeJson, getRestSeconds, getSettings, getNextSetLabel, showToast, formatTime,
+    dom: { timerDock, timerModeLabel, timerDisplay, timerBar, restStatus, addRestButton, skipRestButton, nextSetButton }
+  });
+  let activeWorkoutMeta = readJson("gmymateActiveWorkoutV1", {});
+  let showRecoveryBanner = Boolean(workouts.length && activeWorkoutMeta.updatedAt);
 
   if (noteInput) {
     noteInput.value = readJson("gmymateWorkoutNote", "");
@@ -60,6 +86,7 @@ function setupWorkoutLog() {
         exerciseId: exercise.id,
         name: log.exercise || exercise.name,
         category: exercise.category,
+        restSeconds: getRestSeconds(),
         sets: Array.from({ length: setCount }, () => ({
           weight: Number(log.weight) || exercise.weight,
           reps: Number(log.reps) || exercise.reps,
@@ -84,6 +111,7 @@ function setupWorkoutLog() {
         exerciseId: workout.exerciseId || exercise.id,
         name: workout.name || exercise.name,
         category: workout.category || exercise.category,
+        restSeconds: getWorkoutRestSeconds(workout),
         sets: sets.map((set) => ({
           weight: Math.max(Number(set.weight) || 0, 0),
           reps: Math.max(Math.round(Number(set.reps) || exercise.reps || 1), 1),
@@ -93,8 +121,31 @@ function setupWorkoutLog() {
     });
   }
 
-  function saveWorkouts() {
+  function saveWorkouts(syncCloud = true) {
     writeJson("gmymateWorkoutLogsV2", workouts);
+
+    if (workouts.length) {
+      activeWorkoutMeta = {
+        startedAt: Number(activeWorkoutMeta.startedAt) || Date.now(),
+        updatedAt: Date.now(),
+        exerciseCount: workouts.length,
+        completedSets: getWorkoutStats().doneSets
+      };
+      writeJson("gmymateActiveWorkoutV1", activeWorkoutMeta);
+    } else {
+      activeWorkoutMeta = {};
+      localStorage.removeItem("gmymateActiveWorkoutV1");
+    }
+
+    if (syncCloud) {
+      app.cloudSync?.scheduleActiveWorkout({
+        workouts,
+        note: noteInput?.value.trim() || "",
+        meta: activeWorkoutMeta
+      });
+    }
+
+    renderSaveStatus();
   }
 
   function saveRecentExercises() {
@@ -122,11 +173,7 @@ function setupWorkoutLog() {
   }
 
   function makeSets(exercise) {
-    return Array.from({ length: exercise.sets }, () => ({
-      weight: exercise.weight,
-      reps: exercise.reps,
-      done: false
-    }));
+    return createSetsFromPrevious(exercise, exercise.sets);
   }
 
   function getWeightStep() {
@@ -139,27 +186,39 @@ function setupWorkoutLog() {
     return seconds > 0 ? seconds : 90;
   }
 
-  function formatNumber(value) {
-    return Number(value).toFixed(1).replace(/\.0$/, "");
+  function getWorkoutRestSeconds(workout) {
+    const seconds = Number(workout?.restSeconds);
+
+    if (!Number.isFinite(seconds) || seconds <= 0) {
+      return getRestSeconds();
+    }
+
+    return Math.min(Math.max(Math.round(seconds), 15), 600);
   }
 
-  function formatTime(totalSeconds) {
-    const safeSeconds = Math.max(Math.floor(totalSeconds), 0);
-    const minutes = String(Math.floor(safeSeconds / 60)).padStart(2, "0");
-    const seconds = String(safeSeconds % 60).padStart(2, "0");
-    return `${minutes}:${seconds}`;
+  function renderSaveStatus() {
+    if (!saveStatus) {
+      return;
+    }
+
+    saveStatus.textContent = workouts.length && activeWorkoutMeta.updatedAt
+      ? `자동 저장됨 · ${formatSavedTime(activeWorkoutMeta.updatedAt)}`
+      : "자동 저장 준비";
   }
 
-  function exerciseIcon(name) {
-    const initial = escapeHtml(name.slice(0, 1));
+  function renderRecoveryBanner() {
+    if (!recoveryBanner) {
+      return;
+    }
 
-    return `
-      <svg viewBox="0 0 44 44" aria-hidden="true">
-        <rect x="3" y="3" width="38" height="38" rx="12"></rect>
-        <path d="M12 22h20M9 16h5v12H9zm21 0h5v12h-5z"></path>
-        <text x="22" y="29">${initial}</text>
-      </svg>
-    `;
+    const stats = getWorkoutStats();
+    const remaining = Math.max(stats.totalSets - stats.doneSets, 0);
+    recoveryBanner.hidden = !showRecoveryBanner || workouts.length === 0;
+
+    if (!recoveryBanner.hidden) {
+      recoveryTitle.textContent = "이전 운동을 복구했어요.";
+      recoveryDetail.textContent = `${workouts.length}개 운동 · 남은 세트 ${remaining}개 · ${formatSavedTime(activeWorkoutMeta.updatedAt)} 저장`;
+    }
   }
 
   function getWorkoutStats() {
@@ -195,129 +254,14 @@ function setupWorkoutLog() {
     }
   }
 
-  function restoreTimerState() {
-    const saved = readJson("gmymateTimerState", {});
-    const mode = ["set", "rest"].includes(saved.mode) ? saved.mode : "idle";
-    const restored = {
-      mode,
-      setStartedAt: Number(saved.setStartedAt) || 0,
-      restEndsAt: Number(saved.restEndsAt) || 0,
-      restTotalSeconds: Number(saved.restTotalSeconds) || getRestSeconds()
-    };
-
-    if (restored.mode === "rest" && restored.restEndsAt <= Date.now()) {
-      restored.mode = "set";
-      restored.setStartedAt = Date.now();
-    }
-
-    if (restored.mode === "set" && !restored.setStartedAt) {
-      restored.setStartedAt = Date.now();
-    }
-
-    return restored;
-  }
-
-  function saveTimerState() {
-    writeJson("gmymateTimerState", timerState);
-  }
-
-  function ensureTimerInterval() {
-    window.clearInterval(timerIntervalId);
-    timerIntervalId = timerState.mode === "idle" ? null : window.setInterval(renderTimer, 500);
-  }
-
-  function startSetTimer() {
-    timerState = {
-      mode: "set",
-      setStartedAt: Date.now(),
-      restEndsAt: 0,
-      restTotalSeconds: getRestSeconds()
-    };
-    saveTimerState();
-    ensureTimerInterval();
-    renderTimer();
-  }
-
-  function startRestTimer(seconds = getRestSeconds()) {
-    const total = Math.max(Math.round(Number(seconds) || getRestSeconds()), 1);
-    timerState = {
-      mode: "rest",
-      setStartedAt: 0,
-      restEndsAt: Date.now() + total * 1000,
-      restTotalSeconds: total
-    };
-    saveTimerState();
-    ensureTimerInterval();
-    renderTimer();
-  }
-
-  function stopTimer() {
-    window.clearInterval(timerIntervalId);
-    timerIntervalId = null;
-    timerState = {
-      mode: "idle",
-      setStartedAt: 0,
-      restEndsAt: 0,
-      restTotalSeconds: getRestSeconds()
-    };
-    saveTimerState();
-    renderTimer();
-  }
-
-  function finishRest() {
-    startSetTimer();
-    navigator.vibrate?.([180, 100, 180]);
-    showToast("휴식 끝! 다음 세트를 시작해요.");
-  }
-
-  function renderTimer() {
-    let displaySeconds = 0;
-    let progress = 0;
-
-    if (timerState.mode === "rest") {
-      displaySeconds = Math.max(Math.ceil((timerState.restEndsAt - Date.now()) / 1000), 0);
-
-      if (displaySeconds <= 0) {
-        finishRest();
-        return;
+  function getNextSetLabel() {
+    for (const workout of workouts) {
+      const setIndex = workout.sets.findIndex((set) => !set.done);
+      if (setIndex >= 0) {
+        return `${workout.name} ${setIndex + 1}세트`;
       }
-
-      progress = ((timerState.restTotalSeconds - displaySeconds) / timerState.restTotalSeconds) * 100;
-    } else if (timerState.mode === "set") {
-      displaySeconds = Math.max(Math.floor((Date.now() - timerState.setStartedAt) / 1000), 0);
     }
-
-    if (timerDock) {
-      timerDock.dataset.mode = timerState.mode;
-    }
-
-    if (timerModeLabel) {
-      timerModeLabel.textContent = timerState.mode === "rest" ? "휴식" : timerState.mode === "set" ? "세트" : "준비";
-    }
-
-    if (timerDisplay) {
-      timerDisplay.textContent = formatTime(displaySeconds);
-    }
-
-    if (timerBar) {
-      timerBar.style.width = `${Math.min(Math.max(progress, 0), 100)}%`;
-    }
-
-    if (restStatus) {
-      restStatus.textContent = timerState.mode === "rest" ? formatTime(displaySeconds) : timerState.mode === "set" ? "세트" : "대기";
-    }
-
-    if (addRestButton) {
-      addRestButton.hidden = timerState.mode !== "rest";
-    }
-
-    if (skipRestButton) {
-      skipRestButton.hidden = timerState.mode !== "rest";
-    }
-
-    if (nextSetButton) {
-      nextSetButton.hidden = timerState.mode === "rest";
-    }
+    return "";
   }
 
   function getSetSummary(workout, set) {
@@ -331,8 +275,28 @@ function setupWorkoutLog() {
     return `${weightText} × ${formatNumber(set.reps)}${unit}`;
   }
 
+  function getPreviousSet(workout, setIndex) {
+    const previousSets = getPreviousCompletedSets(workout.exerciseId);
+    return previousSets[setIndex] || previousSets.at(-1) || null;
+  }
+
+  function getPreviousWorkoutLabel(workout) {
+    const previous = findPreviousExerciseWorkout(workout.exerciseId);
+    const previousSets = getPreviousCompletedSets(workout.exerciseId);
+
+    if (!previous || !previousSets.length) {
+      return "지난 기록 없음";
+    }
+
+    const date = new Date(previous.session.finishedAt || `${previous.session.dateKey}T12:00:00`);
+    const dateLabel = Number.isNaN(date.getTime()) ? "최근" : `${date.getMonth() + 1}/${date.getDate()}`;
+    return `지난 ${dateLabel} · ${getSetSummary(workout, previousSets[0])}`;
+  }
+
   function renderLogs() {
     renderWorkoutMetrics();
+    renderRecoveryBanner();
+    renderSaveStatus();
 
     if (workouts.length === 0) {
       list.innerHTML = `
@@ -370,19 +334,34 @@ function setupWorkoutLog() {
             </div>
           </header>
 
+          <div class="exercise-card-context">
+            <span>${escapeHtml(getPreviousWorkoutLabel(workout))}</span>
+            <button type="button" data-replace-workout="${escapeHtml(workout.id)}" ${doneSets ? "disabled" : ""} title="${doneSets ? "완료한 세트가 있어 바꿀 수 없어요." : "같은 부위의 다른 운동으로 바꾸기"}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10.2l-2.6-2.6L16 3l5 5-5 5-1.4-1.4L17.2 9H7a3 3 0 0 0-3 3v1H2v-1a5 5 0 0 1 5-5Zm10 10H6.8l2.6 2.6L8 21l-5-5 5-5 1.4 1.4L6.8 15H17a3 3 0 0 0 3-3v-1h2v1a5 5 0 0 1-5 5Z"/></svg>
+              바꾸기
+            </button>
+          </div>
+
           <div class="set-summary-list">
-            ${workout.sets.map((set, index) => `
-              <button class="set-summary-row ${set.done ? "is-done" : ""}" type="button" data-edit-set="${escapeHtml(workout.id)}:${index}" aria-label="${escapeHtml(workout.name)} ${index + 1}세트, ${escapeHtml(getSetSummary(workout, set))}, ${set.done ? "완료" : "미완료"}">
-                <span class="set-number">${index + 1}</span>
-                <span class="set-summary-value">
-                  <strong>${escapeHtml(getSetSummary(workout, set))}</strong>
-                  <small>${set.done ? "완료됨" : "눌러서 수정"}</small>
-                </span>
-                <span class="set-summary-check" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="m9.7 15.5 7-7 1.4 1.4-8.4 8.4-4.1-4.1L7 12.8Z"/></svg>
-                </span>
-              </button>
-            `).join("")}
+            ${workout.sets.map((set, index) => {
+              const previousSet = getPreviousSet(workout, index);
+              return `
+              <div class="set-summary-row ${set.done ? "is-done" : ""}">
+                <button class="set-summary-edit" type="button" data-edit-set="${escapeHtml(workout.id)}:${index}" aria-label="${escapeHtml(workout.name)} ${index + 1}세트 수정, ${escapeHtml(getSetSummary(workout, set))}">
+                  <span class="set-number">${index + 1}</span>
+                  <span class="set-summary-value">
+                    <strong>${escapeHtml(getSetSummary(workout, set))}</strong>
+                    <small>${set.done ? "완료됨" : previousSet ? `지난 ${escapeHtml(getSetSummary(workout, previousSet))}` : "눌러서 수정"}</small>
+                  </span>
+                </button>
+                <button class="set-summary-check" type="button" data-toggle-set="${escapeHtml(workout.id)}:${index}" aria-pressed="${set.done}" aria-label="${escapeHtml(workout.name)} ${index + 1}세트 ${set.done ? "완료 해제" : "완료"}">
+                  <span aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="m9.7 15.5 7-7 1.4 1.4-8.4 8.4-4.1-4.1L7 12.8Z"/></svg>
+                  </span>
+                </button>
+              </div>
+            `;
+            }).join("")}
           </div>
         </article>
       `;
@@ -487,6 +466,7 @@ function setupWorkoutLog() {
     }
 
     const addedAt = Date.now();
+    const wasEmpty = workouts.length === 0;
     ids.forEach((id, index) => {
       const exercise = getExercise(id);
       workouts.push({
@@ -494,17 +474,113 @@ function setupWorkoutLog() {
         exerciseId: exercise.id,
         name: exercise.name,
         category: exercise.category,
+        restSeconds: getRestSeconds(),
         sets: makeSets(exercise)
       });
     });
 
     recentExerciseIds = [...ids.reverse(), ...recentExerciseIds.filter((id) => !selectedExerciseIds.has(id))].slice(0, 8);
+    showRecoveryBanner = false;
     saveWorkouts();
     saveRecentExercises();
     renderLogs();
     notifyWorkoutsChanged();
     closePicker();
+    if (wasEmpty && timer.getMode() === "idle") {
+      timer.startSet();
+    }
     showToast(`${ids.length}개 운동을 추가했어요.`);
+  }
+
+  function openReplacementPicker(workoutId) {
+    const workout = workouts.find((item) => item.id === workoutId);
+
+    if (!workout) {
+      return;
+    }
+
+    if (workout.sets.some((set) => set.done)) {
+      showToast("완료한 세트가 있는 운동은 바꿀 수 없어요.");
+      return;
+    }
+
+    replacementWorkoutId = workoutId;
+    replacementSearch.value = "";
+    replacementTitle.textContent = `${workout.name} 바꾸기`;
+    replacementCategoryLabel.textContent = `${workout.category} 대체 운동`;
+    replacementPicker.classList.add("show");
+    replacementPicker.setAttribute("aria-hidden", "false");
+    renderReplacementPicker();
+    window.setTimeout(() => replacementSearch?.focus(), 80);
+  }
+
+  function closeReplacementPicker() {
+    replacementPicker?.classList.remove("show");
+    replacementPicker?.setAttribute("aria-hidden", "true");
+    replacementWorkoutId = null;
+
+    if (replacementSearch) {
+      replacementSearch.value = "";
+    }
+  }
+
+  function renderReplacementPicker() {
+    const workout = workouts.find((item) => item.id === replacementWorkoutId);
+
+    if (!workout || !replacementList) {
+      return;
+    }
+
+    const keyword = replacementSearch?.value.trim().toLowerCase() || "";
+    const occupiedExerciseIds = new Set(workouts
+      .filter((item) => item.id !== workout.id)
+      .map((item) => item.exerciseId));
+    const candidates = exerciseCatalog
+      .filter((exercise) => exercise.id !== workout.exerciseId && !occupiedExerciseIds.has(exercise.id))
+      .filter((exercise) => `${exercise.name} ${exercise.category}`.toLowerCase().includes(keyword))
+      .sort((left, right) => Number(right.category === workout.category) - Number(left.category === workout.category));
+
+    replacementList.innerHTML = candidates.length ? candidates.map((exercise) => {
+      const sameCategory = exercise.category === workout.category;
+      return `
+        <button class="exercise-option replacement-option" type="button" data-replacement-exercise="${escapeHtml(exercise.id)}">
+          <span class="exercise-avatar">${exerciseIcon(exercise.name)}</span>
+          <span>
+            <strong>${escapeHtml(exercise.name)}</strong>
+            <small>${sameCategory ? "같은 부위 · " : ""}${escapeHtml(exercise.category)} · ${escapeHtml(getPreviousWorkoutLabel(exercise))}</small>
+          </span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10.2l-2.6-2.6L16 3l5 5-5 5-1.4-1.4L17.2 9H7a3 3 0 0 0-3 3v1H2v-1a5 5 0 0 1 5-5Zm10 10H6.8l2.6 2.6L8 21l-5-5 5-5 1.4 1.4L6.8 15H17a3 3 0 0 0 3-3v-1h2v1a5 5 0 0 1-5 5Z"/></svg>
+        </button>
+      `;
+    }).join("") : `<div class="exercise-empty">바꿀 수 있는 운동이 없어요.</div>`;
+  }
+
+  function replaceWorkout(exerciseId) {
+    const workoutIndex = workouts.findIndex((item) => item.id === replacementWorkoutId);
+    const current = workouts[workoutIndex];
+    const exercise = getExercise(exerciseId);
+
+    if (!current || current.sets.some((set) => set.done)) {
+      showToast("완료한 세트가 있는 운동은 바꿀 수 없어요.");
+      closeReplacementPicker();
+      return;
+    }
+
+    workouts[workoutIndex] = {
+      id: current.id,
+      exerciseId: exercise.id,
+      name: exercise.name,
+      category: exercise.category,
+      restSeconds: getWorkoutRestSeconds(current),
+      sets: createSetsFromPrevious(exercise, current.sets.length)
+    };
+    recentExerciseIds = [exercise.id, ...recentExerciseIds.filter((id) => id !== exercise.id)].slice(0, 8);
+    saveWorkouts();
+    saveRecentExercises();
+    renderLogs();
+    notifyWorkoutsChanged();
+    closeReplacementPicker();
+    showToast(`운동을 바꿨어요: ${exercise.name}`);
   }
 
   function openSetEditor(workoutId, setIndex) {
@@ -521,6 +597,11 @@ function setupWorkoutLog() {
     editorWeight.value = formatNumber(set.weight);
     editorReps.value = formatNumber(set.reps);
     editorUnit.textContent = getUnit(workout.exerciseId);
+    const previousSet = getPreviousSet(workout, setIndex);
+    previousSetSuggestion.hidden = !previousSet;
+    if (previousSet) {
+      previousSetValue.textContent = getSetSummary(workout, previousSet);
+    }
     completeSetButton.textContent = set.done ? "완료 해제" : "세트 완료";
     completeSetButton.classList.toggle("is-done", set.done);
     renderWeightAdjustButtons();
@@ -533,6 +614,28 @@ function setupWorkoutLog() {
     editor.classList.remove("show");
     editor.setAttribute("aria-hidden", "true");
     activeEditor = null;
+  }
+
+  function applyPreviousSet() {
+    const { workout, set } = getActiveSet();
+
+    if (!workout || !set) {
+      return;
+    }
+
+    const previousSet = getPreviousSet(workout, activeEditor.setIndex);
+    if (!previousSet) {
+      return;
+    }
+
+    set.weight = Math.max(Number(previousSet.weight) || 0, 0);
+    set.reps = Math.max(Math.round(Number(previousSet.reps) || 1), 1);
+    editorWeight.value = formatNumber(set.weight);
+    editorReps.value = formatNumber(set.reps);
+    saveWorkouts();
+    renderLogs();
+    notifyWorkoutsChanged();
+    showToast("지난 세트 기록을 적용했어요.");
   }
 
   function getActiveSet() {
@@ -587,26 +690,37 @@ function setupWorkoutLog() {
     }
   }
 
-  function completeActiveSet() {
-    const { set } = getActiveSet();
-
-    if (!set) {
+  function toggleSetCompletion(workout, set, closeEditor = false) {
+    if (!workout || !set) {
       return;
     }
 
     const wasDone = set.done;
     set.done = !set.done;
     saveWorkouts();
-    closeSetEditor();
+    if (closeEditor) {
+      closeSetEditor();
+    }
     renderLogs();
     notifyWorkoutsChanged();
 
     if (!wasDone && set.done) {
-      startRestTimer();
-      showToast(`세트 완료! ${getRestSeconds()}초 휴식을 시작해요.`);
+      const restSeconds = getWorkoutRestSeconds(workout);
+      timer.startRest(restSeconds);
+      showToast(`세트 완료! ${restSeconds}초 휴식을 시작해요.`);
     } else {
       showToast("완료를 해제했어요.");
     }
+  }
+
+  function completeActiveSet() {
+    const { workout, set } = getActiveSet();
+    toggleSetCompletion(workout, set, true);
+  }
+
+  function toggleSetFromSummary(workoutId, setIndex) {
+    const workout = workouts.find((item) => item.id === workoutId);
+    toggleSetCompletion(workout, workout?.sets[setIndex]);
   }
 
   function openNextSet() {
@@ -703,7 +817,7 @@ function setupWorkoutLog() {
     const history = readJson("gmymateWorkoutHistory", []);
     const note = noteInput?.value.trim() || "";
 
-    history.unshift({
+    const session = {
       id: `session-${Date.now()}`,
       title: workouts.map((workout) => workout.name).slice(0, 2).join(", ") || "운동 기록",
       dateKey: getDateKey(now),
@@ -714,18 +828,22 @@ function setupWorkoutLog() {
       volume: Math.round(stats.volume),
       note,
       workouts
-    });
+    };
+
+    history.unshift(session);
 
     writeJson("gmymateWorkoutHistory", history.slice(0, 80));
     workouts = [];
-    writeJson("gmymateWorkoutLogsV2", workouts);
+    showRecoveryBanner = false;
+    saveWorkouts(false);
     writeJson("gmymateWorkoutNote", "");
     if (noteInput) {
       noteInput.value = "";
     }
-    stopTimer();
+    timer.stop();
     renderLogs();
     notifyWorkoutsChanged();
+    app.cloudSync?.completeWorkout(session);
     showToast("운동 기록을 저장했어요.");
   }
 
@@ -762,6 +880,19 @@ function setupWorkoutLog() {
 
   search?.addEventListener("input", renderExercisePicker);
 
+  replacementPicker?.addEventListener("click", (event) => {
+    if (event.target.closest("[data-close-replacement-picker]")) {
+      closeReplacementPicker();
+      return;
+    }
+
+    const replacementButton = event.target.closest("[data-replacement-exercise]");
+    if (replacementButton) {
+      replaceWorkout(replacementButton.dataset.replacementExercise);
+    }
+  });
+  replacementSearch?.addEventListener("input", renderReplacementPicker);
+
   editor.addEventListener("click", (event) => {
     if (event.target.closest("[data-close-set-editor]")) {
       closeSetEditor();
@@ -777,37 +908,54 @@ function setupWorkoutLog() {
 
   editorWeight?.addEventListener("change", () => saveEditorValue("weight", editorWeight.value));
   editorReps?.addEventListener("change", () => saveEditorValue("reps", editorReps.value));
+  previousSetSuggestion?.addEventListener("click", applyPreviousSet);
   completeSetButton?.addEventListener("click", completeActiveSet);
 
   addRestButton?.addEventListener("click", () => {
-    if (timerState.mode !== "rest") {
+    if (timer.getMode() !== "rest") {
       return;
     }
-    timerState.restEndsAt += 15000;
-    timerState.restTotalSeconds += 15;
-    saveTimerState();
-    renderTimer();
+    timer.addRest(15);
     showToast("휴식에 15초를 더했어요.");
   });
 
   skipRestButton?.addEventListener("click", () => {
-    startSetTimer();
+    timer.startSet();
     showToast("휴식을 건너뛰고 세트를 시작해요.");
   });
 
   nextSetButton?.addEventListener("click", openNextSet);
-  noteInput?.addEventListener("input", () => writeJson("gmymateWorkoutNote", noteInput.value));
+  noteInput?.addEventListener("input", () => {
+    writeJson("gmymateWorkoutNote", noteInput.value);
+    if (workouts.length) {
+      saveWorkouts();
+    }
+  });
   finishButton?.addEventListener("click", finishWorkout);
+  recoveryBanner?.addEventListener("click", (event) => {
+    if (event.target.closest("[data-dismiss-recovery]")) {
+      showRecoveryBanner = false;
+      renderRecoveryBanner();
+    }
+  });
 
   list.addEventListener("click", (event) => {
     const openPickerButton = event.target.closest("[data-open-exercise-picker]");
+    const toggleSetButton = event.target.closest("[data-toggle-set]");
     const editSetButton = event.target.closest("[data-edit-set]");
     const addSetButton = event.target.closest("[data-add-set]");
     const removeSetButton = event.target.closest("[data-remove-set]");
+    const replaceWorkoutButton = event.target.closest("[data-replace-workout]");
     const removeWorkoutButton = event.target.closest("[data-remove-workout]");
 
     if (openPickerButton) {
       openPicker();
+      return;
+    }
+
+    if (toggleSetButton) {
+      const [workoutId, indexValue] = toggleSetButton.dataset.toggleSet.split(":");
+      toggleSetFromSummary(workoutId, Number(indexValue));
       return;
     }
 
@@ -827,9 +975,17 @@ function setupWorkoutLog() {
       return;
     }
 
+    if (replaceWorkoutButton) {
+      openReplacementPicker(replaceWorkoutButton.dataset.replaceWorkout);
+      return;
+    }
+
     if (removeWorkoutButton) {
       workouts = workouts.filter((item) => item.id !== removeWorkoutButton.dataset.removeWorkout);
       saveWorkouts();
+      if (!workouts.length) {
+        timer.stop();
+      }
       renderLogs();
       notifyWorkoutsChanged();
       showToast("운동을 지웠어요.");
@@ -888,27 +1044,28 @@ function setupWorkoutLog() {
 
   clearButton?.addEventListener("click", () => {
     workouts = [];
-    writeJson("gmymateWorkoutLogsV2", workouts);
+    showRecoveryBanner = false;
+    saveWorkouts();
     writeJson("gmymateWorkoutLogs", []);
     writeJson("gmymateWorkoutNote", "");
     if (noteInput) {
       noteInput.value = "";
     }
-    stopTimer();
+    timer.stop();
     renderLogs();
     notifyWorkoutsChanged();
     showToast("오늘 기록을 비웠어요.");
   });
 
   window.addEventListener("gmymate:view-changed", (event) => {
-    if (event.detail?.view === "log" && timerState.mode === "idle") {
-      startSetTimer();
+    if (event.detail?.view === "log" && workouts.length && timer.getMode() === "idle") {
+      timer.startSet();
     }
   });
 
   window.addEventListener("gmymate:settings-changed", () => {
     renderWeightAdjustButtons();
-    renderTimer();
+    timer.render();
   });
 
   window.addEventListener("gmymate:workouts-changed", (event) => {
@@ -916,7 +1073,27 @@ function setupWorkoutLog() {
       return;
     }
     workouts = normalizeWorkouts(readJson("gmymateWorkoutLogsV2", []));
+    showRecoveryBanner = false;
+    saveWorkouts();
+    if (!workouts.length) {
+      timer.stop();
+    }
     renderLogs();
+  });
+
+  window.addEventListener("pagehide", () => {
+    if (workouts.length) {
+      saveWorkouts(false);
+    }
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden && workouts.length) {
+      saveWorkouts(false);
+    }
+    if (!document.hidden) {
+      timer.render();
+    }
   });
 
   document.addEventListener("keydown", (event) => {
@@ -925,14 +1102,19 @@ function setupWorkoutLog() {
     }
     if (editor.classList.contains("show")) {
       closeSetEditor();
+    } else if (replacementPicker?.classList.contains("show")) {
+      closeReplacementPicker();
     } else if (picker.classList.contains("show")) {
       closePicker();
     }
   });
 
+  if (workouts.length && !activeWorkoutMeta.updatedAt) {
+    saveWorkouts();
+  }
   renderLogs();
-  renderTimer();
-  ensureTimerInterval();
+  timer.render();
+  timer.ensureInterval();
 }
 
 app.setupWorkoutLog = setupWorkoutLog;

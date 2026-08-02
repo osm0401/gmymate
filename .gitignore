@@ -1,10 +1,5 @@
-# Operating-system and editor files
-Thumbs.db
-.DS_Store
-.vscode/
-
-# Local legacy and cleanup files that are not used by the app
-cleanup-files.mjs
-src/app.legacy.js
-src/script.js
-src/style.css
+api/config.php
+api/config/database.php
+api/config/gemini.php
+scripts/deploy/.ftp-credential.xml
+scripts/deploy/.ftp-state.json

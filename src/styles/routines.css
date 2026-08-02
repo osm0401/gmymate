@@ -1,0 +1,103 @@
+.custom-routine-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 22px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--app-line);
+}
+
+.custom-routine-toolbar strong,
+.custom-routine-toolbar span {
+  display: block;
+}
+
+.custom-routine-toolbar strong { font-size: 17px; }
+.custom-routine-toolbar span { margin-top: 4px; color: var(--app-muted); font-size: 12px; font-weight: 800; }
+.custom-routine-toolbar button { display: inline-flex; min-height: 46px; align-items: center; gap: 6px; border-radius: 8px; padding: 0 13px; color: #fff; background: var(--app-green); font-weight: 900; white-space: nowrap; }
+.custom-routine-toolbar svg { width: 19px; height: 19px; fill: currentColor; }
+.custom-routine-list { display: grid; gap: 10px; margin-top: 12px; }
+
+.empty-routine { display: grid; min-height: 180px; place-items: center; align-content: center; gap: 8px; border: 1px dashed #b9d9c2; border-radius: 8px; color: var(--app-muted); background: #f8fcf9; }
+.empty-routine svg { width: 32px; height: 32px; fill: var(--app-green); }
+.empty-routine strong { color: var(--app-green-dark); font-size: 17px; }
+.empty-routine span { font-size: 13px; }
+
+.custom-routine-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 14px; border: 1px solid var(--app-line); border-radius: 8px; background: #fff; box-shadow: var(--app-soft-shadow); }
+.custom-routine-copy { min-width: 0; }
+.custom-routine-copy > strong { display: block; font-size: 17px; }
+.custom-routine-copy > span { display: block; margin-top: 4px; color: var(--app-green-dark); font-size: 12px; font-weight: 900; }
+.custom-routine-copy p { overflow: hidden; margin: 7px 0 0; color: var(--app-muted); font-size: 12px; font-weight: 800; line-height: 1.45; text-overflow: ellipsis; white-space: nowrap; }
+.custom-routine-actions { display: flex; align-items: center; gap: 5px; }
+.custom-routine-actions button { display: inline-flex; min-width: 36px; min-height: 38px; align-items: center; justify-content: center; gap: 5px; border-radius: 7px; padding: 0 9px; color: var(--app-green-dark); background: var(--app-mint); font-size: 12px; font-weight: 900; }
+.custom-routine-actions button:first-child { color: #fff; background: var(--app-green); }
+.custom-routine-actions svg { width: 18px; height: 18px; fill: currentColor; }
+
+.routine-builder { position: fixed; inset: 0; z-index: 45; visibility: hidden; pointer-events: none; }
+.routine-builder.show { visibility: visible; pointer-events: auto; }
+.routine-builder-backdrop { position: absolute; inset: 0; background: rgba(13, 37, 20, .4); opacity: 0; transition: opacity 180ms ease; }
+.routine-builder.show .routine-builder-backdrop { opacity: 1; }
+.routine-builder-sheet { position: absolute; right: 0; bottom: 0; left: 0; display: grid; width: min(100%, 440px); max-height: 92svh; gap: 15px; margin: 0 auto; padding: 10px 18px calc(18px + env(safe-area-inset-bottom)); border-radius: 20px 20px 0 0; overflow-y: auto; background: #fff; transform: translateY(105%); transition: transform 220ms ease; }
+.routine-builder.show .routine-builder-sheet { transform: translateY(0); }
+.routine-builder-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.routine-builder-header span { color: var(--app-muted); font-size: 12px; font-weight: 900; }
+.routine-builder-header h2 { margin: 3px 0 0; font-size: 21px; }
+.routine-name-field { display: grid; gap: 7px; }
+.routine-name-field span { color: var(--app-green-dark); font-size: 13px; font-weight: 900; }
+.routine-name-field input { min-height: 50px; border: 1px solid var(--app-line); border-radius: 8px; padding: 0 13px; outline: 0; color: var(--app-text); background: #f8fcf9; font-size: 16px; font-weight: 900; }
+.routine-name-field input:focus { border-color: var(--app-green); }
+.routine-builder-section { display: grid; gap: 9px; }
+.routine-builder-section-title { display: flex; align-items: center; justify-content: space-between; }
+.routine-builder-section-title strong { font-size: 15px; }
+.routine-builder-section-title span { color: var(--app-green-dark); font-size: 12px; font-weight: 900; }
+.routine-selected-list { display: grid; gap: 9px; }
+.routine-selected-empty { margin: 0; padding: 14px; border-radius: 8px; color: var(--app-muted); background: var(--app-mint); font-size: 13px; font-weight: 800; text-align: center; }
+.routine-selected-row { display: grid; gap: 10px; padding: 10px; border: 1px solid var(--app-line); border-radius: 8px; background: #fff; }
+.routine-selected-header,.routine-selected-actions { display: flex; align-items: center; }
+.routine-selected-header { justify-content: space-between; gap: 10px; }
+.routine-selected-actions { flex: 0 0 auto; gap: 6px; }
+.routine-selected-copy { min-width: 0; }
+.routine-selected-copy strong,.routine-selected-copy span { display: block; }
+.routine-selected-copy strong { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.routine-selected-copy span { margin-top: 2px; color: var(--app-muted); font-size: 11px; font-weight: 800; }
+.routine-order-buttons,.routine-set-control { display: flex; align-items: center; overflow: hidden; border: 1px solid var(--app-line); border-radius: 6px; }
+.routine-order-buttons button { display: grid; width: 32px; height: 34px; place-items: center; color: var(--app-green-dark); background: #f5faf6; }
+.routine-set-control { width: 100%; min-height: 42px; }
+.routine-set-control button { display: grid; width: 31px; height: 40px; flex: 0 0 auto; place-items: center; color: var(--app-green-dark); background: #f5faf6; font-weight: 900; }
+.routine-order-buttons button:disabled,.routine-set-control button:disabled { color: #b6c5ba; }
+.routine-order-buttons svg { width: 17px; height: 17px; fill: currentColor; }
+.routine-set-control strong { min-width: 20px; flex: 1; font-size: 14px; text-align: center; }
+.routine-remove-exercise { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 7px; color: #8a9d90; background: #f2f7f3; }
+.routine-remove-exercise svg { width: 18px; height: 18px; fill: currentColor; }
+.routine-parameter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.routine-parameter { display: grid; min-width: 0; gap: 5px; }
+.routine-parameter > span:first-child { color: var(--app-muted); font-size: 10px; font-weight: 900; }
+.routine-number-field { display: grid; grid-template-columns: minmax(0, 1fr) auto; min-height: 42px; align-items: center; border: 1px solid var(--app-line); border-radius: 6px; background: #f8fcf9; transition: border-color 150ms ease, box-shadow 150ms ease; }
+.routine-number-field:focus-within { border-color: var(--app-green); box-shadow: 0 0 0 2px rgba(25, 169, 87, .12); }
+.routine-number-field input { width: 100%; min-width: 0; border: 0; outline: 0; padding: 0 3px 0 7px; color: var(--app-text); background: transparent; font-size: 14px; font-weight: 900; text-align: center; appearance: textfield; }
+.routine-number-field input::-webkit-inner-spin-button,.routine-number-field input::-webkit-outer-spin-button { margin: 0; appearance: none; }
+.routine-number-field small { padding-right: 7px; color: var(--app-muted); font-size: 10px; font-weight: 900; }
+.routine-search { display: grid; grid-template-columns: 21px 1fr; align-items: center; gap: 8px; min-height: 48px; border: 1px solid var(--app-line); border-radius: 8px; padding: 0 12px; background: var(--app-mint); }
+.routine-search svg { width: 19px; height: 19px; fill: var(--app-green-dark); }
+.routine-search input { min-width: 0; border: 0; outline: 0; background: transparent; font-size: 15px; font-weight: 900; }
+.routine-exercise-list { display: grid; gap: 5px; max-height: 260px; overflow-y: auto; }
+.routine-exercise-list button { display: grid; grid-template-columns: 1fr 28px; align-items: center; gap: 8px; min-height: 52px; border-bottom: 1px solid #edf4ef; padding: 6px 8px; color: var(--app-text); background: #fff; text-align: left; }
+.routine-exercise-list button:disabled { opacity: .48; }
+.routine-exercise-list strong,.routine-exercise-list small { display: block; }
+.routine-exercise-list strong { font-size: 14px; }
+.routine-exercise-list small { margin-top: 3px; color: var(--app-muted); font-size: 11px; font-weight: 800; }
+.routine-exercise-list svg { width: 21px; height: 21px; fill: var(--app-green); }
+.save-routine-button { position: sticky; bottom: 0; min-height: 55px; border-radius: 8px; color: #fff; background: var(--app-green); box-shadow: 0 10px 24px rgba(25,169,87,.2); font-size: 16px; font-weight: 900; }
+
+@media (max-width: 370px) {
+  .custom-routine-toolbar span { display: none; }
+}
+
+@media (max-width: 390px) {
+  .routine-parameter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .routine-builder-backdrop,.routine-builder-sheet { transition: none; }
+}

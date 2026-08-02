@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>gmymate - 메인</title>
-  <link rel="stylesheet" href="./src/app.css">
+  <title>GAINMUSCLE - 메인</title>
+  <link rel="stylesheet" href="./src/app.css?v=20260717-4">
 </head>
 <body>
   <a class="skip-link" href="#mainContent">본문으로 바로가기</a>
   <main class="phone-screen main-screen" id="mainContent">
     <header class="main-header">
-      <a class="brand compact-brand" href="./main.html" aria-label="gmymate home">
-        <span class="brand-mark">g</span>
-        <span>gmymate</span>
+      <a class="brand compact-brand" href="./main.html" aria-label="GAINMUSCLE 홈">
+        <span class="brand-mark">G</span>
+        <span>GAINMUSCLE</span>
       </a>
       <button class="profile-button" type="button" data-tab="profile" aria-label="내 정보 보기">
         <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -153,6 +153,47 @@
         </div>
       </section>
 
+      <section class="content-section progress-dashboard" aria-labelledby="progressDashboardTitle">
+        <div class="section-title">
+          <div>
+            <span class="soft-label">최근 7일</span>
+            <h2 id="progressDashboardTitle">운동 성장</h2>
+          </div>
+          <span class="soft-label" id="progressTrendLabel">기록을 모으는 중</span>
+        </div>
+
+        <div class="progress-summary-grid" aria-label="최근 7일 운동 요약">
+          <div>
+            <span>운동</span>
+            <strong id="progressWeekSessions">0회</strong>
+          </div>
+          <div>
+            <span>완료 세트</span>
+            <strong id="progressWeekSets">0세트</strong>
+          </div>
+          <div>
+            <span>총 볼륨</span>
+            <strong id="progressWeekVolume">0kg</strong>
+          </div>
+        </div>
+
+        <div class="weekly-volume-panel">
+          <div class="progress-panel-heading">
+            <strong>6주 볼륨</strong>
+            <span>완료한 세트 기준</span>
+          </div>
+          <div class="weekly-volume-chart" id="weeklyVolumeChart" aria-label="최근 6주 운동 볼륨"></div>
+        </div>
+
+        <div class="exercise-progress-panel">
+          <div class="progress-panel-heading">
+            <strong>운동별 변화</strong>
+            <span>최근 기록과 이전 기록 비교</span>
+          </div>
+          <div class="exercise-progress-list" id="exerciseProgressList" aria-live="polite"></div>
+        </div>
+      </section>
+
       <section class="content-section">
         <div class="week-strip" id="weekStrip" aria-label="이번 주 출석">
           <button type="button" class="done">월</button>
@@ -193,6 +234,19 @@
         <h1>운동을 고르고 세트만 체크해요.</h1>
       </section>
 
+      <aside class="workout-recovery-banner" id="workoutRecoveryBanner" hidden>
+        <span class="recovery-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 4a8 8 0 1 1-7.5 5.2l1.9.7A6 6 0 1 0 8 7.5V11H6V4h7v2H9.5A7.9 7.9 0 0 1 12 4Z"/></svg>
+        </span>
+        <span>
+          <strong id="workoutRecoveryTitle">이전 운동을 복구했어요.</strong>
+          <small id="workoutRecoveryDetail">남은 세트를 이어서 기록할 수 있어요.</small>
+        </span>
+        <button class="icon-button" type="button" data-dismiss-recovery aria-label="복구 안내 닫기">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 12.6 12.6-1.4 1.4L5 6.4Zm12.6 1.4L6.4 19 5 17.6 17.6 5Z"/></svg>
+        </button>
+      </aside>
+
       <section class="workout-insight-grid" aria-label="오늘 운동 요약">
         <div>
           <span>진행</span>
@@ -213,6 +267,7 @@
           <div>
             <span class="soft-label">오늘 기록</span>
             <strong id="workoutSummary">운동 0개</strong>
+            <small class="workout-save-status" id="workoutSaveStatus">자동 저장 준비</small>
           </div>
           <button class="add-exercise-button" type="button" data-open-exercise-picker>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6Z"/></svg>
@@ -238,7 +293,7 @@
         <p class="log-help">자주 하는 운동은 위쪽 최근 운동에 먼저 보여요. 세트는 체크하면 바로 저장돼요.</p>
       </section>
 
-      <section class="workout-timer-dock" id="workoutTimerDock" data-mode="set" aria-label="세트와 휴식 타이머">
+      <section class="workout-timer-dock" id="workoutTimerDock" data-mode="set" aria-label="세트와 휴식 타이머" aria-live="polite">
         <div class="timer-dock-copy">
           <span id="timerModeLabel">세트</span>
           <strong id="restTimerDisplay">00:00</strong>
@@ -292,6 +347,30 @@
       </div>
     </section>
 
+    <section class="exercise-picker replacement-picker" id="exerciseReplacementPicker" aria-hidden="true">
+      <div class="exercise-picker-backdrop" data-close-replacement-picker></div>
+      <div class="exercise-picker-sheet" role="dialog" aria-modal="true" aria-labelledby="replacementPickerTitle">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="section-title">
+          <div>
+            <span class="soft-label" id="replacementCategoryLabel">같은 부위 운동</span>
+            <h2 id="replacementPickerTitle">운동을 바꿔요.</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-replacement-picker aria-label="운동 교체 닫기">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 12.6 12.6-1.4 1.4L5 6.4Zm12.6 1.4L6.4 19 5 17.6 17.6 5Z"/></svg>
+          </button>
+        </div>
+
+        <label class="exercise-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 4a6.5 6.5 0 0 1 5.2 10.4l4 4-1.4 1.4-4-4A6.5 6.5 0 1 1 10.5 4Zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z"/></svg>
+          <input id="replacementExerciseSearch" type="search" placeholder="대체 운동 검색">
+        </label>
+
+        <p class="replacement-help">완료한 세트가 없는 운동만 교체할 수 있어요. 세트 수는 그대로 유지돼요.</p>
+        <div class="exercise-list" id="replacementExerciseList"></div>
+      </div>
+    </section>
+
     <section class="set-editor" id="setEditor" aria-hidden="true">
       <div class="set-editor-backdrop" data-close-set-editor></div>
       <div class="set-editor-sheet" role="dialog" aria-modal="true" aria-labelledby="setEditorTitle">
@@ -305,6 +384,12 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 12.6 12.6-1.4 1.4L5 6.4Zm12.6 1.4L6.4 19 5 17.6 17.6 5Z"/></svg>
           </button>
         </div>
+
+        <button class="previous-set-suggestion" id="previousSetSuggestion" type="button" data-use-previous-set hidden>
+          <span>지난 기록</span>
+          <strong id="previousSetValue">20kg × 10회</strong>
+          <small>눌러서 적용</small>
+        </button>
 
         <div class="set-editor-field">
           <label for="setEditorWeight">무게</label>
@@ -336,40 +421,59 @@
     <section class="app-view" data-view="routine">
       <section class="page-heading">
         <p class="screen-label">루틴</p>
-        <h1>어렵지 않은 루틴부터 시작해요.</h1>
+        <h1>나만의 루틴을 만들어요.</h1>
       </section>
 
-      <div class="routine-list">
-        <article class="routine-card">
+      <section class="custom-routine-toolbar">
+        <div>
+          <strong>내 루틴</strong>
+          <span>세트·무게·횟수·휴식을 직접 정해요.</span>
+        </div>
+        <button type="button" data-new-routine>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6Z"/></svg>
+          새 루틴
+        </button>
+      </section>
+
+      <div class="custom-routine-list" id="customRoutineList" aria-live="polite"></div>
+    </section>
+
+    <section class="routine-builder" id="routineBuilder" aria-hidden="true">
+      <div class="routine-builder-backdrop" data-close-routine-builder></div>
+      <div class="routine-builder-sheet" role="dialog" aria-modal="true" aria-labelledby="routineBuilderTitle">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="routine-builder-header">
           <div>
-            <span class="routine-type">상체</span>
-            <h3>가볍게 밀기</h3>
-            <p>체스트프레스, 숄더프레스, 케이블 푸시다운</p>
+            <span>나만의 루틴</span>
+            <h2 id="routineBuilderTitle">새 루틴 만들기</h2>
           </div>
-          <button class="circle-button" type="button" data-start-workout aria-label="상체 루틴 시작">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>
+          <button class="icon-button" type="button" data-close-routine-builder aria-label="루틴 만들기 닫기">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 12.6 12.6-1.4 1.4L5 6.4Zm12.6 1.4L6.4 19 5 17.6 17.6 5Z"/></svg>
           </button>
-        </article>
-        <article class="routine-card">
-          <div>
-            <span class="routine-type">하체</span>
-            <h3>무리 없는 하체</h3>
-            <p>레그프레스, 레그컬, 카프레이즈</p>
+        </div>
+
+        <label class="routine-name-field">
+          <span>루틴 이름</span>
+          <input id="routineNameInput" type="text" maxlength="30" placeholder="예: 월요일 상체">
+        </label>
+
+        <section class="routine-builder-section">
+          <div class="routine-builder-section-title">
+            <strong>선택한 운동</strong>
+            <span id="routineExerciseCount">0개</span>
           </div>
-          <button class="circle-button" type="button" data-start-workout aria-label="하체 루틴 시작">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>
-          </button>
-        </article>
-        <article class="routine-card">
-          <div>
-            <span class="routine-type">전신</span>
-            <h3>처음 온 날 루틴</h3>
-            <p>러닝 10분, 머신 3종, 스트레칭 5분</p>
-          </div>
-          <button class="circle-button" type="button" data-start-workout aria-label="전신 루틴 시작">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>
-          </button>
-        </article>
+          <div class="routine-selected-list" id="routineSelectedList"></div>
+        </section>
+
+        <section class="routine-builder-section">
+          <label class="routine-search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 4a6.5 6.5 0 0 1 5.2 10.4l4 4-1.4 1.4-4-4A6.5 6.5 0 1 1 10.5 4Zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z"/></svg>
+            <input id="routineExerciseSearch" type="search" placeholder="운동 검색">
+          </label>
+          <div class="routine-exercise-list" id="routineExerciseList"></div>
+        </section>
+
+        <button class="save-routine-button" type="button" data-save-routine>루틴 저장</button>
       </div>
     </section>
 
@@ -403,7 +507,7 @@
             <input id="easyWordsSetting" type="checkbox" checked>
           </label>
           <label>
-            <span>운동 시작 알림</span>
+            <span>휴식 종료 알림</span>
             <input id="workoutAlertSetting" type="checkbox">
           </label>
           <label>
@@ -434,8 +538,50 @@
         <div class="settings-actions">
           <button class="text-button" type="button" data-export-data>데이터 복사</button>
           <button class="text-button danger-text" type="button" data-reset-today>오늘 기록 초기화</button>
+          <button class="text-button danger-text" type="button" data-logout>로그아웃</button>
         </div>
       </section>
+    </section>
+
+    <section class="ai-chat-panel" id="aiChatPanel" aria-hidden="true">
+      <div class="ai-chat-backdrop" data-chat-close></div>
+      <div class="ai-chat-sheet" role="dialog" aria-modal="true" aria-labelledby="aiChatTitle" aria-describedby="aiChatDescription">
+        <div class="sheet-handle" aria-hidden="true"></div>
+
+        <header class="ai-chat-header">
+          <div class="ai-chat-identity">
+            <span class="ai-chat-avatar" aria-hidden="true">G</span>
+            <span>
+              <strong id="aiChatTitle">AI 코치</strong>
+              <small id="aiChatDescription">운동과 회복을 편하게 물어보세요</small>
+            </span>
+          </div>
+          <button class="icon-button" type="button" data-chat-close aria-label="AI 채팅 닫기" title="닫기">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.7 5.3 5.3 5.3 5.3-5.3 1.4 1.4-5.3 5.3 5.3 5.3-1.4 1.4-5.3-5.3-5.3 5.3-1.4-1.4 5.3-5.3-5.3-5.3Z"/></svg>
+          </button>
+        </header>
+
+        <div class="ai-chat-messages" id="aiChatMessages" aria-live="polite" aria-relevant="additions"></div>
+
+        <div class="ai-chat-prompts" aria-label="빠른 질문">
+          <button type="button" data-chat-prompt="오늘 할 수 있는 30분 전신 운동을 추천해줘.">오늘 운동</button>
+          <button type="button" data-chat-prompt="지금 하려는 운동을 대신할 수 있는 종목을 추천해줘.">운동 대체</button>
+          <button type="button" data-chat-prompt="오늘 회복 상태를 확인할 질문을 해줘.">회복 점검</button>
+        </div>
+
+        <form class="ai-chat-composer" id="aiChatForm">
+          <label class="ai-chat-input-wrap" for="aiChatInput">
+            <span class="ai-chat-input-label">메시지</span>
+            <textarea id="aiChatInput" rows="1" maxlength="1500" placeholder="운동에 대해 물어보세요" enterkeyhint="send" required></textarea>
+          </label>
+          <button class="ai-chat-send" type="submit" aria-label="메시지 보내기" title="메시지 보내기">
+            <svg class="ai-chat-send-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 4.5 21 12 3.5 19.5l1.8-6.1 8.1-1.4-8.1-1.4Zm3.1 9.8-.6 2 9.5-4.1-9.5-4.1.6 2 7.6 1.3v1.6Z"/></svg>
+            <svg class="ai-chat-stop-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10H7Z"/></svg>
+          </button>
+        </form>
+
+        <p class="ai-chat-note">통증이나 부상이 있다면 운동을 멈추고 전문가와 상담하세요.</p>
+      </div>
     </section>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -449,6 +595,12 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h2v3h6V2h2v3h3v17H4V5h3Zm11 8H6v10h12Z"/></svg>
         <span>달력</span>
       </button>
+      <button class="nav-item chat-nav-item" type="button" data-chat-open aria-haspopup="dialog" aria-controls="aiChatPanel" aria-expanded="false">
+        <span class="chat-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16v12H9l-5 4Zm2 2v9.2L8.2 14H18V6Zm3 3h6v2H9Z"/></svg>
+        </span>
+        <span>AI</span>
+      </button>
       <button class="nav-item" type="button" data-tab="log">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h12v3H6Zm0 5h12v3H6Zm0 5h8v3H6Z"/></svg>
         <span>기록</span>
@@ -457,18 +609,22 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v4H5Zm0 6h14v3H5Zm0 5h10v3H5Z"/></svg>
         <span>루틴</span>
       </button>
-      <button class="nav-item" type="button" data-tab="profile">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.4 0-8 2.1-8 4.7V20h16v-1.3c0-2.6-3.6-4.7-8-4.7Z"/></svg>
-        <span>내정보</span>
-      </button>
     </nav>
   </main>
 
   <script defer src="./src/core/data.js"></script>
   <script defer src="./src/core/storage.js"></script>
-  <script defer src="./src/features/main.js"></script>
-  <script defer src="./src/features/workout-log.js"></script>
+  <script defer src="./src/core/workout-history.js"></script>
+  <script defer src="./src/core/auth-guard.js"></script>
+  <script defer src="./src/core/cloud-sync.js?v=20260717-1"></script>
+  <script defer src="./src/features/main.js?v=20260717-1"></script>
+  <script defer src="./src/features/progress-dashboard.js?v=20260802-1"></script>
+  <script defer src="./src/features/workout-log-utils.js?v=20260802-1"></script>
+  <script defer src="./src/features/workout-log-timer.js?v=20260802-1"></script>
+  <script defer src="./src/features/workout-log.js?v=20260717-5"></script>
+  <script defer src="./src/features/routines.js?v=20260717-1"></script>
+  <script defer src="./src/features/ai-chat.js?v=20260717-2"></script>
   <script defer src="./src/features/tap-effects.js"></script>
-  <script defer src="./src/app.js"></script>
+  <script defer src="./src/app.js?v=20260717-1"></script>
 </body>
 </html>
