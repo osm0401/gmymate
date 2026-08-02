@@ -16,7 +16,8 @@
   - config/레이트리밋/요청가공 함수를 `api/services/gemini.php`로, `gemini.php`는 얇은 엔드포인트로. (DB 없음 → repository 없음.)
 - [DOING] FE-1 · [FE] · Claude — `src/features/workout-log.js` 모듈 분할 (3단계, `decisions.md` D-7~D-9)
   - Stage 1 ✅: 순수 헬퍼(`formatNumber`/`formatTime`/`formatSavedTime`/`exerciseIcon`) → `workout-log-utils.js`(`app.workoutLogUtils`, 네임스페이스로 D-9 충돌 회피). 1346→1319줄. `node --check`+브라우저 검증.
-  - Stage 2 (다음): 타이머 서브시스템(~200줄) → 팩토리 모듈. 외부 호출부 ~14곳 재배선(3곳은 `timerState` 내부 접근: +15초 핸들러, 모드 체크). **라이브(dothome) 테스트 권장** — 카운트다운/알림은 file:// 정적 로드로 확인 불가.
+  - Stage 2 ✅: 타이머 → `workout-log-timer.js`(`app.createWorkoutTimer` 팩토리, 상태 캡슐화). 호출부 16곳 `timer.*`로 재배선, `timerState` 내부 접근은 `timer.addRest`/`getMode`로 캡슐화. 1319→1121줄. `node --check`+브라우저 상태전이 검증. **타이머 카운트다운/휴식알림은 라이브(dothome) 테스트 필요(미완).**
+  - 리뷰어: Gemini → **Antigravity**로 변경됨.
   - Stage 3: 피커 + 세트 에디터. 공유 `workouts`/`activeEditor` 접근.
 - [DONE] FE-2 · [FE] · Claude — `src/features/main.js` 분할 ✅
   - 진행상황 대시보드 블록을 `src/features/progress-dashboard.js`(238줄)로 분리. `main.js` 606→391줄.

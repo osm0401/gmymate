@@ -65,10 +65,10 @@ function setupWorkoutLog() {
   let activeEditor = null;
   let replacementWorkoutId = null;
   let dragState = null;
-  let timerIntervalId = null;
-  let restCompletionTimeoutId = null;
-  let audioContext = null;
-  let timerState = restoreTimerState();
+  const timer = app.createWorkoutTimer({
+    readJson, writeJson, getRestSeconds, getSettings, getNextSetLabel, showToast, formatTime,
+    dom: { timerDock, timerModeLabel, timerDisplay, timerBar, restStatus, addRestButton, skipRestButton, nextSetButton }
+  });
   let activeWorkoutMeta = readJson("gmymateActiveWorkoutV1", {});
   let showRecoveryBanner = Boolean(workouts.length && activeWorkoutMeta.updatedAt);
 
@@ -254,151 +254,6 @@ function setupWorkoutLog() {
     }
   }
 
-  function restoreTimerState() {
-    const saved = readJson("gmymateTimerState", {});
-    const mode = ["set", "rest"].includes(saved.mode) ? saved.mode : "idle";
-    const restored = {
-      mode,
-      setStartedAt: Number(saved.setStartedAt) || 0,
-      restEndsAt: Number(saved.restEndsAt) || 0,
-      restTotalSeconds: Number(saved.restTotalSeconds) || getRestSeconds()
-    };
-
-    if (restored.mode === "set" && !restored.setStartedAt) {
-      restored.setStartedAt = Date.now();
-    }
-
-    return restored;
-  }
-
-  function saveTimerState() {
-    writeJson("gmymateTimerState", timerState);
-  }
-
-  function ensureTimerInterval() {
-    window.clearInterval(timerIntervalId);
-    window.clearTimeout(restCompletionTimeoutId);
-    timerIntervalId = timerState.mode === "idle" ? null : window.setInterval(renderTimer, 500);
-    restCompletionTimeoutId = null;
-
-    if (timerState.mode === "rest") {
-      const delay = Math.max(timerState.restEndsAt - Date.now(), 0);
-      restCompletionTimeoutId = window.setTimeout(finishRest, delay);
-    }
-  }
-
-  function startSetTimer() {
-    timerState = {
-      mode: "set",
-      setStartedAt: Date.now(),
-      restEndsAt: 0,
-      restTotalSeconds: getRestSeconds()
-    };
-    saveTimerState();
-    ensureTimerInterval();
-    renderTimer();
-  }
-
-  function startRestTimer(seconds = getRestSeconds()) {
-    const total = Math.max(Math.round(Number(seconds) || getRestSeconds()), 1);
-    primeRestAlert();
-    timerState = {
-      mode: "rest",
-      setStartedAt: 0,
-      restEndsAt: Date.now() + total * 1000,
-      restTotalSeconds: total
-    };
-    saveTimerState();
-    ensureTimerInterval();
-    renderTimer();
-  }
-
-  function stopTimer() {
-    window.clearInterval(timerIntervalId);
-    window.clearTimeout(restCompletionTimeoutId);
-    timerIntervalId = null;
-    restCompletionTimeoutId = null;
-    timerState = {
-      mode: "idle",
-      setStartedAt: 0,
-      restEndsAt: 0,
-      restTotalSeconds: getRestSeconds()
-    };
-    saveTimerState();
-    renderTimer();
-  }
-
-  function finishRest() {
-    if (timerState.mode !== "rest") {
-      return;
-    }
-
-    const nextSet = getNextSetLabel();
-    startSetTimer();
-    timerDock?.classList.add("is-rest-complete");
-    window.setTimeout(() => timerDock?.classList.remove("is-rest-complete"), 1400);
-
-    if (getSettings().workoutAlert) {
-      navigator.vibrate?.([180, 90, 180, 90, 240]);
-      playRestCompleteSound();
-      showRestCompleteNotification(nextSet);
-    }
-
-    showToast(nextSet ? `휴식 끝! ${nextSet}를 시작해요.` : "휴식 끝! 오늘 세트를 모두 완료했어요.");
-  }
-
-  function primeRestAlert() {
-    if (!getSettings().workoutAlert) {
-      return;
-    }
-
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) {
-      return;
-    }
-
-    audioContext ||= new AudioContext();
-    audioContext.resume?.();
-  }
-
-  function playRestCompleteSound() {
-    if (!audioContext) {
-      return;
-    }
-
-    try {
-      const now = audioContext.currentTime;
-      [0, 0.18].forEach((offset, index) => {
-        const oscillator = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        oscillator.frequency.value = index ? 880 : 660;
-        gain.gain.setValueAtTime(0.0001, now + offset);
-        gain.gain.exponentialRampToValueAtTime(0.16, now + offset + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.15);
-        oscillator.connect(gain).connect(audioContext.destination);
-        oscillator.start(now + offset);
-        oscillator.stop(now + offset + 0.17);
-      });
-    } catch {
-      // The visual timer and vibration remain available if audio is blocked.
-    }
-  }
-
-  function showRestCompleteNotification(nextSet) {
-    if (!("Notification" in window) || Notification.permission !== "granted" || !document.hidden) {
-      return;
-    }
-
-    try {
-      new Notification("GAINMUSCLE · 휴식 끝", {
-        body: nextSet ? `${nextSet}를 시작할 차례예요.` : "오늘 세트를 모두 완료했어요.",
-        tag: "gmymate-rest-complete"
-      });
-    } catch {
-      // Some mobile browsers only allow notifications through a service worker.
-    }
-  }
-
   function getNextSetLabel() {
     for (const workout of workouts) {
       const setIndex = workout.sets.findIndex((set) => !set.done);
@@ -407,56 +262,6 @@ function setupWorkoutLog() {
       }
     }
     return "";
-  }
-
-  function renderTimer() {
-    let displaySeconds = 0;
-    let progress = 0;
-
-    if (timerState.mode === "rest") {
-      displaySeconds = Math.max(Math.ceil((timerState.restEndsAt - Date.now()) / 1000), 0);
-
-      if (displaySeconds <= 0) {
-        finishRest();
-        return;
-      }
-
-      progress = ((timerState.restTotalSeconds - displaySeconds) / timerState.restTotalSeconds) * 100;
-    } else if (timerState.mode === "set") {
-      displaySeconds = Math.max(Math.floor((Date.now() - timerState.setStartedAt) / 1000), 0);
-    }
-
-    if (timerDock) {
-      timerDock.dataset.mode = timerState.mode;
-    }
-
-    if (timerModeLabel) {
-      timerModeLabel.textContent = timerState.mode === "rest" ? "휴식" : timerState.mode === "set" ? "세트" : "준비";
-    }
-
-    if (timerDisplay) {
-      timerDisplay.textContent = formatTime(displaySeconds);
-    }
-
-    if (timerBar) {
-      timerBar.style.width = `${Math.min(Math.max(progress, 0), 100)}%`;
-    }
-
-    if (restStatus) {
-      restStatus.textContent = timerState.mode === "rest" ? formatTime(displaySeconds) : timerState.mode === "set" ? "세트" : "대기";
-    }
-
-    if (addRestButton) {
-      addRestButton.hidden = timerState.mode !== "rest";
-    }
-
-    if (skipRestButton) {
-      skipRestButton.hidden = timerState.mode !== "rest";
-    }
-
-    if (nextSetButton) {
-      nextSetButton.hidden = timerState.mode === "rest";
-    }
   }
 
   function getSetSummary(workout, set) {
@@ -681,8 +486,8 @@ function setupWorkoutLog() {
     renderLogs();
     notifyWorkoutsChanged();
     closePicker();
-    if (wasEmpty && timerState.mode === "idle") {
-      startSetTimer();
+    if (wasEmpty && timer.getMode() === "idle") {
+      timer.startSet();
     }
     showToast(`${ids.length}개 운동을 추가했어요.`);
   }
@@ -901,7 +706,7 @@ function setupWorkoutLog() {
 
     if (!wasDone && set.done) {
       const restSeconds = getWorkoutRestSeconds(workout);
-      startRestTimer(restSeconds);
+      timer.startRest(restSeconds);
       showToast(`세트 완료! ${restSeconds}초 휴식을 시작해요.`);
     } else {
       showToast("완료를 해제했어요.");
@@ -1035,7 +840,7 @@ function setupWorkoutLog() {
     if (noteInput) {
       noteInput.value = "";
     }
-    stopTimer();
+    timer.stop();
     renderLogs();
     notifyWorkoutsChanged();
     app.cloudSync?.completeWorkout(session);
@@ -1107,18 +912,15 @@ function setupWorkoutLog() {
   completeSetButton?.addEventListener("click", completeActiveSet);
 
   addRestButton?.addEventListener("click", () => {
-    if (timerState.mode !== "rest") {
+    if (timer.getMode() !== "rest") {
       return;
     }
-    timerState.restEndsAt += 15000;
-    timerState.restTotalSeconds += 15;
-    saveTimerState();
-    renderTimer();
+    timer.addRest(15);
     showToast("휴식에 15초를 더했어요.");
   });
 
   skipRestButton?.addEventListener("click", () => {
-    startSetTimer();
+    timer.startSet();
     showToast("휴식을 건너뛰고 세트를 시작해요.");
   });
 
@@ -1182,7 +984,7 @@ function setupWorkoutLog() {
       workouts = workouts.filter((item) => item.id !== removeWorkoutButton.dataset.removeWorkout);
       saveWorkouts();
       if (!workouts.length) {
-        stopTimer();
+        timer.stop();
       }
       renderLogs();
       notifyWorkoutsChanged();
@@ -1249,21 +1051,21 @@ function setupWorkoutLog() {
     if (noteInput) {
       noteInput.value = "";
     }
-    stopTimer();
+    timer.stop();
     renderLogs();
     notifyWorkoutsChanged();
     showToast("오늘 기록을 비웠어요.");
   });
 
   window.addEventListener("gmymate:view-changed", (event) => {
-    if (event.detail?.view === "log" && workouts.length && timerState.mode === "idle") {
-      startSetTimer();
+    if (event.detail?.view === "log" && workouts.length && timer.getMode() === "idle") {
+      timer.startSet();
     }
   });
 
   window.addEventListener("gmymate:settings-changed", () => {
     renderWeightAdjustButtons();
-    renderTimer();
+    timer.render();
   });
 
   window.addEventListener("gmymate:workouts-changed", (event) => {
@@ -1274,7 +1076,7 @@ function setupWorkoutLog() {
     showRecoveryBanner = false;
     saveWorkouts();
     if (!workouts.length) {
-      stopTimer();
+      timer.stop();
     }
     renderLogs();
   });
@@ -1290,7 +1092,7 @@ function setupWorkoutLog() {
       saveWorkouts(false);
     }
     if (!document.hidden) {
-      renderTimer();
+      timer.render();
     }
   });
 
@@ -1311,8 +1113,8 @@ function setupWorkoutLog() {
     saveWorkouts();
   }
   renderLogs();
-  renderTimer();
-  ensureTimerInterval();
+  timer.render();
+  timer.ensureInterval();
 }
 
 app.setupWorkoutLog = setupWorkoutLog;
