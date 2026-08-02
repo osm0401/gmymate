@@ -1,7 +1,101 @@
+@media (max-width: 480px) {
+  html {
+    scroll-padding-bottom: calc(190px + env(safe-area-inset-bottom));
+  }
+
+  .main-screen {
+    padding-bottom: calc(132px + env(safe-area-inset-bottom));
+  }
+
+  .bottom-nav {
+    right: 8px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: 8px;
+    width: auto;
+    max-width: 424px;
+    padding: 7px 6px;
+    border: 1px solid var(--app-line);
+    border-radius: 18px;
+  }
+
+  .nav-item {
+    min-height: 48px;
+    border-radius: 12px;
+  }
+
+  .chat-nav-item .chat-nav-icon {
+    width: 34px;
+    height: 34px;
+    margin-top: 0;
+  }
+
+  .workout-timer-dock {
+    bottom: calc(78px + env(safe-area-inset-bottom));
+  }
+
+  .phone-screen,
+  .app-view,
+  .content-section,
+  .workout-log-panel,
+  .exercise-log-card {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .exercise-picker-sheet,
+  .set-editor-sheet,
+  .routine-builder-sheet,
+  .ai-chat-sheet {
+    right: 8px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: 8px;
+    width: auto;
+    max-height: calc(100svh - 16px - env(safe-area-inset-bottom));
+    border: 1px solid var(--app-line);
+    border-radius: 20px;
+    overflow-x: hidden;
+  }
+
+  .exercise-picker-sheet {
+    padding-bottom: 18px;
+  }
+
+  .picker-selection-bar {
+    bottom: -18px;
+    margin-bottom: -18px;
+  }
+
+  .exercise-chip-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow-x: visible;
+  }
+
+  .exercise-chip {
+    min-width: 0;
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+
+  .exercise-category-list {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+
+  .exercise-category-list button {
+    flex: 1 0 auto;
+  }
+}
+
 @media (max-width: 360px) {
   .phone-screen {
     padding-right: 14px;
     padding-left: 14px;
+  }
+
+  .bottom-nav {
+    right: 6px;
+    left: 6px;
   }
 
   .onboarding-screen .intro-section h1,
@@ -17,6 +111,11 @@
   .onboarding-screen .field input,
   .onboarding-screen .field select {
     font-size: 34px;
+  }
+
+  .onboarding-screen .field {
+    padding-right: 2px;
+    padding-left: 2px;
   }
 
   .quick-actions,

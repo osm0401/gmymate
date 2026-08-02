@@ -1,0 +1,137 @@
+.auth-screen {
+  display: grid;
+  min-height: 100svh;
+  padding: 24px 18px;
+  place-items: center;
+}
+
+.auth-shell {
+  width: min(100%, 420px);
+}
+
+.auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.auth-brand .brand-mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 10px;
+}
+
+.auth-heading {
+  margin: 56px 0 30px;
+}
+
+.auth-heading p {
+  margin: 0 0 8px;
+  color: var(--app-muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.auth-heading h1 {
+  margin: 0;
+  color: var(--app-green-dark);
+  font-size: 34px;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.account-form {
+  display: grid;
+  gap: 16px;
+}
+
+.account-form[hidden] {
+  display: none;
+}
+
+.account-field {
+  display: grid;
+  gap: 8px;
+}
+
+.account-field > span {
+  color: var(--app-text);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.account-field input {
+  width: 100%;
+  min-height: 56px;
+  padding: 0 15px;
+  border: 1px solid var(--app-line);
+  border-radius: 8px;
+  color: var(--app-text);
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(28, 112, 61, 0.05);
+}
+
+.account-field input:focus {
+  border-color: var(--app-green);
+}
+
+.account-field small {
+  color: var(--app-muted);
+  font-size: 12px;
+}
+
+.account-submit {
+  min-height: 58px;
+  margin-top: 8px;
+  border-radius: 8px;
+  color: #ffffff;
+  background: var(--app-green);
+  box-shadow: 0 14px 28px rgba(25, 169, 87, 0.2);
+  font-weight: 900;
+}
+
+.account-submit:disabled {
+  opacity: 0.58;
+  cursor: wait;
+}
+
+.auth-message {
+  min-height: 21px;
+  margin: 14px 0 0;
+  color: var(--app-green-dark);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.auth-message.is-error {
+  color: var(--app-danger);
+}
+
+.auth-switch {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 4px;
+  color: var(--app-muted);
+  background: transparent;
+  font-size: 13px;
+}
+
+.auth-switch strong {
+  color: var(--app-green-dark);
+}
+
+@media (max-height: 690px) {
+  .auth-screen {
+    place-items: start center;
+  }
+
+  .auth-heading {
+    margin-top: 34px;
+  }
+}

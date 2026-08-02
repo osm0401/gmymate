@@ -150,7 +150,7 @@ function setupOnboarding() {
     }
   });
 
-  function finishOnboarding(provider = "google") {
+  async function finishOnboarding() {
     const profile = Object.fromEntries(new FormData(form).entries());
     const emptyStep = onboardingRules.findIndex((rule) => !profile[rule.name]);
 
@@ -176,21 +176,34 @@ function setupOnboarding() {
       return;
     }
 
-    profile.provider = provider;
-    writeJson("gmymateProfile", profile);
-    window.location.href = "./main.html";
-  }
+    const submitButton = form.querySelector('[type="submit"]');
+    submitButton.disabled = true;
+    setNote("정보를 안전하게 저장하고 있어요.");
 
-  form.querySelectorAll("[data-provider]").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.preventDefault();
-      finishOnboarding(button.dataset.provider || "google");
-    });
-  });
+    try {
+      const response = await fetch("./api/profile.php", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profile)
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "정보를 저장하지 못했어요.");
+      }
+
+      writeJson("gmymateProfile", data.user?.profile || profile);
+      window.location.href = data.next || "./main.html";
+    } catch (error) {
+      setNote(error.message, true);
+      submitButton.disabled = false;
+    }
+  }
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    finishOnboarding(event.submitter?.dataset.provider || "google");
+    finishOnboarding();
   });
 
   showStep(0);

@@ -544,9 +544,21 @@
   text-align: center;
 }
 
+.replacement-help {
+  margin: -4px 0 0;
+  color: var(--app-muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.replacement-option {
+  grid-template-columns: 50px minmax(0, 1fr) 24px;
+}
+
 /* Compact mobile workout flow */
 .app-view[data-view="log"] {
-  padding-bottom: 92px;
+  padding-bottom: 184px;
 }
 
 .app-view[data-view="log"] .page-heading h1 {
@@ -556,18 +568,88 @@
 }
 
 .workout-log-panel {
-  gap: 12px;
-  padding: 0;
-  border-radius: 0;
+  gap: 16px;
+  padding: 14px;
+  border-radius: 16px;
+}
+
+.workout-toolbar {
+  align-items: flex-start;
+}
+
+.workout-toolbar > div {
+  min-width: 0;
 }
 
 .workout-toolbar strong {
-  font-size: 17px;
+  margin-top: 5px;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.workout-save-status {
+  display: block;
+  margin-top: 5px;
+  color: var(--app-muted);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.workout-recovery-banner {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 14px;
+  padding: 11px;
+  border: 1px solid #9ddbad;
+  border-radius: 8px;
+  background: #effaf2;
+  box-shadow: 0 8px 22px rgba(24, 119, 60, 0.08);
+}
+
+.workout-recovery-banner[hidden] {
+  display: none;
+}
+
+.recovery-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 8px;
+  color: #ffffff;
+  background: var(--app-green);
+}
+
+.recovery-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+.workout-recovery-banner strong,
+.workout-recovery-banner small {
+  display: block;
+}
+
+.workout-recovery-banner strong {
+  color: var(--app-green-dark);
+  font-size: 13px;
+}
+
+.workout-recovery-banner small {
+  margin-top: 3px;
+  color: var(--app-muted);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
 .exercise-log-card {
-  gap: 8px;
-  padding: 10px;
+  gap: 10px;
+  padding: 12px;
   border: 1px solid var(--app-line);
   border-radius: 8px;
   background: var(--app-surface);
@@ -627,6 +709,52 @@
   gap: 5px;
 }
 
+.exercise-card-context {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 7px;
+  border-radius: 7px;
+  color: var(--app-muted);
+  background: #f3faf5;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.exercise-card-context > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exercise-card-context button {
+  display: inline-flex;
+  min-width: 66px;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 6px;
+  color: var(--app-green-dark);
+  background: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.exercise-card-context button:disabled {
+  color: #9caca0;
+  background: #e8efea;
+}
+
+.exercise-card-context svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
 .set-count-control {
   display: grid;
   grid-template-columns: 28px 26px 28px;
@@ -679,18 +807,28 @@
 .set-summary-row {
   display: grid;
   min-height: 48px;
-  grid-template-columns: 28px minmax(0, 1fr) 32px;
+  grid-template-columns: minmax(0, 1fr) 40px;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   border-bottom: 1px solid #edf4ef;
-  border-radius: 0;
   color: var(--app-text);
   background: transparent;
-  text-align: left;
 }
 
 .set-summary-row:last-child {
   border-bottom: 0;
+}
+
+.set-summary-edit {
+  display: grid;
+  min-width: 0;
+  min-height: 48px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
 }
 
 .set-summary-row .set-number {
@@ -724,12 +862,23 @@
 
 .set-summary-check {
   display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 50%;
+  background: transparent;
+  transition: transform 140ms ease, background-color 140ms ease;
+}
+
+.set-summary-check > span {
+  display: grid;
   width: 28px;
   height: 28px;
   place-items: center;
   border-radius: 50%;
   color: #ffffff;
   background: #d0dbd3;
+  transition: background-color 140ms ease, box-shadow 140ms ease;
 }
 
 .set-summary-check svg {
@@ -738,13 +887,23 @@
   fill: currentColor;
 }
 
+.set-summary-check:active {
+  transform: scale(0.9);
+}
+
+.set-summary-check:focus-visible {
+  outline: 3px solid rgba(25, 169, 87, 0.24);
+  outline-offset: 0;
+}
+
 .set-summary-row.is-done {
   color: var(--app-green-dark);
   background: #f4fbf6;
 }
 
-.set-summary-row.is-done .set-summary-check {
+.set-summary-row.is-done .set-summary-check > span {
   background: var(--app-green);
+  box-shadow: 0 4px 10px rgba(25, 169, 87, 0.18);
 }
 
 .exercise-log-card.is-dragging {
@@ -927,6 +1086,40 @@
   font-size: 21px;
 }
 
+.previous-set-suggestion {
+  display: grid;
+  min-height: 58px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #9ddbad;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--app-green-dark);
+  background: #effaf2;
+  text-align: left;
+}
+
+.previous-set-suggestion[hidden] {
+  display: none;
+}
+
+.previous-set-suggestion span,
+.previous-set-suggestion small {
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.previous-set-suggestion strong {
+  overflow-wrap: anywhere;
+  font-size: 15px;
+  text-align: center;
+}
+
+.previous-set-suggestion small {
+  color: var(--app-muted);
+}
+
 .set-editor-field {
   display: grid;
   gap: 10px;
@@ -1006,18 +1199,18 @@
 .workout-timer-dock {
   position: fixed;
   right: 12px;
-  bottom: 79px;
+  bottom: 82px;
   left: 12px;
   z-index: 9;
   display: grid;
   width: min(calc(100% - 24px), 416px);
-  min-height: 68px;
+  min-height: 62px;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   margin: 0 auto;
   overflow: hidden;
-  padding: 10px 12px 13px;
+  padding: 8px 11px 11px;
   border: 1px solid var(--app-line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.97);
@@ -1039,12 +1232,24 @@
 
 .timer-dock-copy strong {
   color: var(--app-text);
-  font-size: 25px;
+  font-size: 23px;
   line-height: 1;
 }
 
 .workout-timer-dock[data-mode="rest"] .timer-dock-copy strong {
   color: var(--app-green);
+}
+
+.workout-timer-dock.is-rest-complete {
+  border-color: var(--app-green);
+  background: #effaf2;
+  animation: rest-complete-pulse 700ms ease 2;
+}
+
+@keyframes rest-complete-pulse {
+  50% {
+    box-shadow: 0 0 0 5px rgba(25, 169, 87, 0.18), 0 -8px 28px rgba(28, 112, 61, 0.13);
+  }
 }
 
 .timer-dock-actions {
@@ -1089,19 +1294,54 @@ body:has(.app-view[data-view="log"].active) .toast {
 }
 
 @media (max-width: 370px) {
+  .workout-log-panel {
+    padding: 12px;
+  }
+
+  .workout-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .add-exercise-button {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
   .exercise-card-header.compact {
-    grid-template-columns: 24px 34px minmax(0, 1fr) auto;
-    gap: 5px;
+    grid-template-areas:
+      "drag avatar title delete"
+      "controls controls controls controls";
+    grid-template-columns: 24px 34px minmax(0, 1fr) 30px;
+    gap: 7px 5px;
+  }
+
+  .exercise-card-header.compact .drag-handle {
+    grid-area: drag;
   }
 
   .compact-avatar,
   .compact-avatar svg {
+    grid-area: avatar;
     width: 34px;
     height: 34px;
   }
 
+  .exercise-card-header.compact .exercise-title-block {
+    grid-area: title;
+  }
+
+  .compact-card-actions {
+    display: contents;
+  }
+
   .set-count-control {
+    grid-area: controls;
     grid-template-columns: 25px 22px 25px;
+    justify-self: end;
   }
 
   .set-count-control button {
@@ -1109,6 +1349,7 @@ body:has(.app-view[data-view="log"].active) .toast {
   }
 
   .delete-workout-button {
+    grid-area: delete;
     width: 30px;
   }
 
@@ -1120,12 +1361,22 @@ body:has(.app-view[data-view="log"].active) .toast {
     padding: 0 8px;
     font-size: 11px;
   }
+
+  .previous-set-suggestion {
+    grid-template-columns: 1fr auto;
+  }
+
+  .previous-set-suggestion span {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .set-editor-backdrop,
   .set-editor-sheet,
+  .workout-timer-dock.is-rest-complete,
   .timer-progress span {
+    animation: none;
     transition: none;
   }
 }

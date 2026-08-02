@@ -110,15 +110,16 @@
 
 .onboarding-screen .field input,
 .onboarding-screen .field select {
-  width: 100%;
+  width: min(100%, 380px);
   min-height: 78px;
   margin-top: 12px;
-  border: 0;
-  border-bottom: 3px solid var(--app-line);
-  border-radius: 0;
+  border: 2px solid var(--app-line);
+  border-radius: 18px;
+  padding: 0 52px;
   outline: 0;
   color: var(--app-green-dark);
-  background: transparent;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 28px rgba(28, 112, 61, 0.07);
   font-size: 40px;
   font-weight: 900;
   text-align: center;
@@ -131,11 +132,12 @@
 .onboarding-screen .field input:focus,
 .onboarding-screen .field select:focus {
   border-color: var(--app-green);
+  box-shadow: 0 0 0 4px rgba(25, 169, 87, 0.12);
 }
 
 .onboarding-screen .field small {
   position: absolute;
-  right: 0;
+  right: max(18px, calc((100% - 380px) / 2 + 18px));
   bottom: 62px;
   color: var(--app-green-dark);
   font-size: 18px;

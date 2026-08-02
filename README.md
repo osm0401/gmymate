@@ -1,27 +1,51 @@
-# gmymate
+# GAINMUSCLE
 
-헬스장에서 휴대전화로 빠르게 운동을 기록할 수 있도록 만든 초록·하양 테마의 모바일 웹앱입니다.
+GAINMUSCLE is a mobile-first workout tracker with account login, onboarding,
+set-by-set workout logging, routines, progress summaries, rest timers, and an
+exercise-focused Gemini assistant.
 
-## 주요 기능
+## Project structure
 
-- 키, 나이, 몸무게, 목표 몸무게, 운동 경력 온보딩
-- 최근 운동과 검색을 지원하는 운동 추가 목록
-- 세트별 무게·횟수 기록과 빠른 증감 버튼
-- 사용자 설정값 `k`를 이용한 무게 조절
-- 세트 완료와 자동 휴식 타이머
-- 오늘 운동량, 완료 세트, 연속 운동일 요약
-- 운동 달력과 최근 운동 기록
-- 큰 버튼 모드와 간단한 사용성 설정
-- 브라우저에 운동 기록 자동 저장
+```text
+gmymate/
+|-- api/                 PHP endpoints and server modules
+|   |-- config/          Local secrets and shareable examples
+|   |-- core/            HTTP, session, database, and bootstrap helpers
+|   |-- repositories/    Database queries
+|   `-- services/        Authentication and user services
+|-- docs/                Deployment documentation
+|-- scripts/deploy/      FTP setup and changed-file deployment
+|-- src/
+|   |-- core/            Shared browser data, storage, and auth guards
+|   |-- features/        Page and feature behavior
+|   `-- styles/          Feature-focused stylesheets
+|-- index.html           Login and registration
+|-- onboarding.html      Initial profile setup
+`-- main.html            Main mobile application
+```
 
-## 실행 방법
+## Local development
 
-별도의 설치나 빌드 없이 `index.html`을 열면 됩니다. 로컬 웹 서버나 일반 정적 웹호스팅에서도 실행할 수 있습니다.
+The frontend has no build step, but login and AI features require PHP. Serve the
+project through a PHP-capable local server or upload it to Dothome. Opening the
+HTML files directly only previews static layout.
 
-## 호스팅 업로드
+Create these private files from their examples before using server features:
 
-FTP의 `public_html` 안에 `index.html`, `main.html`, `onboarding.html`, `src` 폴더를 업로드합니다. 배포용 파일은 프로젝트 바깥의 `gmymate-upload` 폴더에도 정리되어 있습니다.
+- `api/config/database.php`
+- `api/config/gemini.php`
 
-## 현재 저장 방식
+Both files are ignored by Git. Never place passwords or API keys in public PHP,
+HTML, or JavaScript files.
 
-운동 기록과 설정은 브라우저의 로컬 저장소에 보관됩니다. 로그인, 여러 기기 동기화, 결제 기능은 서버와 데이터베이스를 연결하는 다음 단계에서 추가할 예정입니다.
+## Deployment
+
+See [docs/deployment.md](docs/deployment.md). FTP deployment reads directly from
+this repository, uploads only changed production files, and no longer requires a
+separate upload mirror.
+
+## Storage
+
+Accounts and profile information use PHP sessions and MySQL. Workout state and
+interface preferences currently use browser storage, so cross-device workout
+synchronization is still a future backend task.

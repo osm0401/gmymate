@@ -32,6 +32,10 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.auth-checking body {
+  visibility: hidden;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -99,13 +103,25 @@ textarea {
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   color: var(--app-green-dark);
+  font-size: 15px;
+  font-weight: 900;
 }
 
 .brand-mark {
-  border-radius: 14px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  flex: 0 0 32px;
+  border-radius: 8px;
   color: #ffffff;
   background: var(--app-green);
+  font-size: 17px;
+  font-weight: 900;
   box-shadow: 0 10px 24px rgba(25, 169, 87, 0.22);
 }
 

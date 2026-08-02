@@ -3,13 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>gmymate</title>
-  <meta http-equiv="refresh" content="0; url=./onboarding.html">
-  <link rel="canonical" href="./onboarding.html">
+  <meta name="theme-color" content="#19a957">
+  <title>GAINMUSCLE - 로그인</title>
+  <link rel="stylesheet" href="./src/app.css?v=20260717-4">
 </head>
 <body>
-  <main>
-    <a href="./onboarding.html">gmymate 시작하기</a>
+  <main class="auth-screen">
+    <section class="auth-shell" aria-labelledby="authTitle">
+      <a class="brand auth-brand" href="./index.html" aria-label="GAINMUSCLE 로그인">
+        <span class="brand-mark">G</span>
+        <span>GAINMUSCLE</span>
+      </a>
+
+      <div class="auth-heading">
+        <p>오늘도 가볍게 시작해요</p>
+        <h1 id="authTitle">로그인</h1>
+      </div>
+
+      <form class="account-form" id="loginForm" novalidate>
+        <label class="account-field">
+          <span>아이디 또는 이메일</span>
+          <input name="identifier" type="text" autocomplete="username" maxlength="100" required>
+        </label>
+        <label class="account-field">
+          <span>비밀번호</span>
+          <input name="password" type="password" autocomplete="current-password" maxlength="72" required>
+        </label>
+        <button class="account-submit" type="submit">로그인</button>
+      </form>
+
+      <form class="account-form" id="registerForm" hidden novalidate>
+        <label class="account-field">
+          <span>아이디</span>
+          <input name="username" type="text" autocomplete="username" minlength="2" maxlength="30" required>
+          <small>한글, 영문, 숫자, 밑줄을 사용할 수 있어요.</small>
+        </label>
+        <label class="account-field">
+          <span>이메일</span>
+          <input name="email" type="email" autocomplete="email" maxlength="255" required>
+        </label>
+        <label class="account-field">
+          <span>비밀번호</span>
+          <input name="password" type="password" autocomplete="new-password" minlength="8" maxlength="72" required>
+          <small>8자 이상 입력해주세요.</small>
+        </label>
+        <label class="account-field">
+          <span>비밀번호 확인</span>
+          <input name="passwordConfirm" type="password" autocomplete="new-password" minlength="8" maxlength="72" required>
+        </label>
+        <button class="account-submit" type="submit">회원가입</button>
+      </form>
+
+      <p class="auth-message" id="authMessage" role="status" aria-live="polite"></p>
+      <button class="auth-switch" type="button" id="authSwitch">처음이신가요? <strong>회원가입</strong></button>
+    </section>
   </main>
+
+  <script defer src="./src/features/auth.js"></script>
 </body>
 </html>

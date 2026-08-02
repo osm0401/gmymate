@@ -1,0 +1,9 @@
+{
+  "host": "kpgo.dothome.co.kr",
+  "port": 21,
+  "username": "kpgo",
+  "remoteRoot": "/html",
+  "localRoot": ".",
+  "verifyUrl": "https://kpgo.dothome.co.kr/",
+  "requireTls": false
+}
