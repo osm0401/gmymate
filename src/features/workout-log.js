@@ -9,6 +9,7 @@ const {
   showToast,
   writeJson
 } = app;
+const { formatNumber, formatTime, formatSavedTime, exerciseIcon } = app.workoutLogUtils;
 
 function setupWorkoutLog() {
   const list = document.querySelector("#logList");
@@ -195,22 +196,6 @@ function setupWorkoutLog() {
     return Math.min(Math.max(Math.round(seconds), 15), 600);
   }
 
-  function formatNumber(value) {
-    return Number(value).toFixed(1).replace(/\.0$/, "");
-  }
-
-  function formatTime(totalSeconds) {
-    const safeSeconds = Math.max(Math.floor(totalSeconds), 0);
-    const minutes = String(Math.floor(safeSeconds / 60)).padStart(2, "0");
-    const seconds = String(safeSeconds % 60).padStart(2, "0");
-    return `${minutes}:${seconds}`;
-  }
-
-  function formatSavedTime(value) {
-    const date = new Date(Number(value) || Date.now());
-    return date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
-  }
-
   function renderSaveStatus() {
     if (!saveStatus) {
       return;
@@ -234,18 +219,6 @@ function setupWorkoutLog() {
       recoveryTitle.textContent = "이전 운동을 복구했어요.";
       recoveryDetail.textContent = `${workouts.length}개 운동 · 남은 세트 ${remaining}개 · ${formatSavedTime(activeWorkoutMeta.updatedAt)} 저장`;
     }
-  }
-
-  function exerciseIcon(name) {
-    const initial = escapeHtml(name.slice(0, 1));
-
-    return `
-      <svg viewBox="0 0 44 44" aria-hidden="true">
-        <rect x="3" y="3" width="38" height="38" rx="12"></rect>
-        <path d="M12 22h20M9 16h5v12H9zm21 0h5v12h-5z"></path>
-        <text x="22" y="29">${initial}</text>
-      </svg>
-    `;
   }
 
   function getWorkoutStats() {
