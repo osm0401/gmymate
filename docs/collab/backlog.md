@@ -14,9 +14,10 @@
 - [TODO] BE-2 · [BE] · Codex — `api/gemini.php` 관례 정렬 (`decisions.md` D-5)
   - `core/bootstrap.php` 사용 + 인라인 세션체크 → `requireUserId()`.
   - config/레이트리밋/요청가공 함수를 `api/services/gemini.php`로, `gemini.php`는 얇은 엔드포인트로. (DB 없음 → repository 없음.)
-- [DOING] FE-1 · [FE] · Claude — `src/features/workout-log.js`(1346줄) 모듈 분할 (`decisions.md` D-7~D-9)
-  - 공유 가변 상태(`workouts`/`activeEditor`/`timerState`/`dragState`)를 어느 모듈이 소유할지 구현 중 결정. 타이머/피커/에디터 하위 모듈로.
-  - `CustomEvent` 규약·스크립트 로드 순서 유지. 이름 충돌(`getDateKey`/`getWorkoutStats`/`formatNumber`) 해소.
+- [DOING] FE-1 · [FE] · Claude — `src/features/workout-log.js` 모듈 분할 (3단계, `decisions.md` D-7~D-9)
+  - Stage 1 ✅: 순수 헬퍼(`formatNumber`/`formatTime`/`formatSavedTime`/`exerciseIcon`) → `workout-log-utils.js`(`app.workoutLogUtils`, 네임스페이스로 D-9 충돌 회피). 1346→1319줄. `node --check`+브라우저 검증.
+  - Stage 2 (다음): 타이머 서브시스템(~200줄) → 팩토리 모듈. 외부 호출부 ~14곳 재배선(3곳은 `timerState` 내부 접근: +15초 핸들러, 모드 체크). **라이브(dothome) 테스트 권장** — 카운트다운/알림은 file:// 정적 로드로 확인 불가.
+  - Stage 3: 피커 + 세트 에디터. 공유 `workouts`/`activeEditor` 접근.
 - [DONE] FE-2 · [FE] · Claude — `src/features/main.js` 분할 ✅
   - 진행상황 대시보드 블록을 `src/features/progress-dashboard.js`(238줄)로 분리. `main.js` 606→391줄.
   - `app.renderProgressDashboard`로 노출, `main.js`의 `renderAppStats`가 호출. 충돌 헬퍼(`getDateKey`/`formatNumber`/`formatHistoryDate`)는 파일 로컬 복제(D-9).
