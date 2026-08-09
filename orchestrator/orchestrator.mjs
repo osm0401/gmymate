@@ -56,6 +56,18 @@ function bin(name) {
   return pick;
 }
 
+// Node 20+는 CVE-2024-27980 패치 이후 .cmd/.bat을 shell 없이 띄우지 못한다(EINVAL).
+// npm 전역 CLI는 .cmd라서 그 경우만 shell을 켜고 인자를 직접 인용한다.
+const quoteArg = (a) => (/[\s"&|<>^()]/.test(a) ? `"${String(a).replace(/"/g, '""')}"` : a);
+function run(name, args, opts = {}) {
+  const exe = bin(name);
+  const o = { cwd: repo, encoding: "utf8", maxBuffer: 64e6, ...opts };
+  // args 배열 + shell:true 조합은 DEP0190 경고를 내므로 명령줄을 직접 조립해 넘긴다.
+  return /\.(cmd|bat)$/i.test(exe)
+    ? execSync([exe, ...args].map(quoteArg).join(" "), o)
+    : execFileSync(exe, args, o);
+}
+
 function log(msg) {
   const line = `[${new Date().toISOString()}] ${msg}`;
   cycle.log.push(line);
@@ -97,11 +109,7 @@ function gemini(model, prompt) {
   const f = path.join(tmpdir(), `orch-${Date.now()}-${Math.random().toString(36).slice(2)}.md`);
   writeFileSync(f, prompt);
   try {
-    return execFileSync(bin("gemini"), ["--model", model, "-p", `@${f}`], {
-      cwd: repo,
-      encoding: "utf8",
-      maxBuffer: 64e6,
-    }).trim();
+    return run("gemini", ["--model", model, "-p", `@${f}`]).trim();
   } catch (e) {
     throw new Error(`gemini ${model}: ${e.stderr || e.stdout || e.message}`);
   } finally {
@@ -129,8 +137,8 @@ async function geminiHold(model, prompt) {
 function codex(prompt) {
   const out = path.join(tmpdir(), `orch-order-${Date.now()}.md`);
   try {
-    execFileSync(
-      bin("codex"),
+    run(
+      "codex",
       ["exec", "--skip-git-repo-check", "-s", "read-only",
        "-c", "tools.web_search=true",                                    // 온라인 리서치 (계획서 3)
        ...(process.env.CODEX_MODEL ? ["-m", process.env.CODEX_MODEL] : []), // 기본 모델을 그대로 쓴다
@@ -150,10 +158,9 @@ function codex(prompt) {
 // Claude Code CLI를 헤드리스로 실행. CLI가 직접 파일을 수정하고 결과 요약을 돌려준다.
 function claudeCode(prompt) {
   try {
-    const out = execFileSync(
-      bin("claude"),
+    const out = run(
+      "claude",
       ["-p", prompt, "--output-format", "json", "--permission-mode", process.env.CLAUDE_PERMISSION_MODE || "acceptEdits"],
-      { cwd: repo, encoding: "utf8", maxBuffer: 64e6 },
     );
     const j = JSON.parse(out);
     if (j.is_error) throw new Error(j.result || "claude code 실패");
@@ -271,11 +278,11 @@ function runCheck() {
   const win = process.platform === "win32";
   const script = win ? "scripts/check.ps1" : "scripts/check.sh";
   if (!existsSync(path.join(repo, script))) return { ok: true, output: `${script} 없음 — 검사 생략` };
-  const [bin, argv] = win
+  const [shellBin, argv] = win
     ? ["powershell", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", script]]
     : ["bash", [script]];
   try {
-    return { ok: true, output: execFileSync(bin, argv, { cwd: repo, encoding: "utf8", maxBuffer: 16e6 }) };
+    return { ok: true, output: execFileSync(shellBin, argv, { cwd: repo, encoding: "utf8", maxBuffer: 16e6 }) };
   } catch (e) {
     return { ok: false, output: `${e.stdout ?? ""}${e.stderr ?? ""}`.trim() || e.message };
   }
