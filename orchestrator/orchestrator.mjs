@@ -25,7 +25,7 @@ const agyModel = process.env.GEMINI_AGY_MODEL || "gemini-2.5-flash-lite"; // 대
 const maxRounds = Number(process.env.MAX_ROUNDS ?? 20); // 0 = 무제한
 
 // 이번 사이클의 관찰 기록 — 보고서에 그대로 들어간다
-const cycle = { agy: [], blocked: [], rounds: 0, flags: [], log: [] };
+const cycle = { agy: [], blocked: [], rounds: 0, checkFails: 0, flags: [], log: [] };
 
 // ---------------------------------------------------------------- 유틸
 
@@ -244,6 +244,22 @@ ${diff.slice(0, 400_000)}
 }
 
 // 판정을 못 읽으면 통과시키지 않는다 (fail-closed)
+// 리뷰어를 부르기 전에 문법 검사부터 통과시킨다.
+// 린트에서 걸릴 코드를 Gemini에게 보내는 건 무료 한도 낭비다 — 바로 코더에게 되돌린다.
+function runCheck() {
+  const win = process.platform === "win32";
+  const script = win ? "scripts/check.ps1" : "scripts/check.sh";
+  if (!existsSync(path.join(repo, script))) return { ok: true, output: `${script} 없음 — 검사 생략` };
+  const [bin, argv] = win
+    ? ["powershell", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", script]]
+    : ["bash", [script]];
+  try {
+    return { ok: true, output: execFileSync(bin, argv, { cwd: repo, encoding: "utf8", maxBuffer: 16e6 }) };
+  } catch (e) {
+    return { ok: false, output: `${e.stdout ?? ""}${e.stderr ?? ""}`.trim() || e.message };
+  }
+}
+
 export function parseReview(text) {
   const m = String(text).match(/REQUEST[_ ]CHANGES|APPROVE/i);
   const verdict = m && /APPROVE/i.test(m[0]) ? "APPROVE" : "REQUEST_CHANGES";
@@ -360,6 +376,19 @@ async function runCycle(command) {
     sh("git add -A");
     sh(`git commit -F .git/ORCH_MSG`);
 
+    log(`라운드 ${cycle.rounds}: 자동 검사 (${process.platform === "win32" ? "check.ps1" : "check.sh"})`);
+    const check = runCheck();
+    if (!check.ok) {
+      cycle.checkFails++;
+      verdict = "REQUEST_CHANGES";
+      feedback = `자동 검사(scripts/check)가 실패했다. 리뷰 이전에 아래를 먼저 고쳐라.\n\n${check.output.slice(0, 20_000)}`;
+      history.push(feedback);
+      cycle.flags = repeatFlag(history);
+      log("검사 실패 — Gemini 리뷰를 건너뛰고 코더에게 반려");
+      continue;
+    }
+    log("검사 통과");
+
     const diff = sh(`git diff ${base}...HEAD`);
     log(`라운드 ${cycle.rounds}: 리뷰`);
     ({ verdict, feedback } = await reviewer(order, diff));
@@ -386,6 +415,7 @@ async function runCycle(command) {
 ## ${id} — ${command}
 - 시작: ${started.toISOString()}
 - 리뷰 라운드: ${cycle.rounds}
+- 자동 검사 실패: ${cycle.checkFails}회 (리뷰까지 못 간 라운드)
 - 결과: ${result}
 - AGY 모드: ${cycle.agy.length ? cycle.agy.map((a) => `${a.role} (${a.reason.slice(0, 80)})`).join("; ") : "없음"}
 - 블로킹: ${cycle.blocked.length ? `${cycle.blocked.length}회` : "없음"}

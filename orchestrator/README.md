@@ -43,9 +43,12 @@ node orchestrator/test.mjs
 | --- | --- | --- |
 | 작업 지시서 | OpenAI Responses API + web_search | 5초 후 1회 재시도 → Gemini Flash-Lite 대행 |
 | 코드 구현 | `claude -p --output-format json` | 동일. 대행 시 Gemini가 파일 전체 내용을 JSON으로 반환 |
+| 자동 검사 | `scripts/check.ps1` (win) / `check.sh` — php·js 문법 | 실패 시 리뷰를 건너뛰고 바로 코더에게 반려 |
 | 리뷰 | `gemini --model gemini-2.5-pro -p @프롬프트파일`, 6개 체크리스트 | 한도 소진 시 10~30분 간격 자동 재시도(보류) |
 | 머지 | `gh pr create` → `gh pr merge --squash` | — |
 
+- 문법 검사가 리뷰보다 먼저다. 린트에서 걸릴 코드를 Gemini에 보내면 무료 한도만 태운다.
+- `php`/`node`가 없으면 해당 검사는 `SKIP`으로 넘어간다. 도구 부재는 코드 결함이 아니라서 실패로 치면 코더가 고칠 수 없는 걸 무한히 고치려 든다.
 - 리뷰 판정을 못 읽으면 `REQUEST_CHANGES`로 처리한다 (fail-closed).
 - 같은 지적이 3회 반복되면 보고서에 "반복 이슈"로 표시만 하고 멈추지 않는다.
 - `MAX_ROUNDS` 기본 20은 계획서 원안(무제한)에 붙인 폭주 방지 상한이다. `MAX_ROUNDS=0`이면 원안대로 무제한.
