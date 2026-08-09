@@ -8,13 +8,15 @@
 //   node orchestrator.mjs --report weekly
 
 import { execSync, execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync, appendFileSync, mkdirSync, readdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, appendFileSync, mkdirSync, readdirSync, existsSync, unlinkSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeDocx, stamp } from "./docx.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-loadEnv(path.join(here, ".env"));
+loadEnv(path.join(here, ".env"));           // 오케스트레이터 전용 키가 우선
+loadEnv(path.resolve(here, "..", ".env")); // 없으면 저장소 루트 .env를 재사용
 
 const repo = process.env.REPO_DIR || path.resolve(here, "..");
 const base = process.env.BASE_BRANCH || "main";
@@ -73,18 +75,22 @@ async function withAGY(role, primary, fallback) {
 
 // ---------------------------------------------------------------- API 호출
 
-async function gemini(model, prompt) {
-  const r = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-    {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-    },
-  );
-  if (!r.ok) throw Object.assign(new Error(`gemini ${model}: ${await r.text()}`), { status: r.status });
-  const j = await r.json();
-  return (j.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? "").join("");
+// Gemini CLI를 쓴다 — 구글 계정 인증이라 API 키가 필요 없고, 코더(claude CLI)와 방식이 같다.
+// 프롬프트에 diff가 통째로 들어가 argv 길이 제한(윈도우 ~32KB)을 넘기므로 파일로 넘긴다.
+function gemini(model, prompt) {
+  const f = path.join(tmpdir(), `orch-${Date.now()}-${Math.random().toString(36).slice(2)}.md`);
+  writeFileSync(f, prompt);
+  try {
+    return execFileSync("gemini", ["--model", model, "-p", `@${f}`], {
+      cwd: repo,
+      encoding: "utf8",
+      maxBuffer: 64e6,
+    }).trim();
+  } catch (e) {
+    throw new Error(`gemini ${model}: ${e.stderr || e.stdout || e.message}`);
+  } finally {
+    try { unlinkSync(f); } catch {}
+  }
 }
 
 // Gemini까지 소진되면 파이프라인을 "보류"로 두고 10~30분 간격 자동 재시도 (계획서 6.3)
@@ -315,8 +321,11 @@ async function runCycle(command) {
 
   // 사전 점검 — git을 건드리기 전에 막는다.
   // 특히 더티 트리에서 시작하면 뒤의 `git add -A`가 무관한 작업물까지 커밋에 쓸어담는다.
-  const missing = ["OPENAI_API_KEY", "GEMINI_API_KEY"].filter((k) => !process.env[k]);
-  if (missing.length) throw new Error(`환경변수 누락: ${missing.join(", ")} — orchestrator/.env를 채워라`);
+  if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY 없음 — .env를 채워라");
+  for (const cli of ["gemini", "claude", "gh"]) {
+    try { execFileSync(process.platform === "win32" ? "where" : "which", [cli], { stdio: "ignore" }); }
+    catch { throw new Error(`${cli} CLI를 찾을 수 없다 — 설치/로그인 후 실행하라`); }
+  }
   const dirty = sh("git status --porcelain");
   if (dirty) throw new Error(`작업 트리에 커밋되지 않은 변경 ${dirty.split("\n").length}건 — 먼저 커밋/스태시 후 실행하라`);
 

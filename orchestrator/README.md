@@ -5,10 +5,13 @@
 
 ## 준비
 
-1. `cp .env.example .env` 후 `OPENAI_API_KEY`, `GEMINI_API_KEY` 입력
-2. `claude` CLI 로그인 (`claude` 실행 후 인증)
-3. `gh` CLI 로그인 (`gh auth login`) — PR 생성/머지에 사용
-4. Node 18+ (내장 `fetch` 사용, 의존성 없음)
+1. `OPENAI_API_KEY` — 저장소 루트 `.env`에 있으면 그대로 쓴다. 없으면 `cp .env.example .env` 후 입력
+2. `claude` CLI 로그인 — 코더 역할
+3. `gemini` CLI 로그인 — 리뷰어 + AGY 대행 역할 (구글 계정 인증, API 키 불필요)
+4. `gh` CLI 로그인 (`gh auth login`) — PR 생성/머지
+5. Node 18+ (의존성 없음)
+
+세 AI 중 둘은 CLI 계정 인증이라 관리할 키가 `OPENAI_API_KEY` 하나뿐이다.
 
 ## 실행
 
@@ -40,7 +43,7 @@ node orchestrator/test.mjs
 | --- | --- | --- |
 | 작업 지시서 | OpenAI Responses API + web_search | 5초 후 1회 재시도 → Gemini Flash-Lite 대행 |
 | 코드 구현 | `claude -p --output-format json` | 동일. 대행 시 Gemini가 파일 전체 내용을 JSON으로 반환 |
-| 리뷰 | Gemini 2.5 Pro, 6개 체크리스트 | 한도 소진 시 10~30분 간격 자동 재시도(보류) |
+| 리뷰 | `gemini --model gemini-2.5-pro -p @프롬프트파일`, 6개 체크리스트 | 한도 소진 시 10~30분 간격 자동 재시도(보류) |
 | 머지 | `gh pr create` → `gh pr merge --squash` | — |
 
 - 리뷰 판정을 못 읽으면 `REQUEST_CHANGES`로 처리한다 (fail-closed).
