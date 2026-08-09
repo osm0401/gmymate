@@ -5,13 +5,15 @@
 
 ## 준비
 
-1. `OPENAI_API_KEY` — 저장소 루트 `.env`에 있으면 그대로 쓴다. 없으면 `cp .env.example .env` 후 입력
-2. `claude` CLI 로그인 — 코더 역할
-3. `gemini` CLI 로그인 — 리뷰어 + AGY 대행 역할 (구글 계정 인증, API 키 불필요)
+1. `codex` CLI 로그인 (`codex login`) — 지휘자. ChatGPT 구독 인증
+2. `claude` CLI 로그인 — 코더
+3. `gemini` CLI 로그인 — 리뷰어 + AGY 대행. 구글 계정 인증
 4. `gh` CLI 로그인 (`gh auth login`) — PR 생성/머지
 5. Node 18+ (의존성 없음)
+6. `cp .env.example .env` 후 `BASE_BRANCH` 확인
 
-세 AI 중 둘은 CLI 계정 인증이라 관리할 키가 `OPENAI_API_KEY` 하나뿐이다.
+**API 키가 하나도 필요 없다.** 세 역할 전부 CLI 구독/계정 인증을 쓴다.
+OpenAI API를 직접 쓰던 초기 버전은 계정 크레딧이 0이면 매 사이클 429로 AGY 폴백이 걸려서 폐기했다.
 
 ## 실행
 
@@ -41,7 +43,7 @@ node orchestrator/test.mjs
 
 | 단계 | 담당 | 실패 시 |
 | --- | --- | --- |
-| 작업 지시서 | OpenAI Responses API + web_search | 5초 후 1회 재시도 → Gemini Flash-Lite 대행 |
+| 작업 지시서 | `codex exec -s read-only -c tools.web_search=true` | 5초 후 1회 재시도 → Gemini Flash-Lite 대행 |
 | 코드 구현 | `claude -p --output-format json` | 동일. 대행 시 Gemini가 파일 전체 내용을 JSON으로 반환 |
 | 자동 검사 | `scripts/check.ps1` (win) / `check.sh` — php·js 문법 | 실패 시 리뷰를 건너뛰고 바로 코더에게 반려 |
 | 리뷰 | `gemini --model gemini-2.5-pro -p @프롬프트파일`, 6개 체크리스트 | 한도 소진 시 10~30분 간격 자동 재시도(보류) |

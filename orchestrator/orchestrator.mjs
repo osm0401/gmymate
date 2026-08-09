@@ -40,6 +40,22 @@ function loadEnv(file) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const sh = (cmd) => execSync(cmd, { cwd: repo, encoding: "utf8", maxBuffer: 64e6 }).trim();
 
+// 윈도우에서 npm 전역 설치본은 확장자 없는 셔임 + .cmd 쌍으로 깔린다.
+// execFile은 PATHEXT를 안 보므로 이름만 넘기면 ENOENT가 난다 — 실제 경로를 찾아 쓴다.
+const binCache = new Map();
+const binScore = (p) => (/\.exe$/i.test(p) ? 3 : /\.(cmd|bat)$/i.test(p) ? 2 : 1);
+function bin(name) {
+  if (binCache.has(name)) return binCache.get(name);
+  const win = process.platform === "win32";
+  let found;
+  try { found = execFileSync(win ? "where" : "which", [name], { encoding: "utf8" }); }
+  catch { throw new Error(`${name} CLI를 찾을 수 없다 — 설치/로그인 후 실행하라`); }
+  const paths = found.split("\n").map((s) => s.trim()).filter(Boolean);
+  const pick = win ? paths.sort((a, b) => binScore(b) - binScore(a))[0] : paths[0];
+  binCache.set(name, pick);
+  return pick;
+}
+
 function log(msg) {
   const line = `[${new Date().toISOString()}] ${msg}`;
   cycle.log.push(line);
@@ -67,7 +83,7 @@ async function withAGY(role, primary, fallback) {
       if (!isQuotaError(e2)) throw e2;
       const reason = String(e2.message || e2).slice(0, 300);
       cycle.agy.push({ role, at: new Date().toISOString(), reason });
-      log(`AGY 모드 발동: ${role} 역할을 Gemini(${agyModel})가 대행`);
+      log(`AGY 모드 발동: ${role} 역할을 Gemini(${agyModel})가 대행 — 사유: ${reason}`);
       return await fallback();
     }
   }
@@ -81,7 +97,7 @@ function gemini(model, prompt) {
   const f = path.join(tmpdir(), `orch-${Date.now()}-${Math.random().toString(36).slice(2)}.md`);
   writeFileSync(f, prompt);
   try {
-    return execFileSync("gemini", ["--model", model, "-p", `@${f}`], {
+    return execFileSync(bin("gemini"), ["--model", model, "-p", `@${f}`], {
       cwd: repo,
       encoding: "utf8",
       maxBuffer: 64e6,
@@ -108,29 +124,34 @@ async function geminiHold(model, prompt) {
   }
 }
 
-async function openai(prompt) {
-  const r = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-5.5",
-      tools: [{ type: "web_search" }], // 지휘자는 온라인 리서치 필수 (계획서 3)
-      input: prompt,
-    }),
-  });
-  if (!r.ok) throw Object.assign(new Error(`openai: ${await r.text()}`), { status: r.status });
-  const j = await r.json();
-  return j.output_text ?? (j.output ?? []).flatMap((o) => o.content ?? []).map((c) => c.text ?? "").join("");
+// 지휘자도 CLI로 간다 — codex는 ChatGPT 구독 인증이라 API 크레딧이 필요 없다.
+// 읽기 전용 샌드박스: 지휘자는 문서만 쓰고 코드는 건드리지 않는다.
+function codex(prompt) {
+  const out = path.join(tmpdir(), `orch-order-${Date.now()}.md`);
+  try {
+    execFileSync(
+      bin("codex"),
+      ["exec", "--skip-git-repo-check", "-s", "read-only",
+       "-c", "tools.web_search=true",                                    // 온라인 리서치 (계획서 3)
+       ...(process.env.CODEX_MODEL ? ["-m", process.env.CODEX_MODEL] : []), // 기본 모델을 그대로 쓴다
+       "-o", out, prompt],
+      { cwd: repo, encoding: "utf8", maxBuffer: 64e6 },
+    );
+    const order = existsSync(out) ? readFileSync(out, "utf8").trim() : "";
+    if (!order) throw new Error("작업 지시서가 비어 있다");
+    return order;
+  } catch (e) {
+    throw new Error(`codex: ${e.stderr || e.stdout || e.message}`);
+  } finally {
+    try { unlinkSync(out); } catch {}
+  }
 }
 
 // Claude Code CLI를 헤드리스로 실행. CLI가 직접 파일을 수정하고 결과 요약을 돌려준다.
 function claudeCode(prompt) {
   try {
     const out = execFileSync(
-      "claude",
+      bin("claude"),
       ["-p", prompt, "--output-format", "json", "--permission-mode", process.env.CLAUDE_PERMISSION_MODE || "acceptEdits"],
       { cwd: repo, encoding: "utf8", maxBuffer: 64e6 },
     );
@@ -174,7 +195,7 @@ ${projectContext()}
 }
 
 const director = (command) =>
-  withAGY("지휘(ChatGPT)", () => openai(directorPrompt(command)), () => geminiHold(agyModel, directorPrompt(command)));
+  withAGY("지휘(ChatGPT)", () => codex(directorPrompt(command)), () => geminiHold(agyModel, directorPrompt(command)));
 
 function coderPrompt(order, feedback) {
   return `아래 작업 지시서대로 이 저장소에 코드를 구현하라.
@@ -337,11 +358,7 @@ async function runCycle(command) {
 
   // 사전 점검 — git을 건드리기 전에 막는다.
   // 특히 더티 트리에서 시작하면 뒤의 `git add -A`가 무관한 작업물까지 커밋에 쓸어담는다.
-  if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY 없음 — .env를 채워라");
-  for (const cli of ["gemini", "claude", "gh"]) {
-    try { execFileSync(process.platform === "win32" ? "where" : "which", [cli], { stdio: "ignore" }); }
-    catch { throw new Error(`${cli} CLI를 찾을 수 없다 — 설치/로그인 후 실행하라`); }
-  }
+  for (const cli of ["codex", "gemini", "claude", "gh"]) bin(cli); // 없으면 여기서 던진다
   const dirty = sh("git status --porcelain");
   if (dirty) throw new Error(`작업 트리에 커밋되지 않은 변경 ${dirty.split("\n").length}건 — 먼저 커밋/스태시 후 실행하라`);
 
