@@ -2,17 +2,24 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>gmymate - 시작하기</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>GAINMUSCLE - 시작하기</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
   <link rel="stylesheet" href="./src/app.css">
 </head>
 <body>
   <main class="phone-screen onboarding-screen">
     <header class="app-header">
-      <a class="brand" href="./onboarding.html" aria-label="gmymate home">
-        <span class="brand-mark">g</span>
-        <span>gmymate</span>
-      </a>
+      <div class="header-actions">
+        <a class="icon-button" href="./index.html" aria-label="로그인으로 돌아가기">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8 1.4-1.4L9.8 12l6.6-6.6Z"/></svg>
+        </a>
+        <span class="login-brand-word">GAINMUSCLE</span>
+      </div>
+      <button class="icon-button" type="button" data-dark-toggle aria-label="다크 모드 전환">
+        <svg class="theme-toggle-icon is-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg class="theme-toggle-icon is-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>
+      </button>
     </header>
 
     <section class="intro-section">
@@ -53,55 +60,61 @@
         </label>
       </div>
 
-      <label class="field">
+      <div class="field">
         <span>헬스 경력은 어느 정도인가요?</span>
         <p class="field-help">처음이어도 괜찮아요. 쉬운 루틴부터 보여드릴게요.</p>
-        <select name="experience">
-          <option value="">선택해주세요</option>
-          <option value="beginner">처음 시작</option>
-          <option value="under-6-months">6개월 이하</option>
-          <option value="under-2-years">2년 이하</option>
-          <option value="over-2-years">2년 이상</option>
-        </select>
-      </label>
+        <input type="hidden" name="experience">
+        <div class="chip-select-group" data-chip-select="experience">
+          <button type="button" data-value="beginner">처음 시작</button>
+          <button type="button" data-value="under-6-months">6개월 이하</button>
+          <button type="button" data-value="under-2-years">2년 이하</button>
+          <button type="button" data-value="over-2-years">2년 이상</button>
+        </div>
+      </div>
 
-      <label class="field">
+      <div class="field">
         <span>가장 큰 목표는 무엇인가요?</span>
         <p class="field-help">목표에 맞춰 오늘 할 운동을 더 쉽게 추천할게요.</p>
-        <select name="goal">
-          <option value="">선택해주세요</option>
-          <option value="fat-loss">체지방 감량</option>
-          <option value="muscle-gain">근육 증가</option>
-          <option value="strength">근력 향상</option>
-          <option value="habit">운동 습관 만들기</option>
-        </select>
-      </label>
+        <input type="hidden" name="goal">
+        <div class="chip-select-group" data-chip-select="goal">
+          <button type="button" data-value="fat-loss">체지방 감량</button>
+          <button type="button" data-value="muscle-gain">근육 증가</button>
+          <button type="button" data-value="strength">근력 향상</button>
+          <button type="button" data-value="habit">운동 습관 만들기</button>
+        </div>
+      </div>
 
-      <label class="field">
+      <div class="field">
         <span>일주일에 몇 번 운동할까요?</span>
         <p class="field-help">현실적으로 가능한 횟수를 고르는 게 가장 좋아요.</p>
-        <select name="weeklyWorkout">
-          <option value="">선택해주세요</option>
-          <option value="2">주 2회</option>
-          <option value="3">주 3회</option>
-          <option value="4">주 4회</option>
-          <option value="5">주 5회 이상</option>
-        </select>
-      </label>
+        <input type="hidden" name="weeklyWorkout">
+        <div class="chip-select-group" data-chip-select="weeklyWorkout">
+          <button type="button" data-value="2">주 2회</button>
+          <button type="button" data-value="3">주 3회</button>
+          <button type="button" data-value="4">주 4회</button>
+          <button type="button" data-value="5">주 5회 이상</button>
+        </div>
+      </div>
 
       <p class="form-note" id="formNote">하나씩 입력하면 바로 시작할 수 있어요.</p>
 
       <div class="auth-actions">
-        <button class="auth-button" type="submit" data-provider="google">
-          <span class="auth-icon">G</span>
-          Google로 시작하기
-        </button>
-        <button class="auth-button" type="submit" data-provider="apple">
-          <span class="auth-icon">A</span>
-          Apple로 시작하기
-        </button>
+        <label class="auth-field">
+          <span>아이디</span>
+          <input name="username" type="text" autocomplete="username" placeholder="영문/숫자/밑줄 3~20자" pattern="[a-zA-Z0-9_]{3,20}" required>
+        </label>
+        <label class="auth-field">
+          <span>비밀번호</span>
+          <input name="password" type="password" autocomplete="new-password" placeholder="8자 이상" minlength="8" required>
+        </label>
+        <button class="auth-button" type="submit">회원가입하고 시작하기</button>
       </div>
     </form>
+
+    <p class="form-note">
+      이미 계정이 있으신가요?
+      <a class="text-button" href="./index.html">로그인</a>
+    </p>
   </main>
 
   <script type="module" src="./src/app.js"></script>

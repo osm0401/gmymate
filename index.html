@@ -2,14 +2,58 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>gmymate</title>
-  <meta http-equiv="refresh" content="0; url=./onboarding.html">
-  <link rel="canonical" href="./onboarding.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>GAINMUSCLE - 로그인</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="./src/app.css">
 </head>
 <body>
-  <main>
-    <a href="./onboarding.html">gmymate 시작하기</a>
+  <main class="phone-screen login-screen">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-brand">
+          <span class="brand-mark login-brand-mark">G</span>
+          <span class="login-brand-word">GAINMUSCLE</span>
+        </div>
+        <button class="icon-button" type="button" data-dark-toggle aria-label="다크 모드 전환">
+          <svg class="theme-toggle-icon is-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg class="theme-toggle-icon is-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <div class="login-intro">
+        <h1>다시 만나서 반가워요.</h1>
+        <p>로그인하고 오늘 운동을 이어가요.</p>
+      </div>
+
+      <form class="login-form" id="loginForm">
+        <label class="auth-field">
+          <span>아이디</span>
+          <input name="username" type="text" autocomplete="username" placeholder="아이디를 입력해주세요" required>
+        </label>
+        <label class="auth-field">
+          <span>비밀번호</span>
+          <input name="password" type="password" autocomplete="current-password" placeholder="비밀번호를 입력해주세요" required>
+        </label>
+
+        <label class="remember-toggle">
+          <input type="checkbox" name="remember" id="rememberMe">
+          <span class="remember-switch" aria-hidden="true"></span>
+          <span class="remember-label">자동 로그인</span>
+        </label>
+
+        <p class="form-note" id="loginNote"></p>
+
+        <button class="primary-action" type="submit">로그인</button>
+      </form>
+
+      <p class="login-signup-link">
+        계정이 없으신가요?
+        <a href="./onboarding.html">회원가입</a>
+      </p>
+    </div>
   </main>
+
+  <script type="module" src="./src/app.js"></script>
 </body>
 </html>

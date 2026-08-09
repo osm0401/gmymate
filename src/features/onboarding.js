@@ -94,6 +94,33 @@ export function setupOnboarding() {
     return false;
   }
 
+  function setupChipSelect(field) {
+    const group = field.querySelector("[data-chip-select]");
+    const input = field.querySelector("input[type=hidden]");
+
+    if (!group || !input) {
+      return;
+    }
+
+    const buttons = Array.from(group.querySelectorAll("button"));
+    const syncSelected = () => {
+      buttons.forEach((button) => {
+        button.classList.toggle("selected", button.dataset.value === input.value);
+      });
+    };
+    syncSelected();
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        input.value = button.dataset.value;
+        syncSelected();
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    });
+  }
+
+  fields.forEach(setupChipSelect);
+
   fields.forEach((field) => {
     const input = field.querySelector("input, select");
     input?.addEventListener("focus", () => {
@@ -150,7 +177,7 @@ export function setupOnboarding() {
     }
   });
 
-  function finishOnboarding(provider = "google") {
+  async function finishOnboarding() {
     const profile = Object.fromEntries(new FormData(form).entries());
     const emptyStep = onboardingRules.findIndex((rule) => !profile[rule.name]);
 
@@ -176,21 +203,47 @@ export function setupOnboarding() {
       return;
     }
 
-    profile.provider = provider;
+    const username = (profile.username || "").trim();
+    const password = profile.password || "";
+
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+      setNote("아이디는 영문/숫자/밑줄 3~20자로 입력해주세요.", true);
+      return;
+    }
+
+    if (password.length < 8) {
+      setNote("비밀번호는 8자 이상이어야 해요.", true);
+      return;
+    }
+
+    setNote("가입하는 중이에요...");
+
+    try {
+      const response = await fetch("./api/signup.php", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      const result = await response.json();
+
+      if (!result.ok) {
+        setNote(result.error || "가입에 실패했어요.", true);
+        return;
+      }
+    } catch {
+      setNote("서버에 연결할 수 없어요.", true);
+      return;
+    }
+
+    delete profile.password;
     writeJson("gmymateProfile", profile);
     window.location.href = "./main.html";
   }
 
-  form.querySelectorAll("[data-provider]").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.preventDefault();
-      finishOnboarding(button.dataset.provider || "google");
-    });
-  });
-
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    finishOnboarding(event.submitter?.dataset.provider || "google");
+    finishOnboarding();
   });
 
   showStep(0);

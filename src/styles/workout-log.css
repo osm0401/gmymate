@@ -5,27 +5,77 @@
   margin-top: 18px;
 }
 
-.workout-insight-grid div {
+/* Same 3-across stat pattern as the home tiles — centre it the same way. */
+.workout-insight-grid > div {
+  display: flex;
   min-height: 82px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 14px 10px;
   border: 1px solid var(--app-line);
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   background: var(--app-surface);
   box-shadow: var(--app-soft-shadow);
+  text-align: center;
 }
 
-.workout-insight-grid span {
+.workout-insight-grid > div > span {
   display: block;
   margin-bottom: 8px;
   color: var(--app-muted);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
-.workout-insight-grid strong {
+.workout-insight-grid > div > strong {
   display: block;
-  color: var(--app-green-dark);
+  color: var(--app-text);
   font-size: 18px;
+  font-weight: 800;
+}
+
+/* Volume reads as a hero stat, styled to match the always-dark treatment
+   used on the home hero card — see today-hero in main.css. */
+.workout-insight-grid > div:nth-child(2) {
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #f2f4ec;
+  background: #14151a;
+}
+
+.workout-insight-grid > div:nth-child(2) > span {
+  color: rgba(242, 244, 236, 0.6);
+}
+
+.workout-insight-grid > div:nth-child(2) > strong {
+  color: var(--app-accent);
+}
+
+.progress-ring {
+  position: relative;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 8px;
+  border-radius: var(--radius-pill);
+  background: conic-gradient(var(--app-accent) calc(var(--pct, 0) * 1%), var(--app-mint) 0);
+  place-items: center;
+}
+
+.progress-ring::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: var(--radius-pill);
+  background: var(--app-surface);
+}
+
+.progress-ring-label {
+  position: relative;
+  z-index: 1;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--app-text);
 }
 
 .workout-log-panel {
@@ -33,7 +83,7 @@
   gap: 14px;
   margin-top: 22px;
   padding: 16px;
-  border-radius: 24px;
+  border-radius: var(--radius-lg);
 }
 
 .workout-toolbar {
@@ -48,6 +98,7 @@
   margin-top: 3px;
   color: var(--app-text);
   font-size: 20px;
+  font-weight: 800;
 }
 
 .add-exercise-button {
@@ -56,13 +107,13 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 16px;
+  border-radius: var(--radius-sm);
   padding: 0 16px;
-  color: #ffffff;
-  background: var(--app-green);
-  box-shadow: 0 14px 28px rgba(25, 169, 87, 0.18);
+  color: var(--app-button-text);
+  background: var(--app-button-bg);
+  box-shadow: var(--app-shadow);
   font-size: 15px;
-  font-weight: 900;
+  font-weight: 800;
   white-space: nowrap;
 }
 
@@ -84,14 +135,15 @@
   min-height: 96px;
   gap: 7px;
   padding: 18px;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   color: var(--app-muted);
   text-align: left;
 }
 
 .empty-log-card strong {
-  color: var(--app-green-dark);
+  color: var(--app-text);
   font-size: 18px;
+  font-weight: 800;
 }
 
 .empty-log-card span,
@@ -105,54 +157,46 @@
 .exercise-log-card {
   display: grid;
   gap: 14px;
-  padding: 14px;
-  border-radius: 22px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--app-line);
+}
+
+.active-workouts .exercise-log-card:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
 .exercise-card-header {
-  display: grid;
-  grid-template-columns: 48px 1fr auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.exercise-card-top {
+  display: flex;
   align-items: center;
   gap: 11px;
 }
 
 .exercise-avatar {
   display: grid;
-  width: 48px;
-  height: 48px;
+  flex-shrink: 0;
   place-items: center;
 }
 
-.exercise-avatar svg,
-.exercise-chip svg {
-  width: 44px;
-  height: 44px;
+/* Recent-exercise chips stack icon over label, so the icon runs a size down. */
+.exercise-chip .part-icon {
+  width: 38px;
+  height: 38px;
 }
 
-.exercise-avatar rect,
-.exercise-chip rect {
-  fill: var(--app-mint);
-}
-
-.exercise-avatar path,
-.exercise-chip path {
-  fill: none;
-  stroke: var(--app-green);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.exercise-avatar text,
-.exercise-chip text {
-  fill: var(--app-green-dark);
-  font-size: 13px;
-  font-weight: 900;
-  text-anchor: middle;
-  font-family: Arial, sans-serif;
+.exercise-chip .part-icon svg {
+  width: 19px;
+  height: 19px;
 }
 
 .exercise-title-block {
+  flex: 1;
   min-width: 0;
 }
 
@@ -161,6 +205,7 @@
   color: var(--app-text);
   font-size: 18px;
   line-height: 1.2;
+  font-weight: 800;
 }
 
 .exercise-title-block span {
@@ -168,11 +213,13 @@
   margin-top: 3px;
   color: var(--app-muted);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .exercise-actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 7px;
 }
 
@@ -181,19 +228,19 @@
   width: 114px;
   grid-template-columns: 34px 1fr 34px;
   align-items: center;
-  border-radius: 12px;
+  border-radius: var(--radius-icon);
   overflow: hidden;
-  color: #47705a;
-  background: #edf7ff;
-  font-weight: 900;
+  color: var(--app-subtle);
+  background: var(--app-mint);
+  font-weight: 800;
 }
 
 .set-count-row button {
   height: 34px;
-  color: #4b83ff;
+  color: var(--app-text);
   background: transparent;
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .set-count-row strong {
@@ -207,13 +254,20 @@
 
 .set-row {
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) 42px;
+  grid-template-columns: 32px minmax(0, 1fr) 40px;
   grid-template-areas:
     "number weight check"
     "number reps check";
   align-items: center;
-  gap: 8px;
-  min-height: 96px;
+  gap: 6px 8px;
+  min-height: 64px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--app-line);
+}
+
+.set-row-list .set-row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
 .set-number {
@@ -221,26 +275,76 @@
   display: grid;
   width: 28px;
   height: 28px;
+  padding: 0;
   place-items: center;
-  border-radius: 50%;
-  color: var(--app-green-dark);
+  border-radius: var(--radius-pill);
+  color: var(--app-subtle);
   background: var(--app-mint);
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 800;
+}
+
+.set-number.is-drop {
+  color: #ffffff;
+  background: var(--app-danger);
+}
+
+.superset-badge {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--app-subtle);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.cardio-timer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-sm);
+  background: var(--app-input-bg);
+}
+
+.cardio-timer-row strong {
+  color: var(--app-text);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.cardio-timer-row button {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  color: var(--app-button-text);
+  background: var(--app-button-bg);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.icon-button:disabled {
+  opacity: 0.35;
+  pointer-events: none;
 }
 
 .set-input-control {
   display: grid;
-  grid-template-columns: minmax(28px, 1fr) auto auto;
+  grid-template-columns: minmax(28px, 1fr) auto auto auto;
   align-items: center;
   gap: 4px;
-  min-height: 44px;
-  border-radius: 14px;
-  padding: 0 8px;
+  min-height: 40px;
   color: var(--app-muted);
-  background: #f3fbf5;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 800;
+}
+
+.set-label {
+  color: var(--app-muted);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .weight-control {
@@ -259,7 +363,7 @@
   color: var(--app-text);
   background: transparent;
   font-size: 17px;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .set-quick-buttons {
@@ -282,17 +386,17 @@
   place-items: center;
   border-radius: 9px;
   padding: 0 4px;
-  color: var(--app-green-dark);
-  background: #e3f5e8;
+  color: var(--app-subtle);
+  background: var(--app-mint);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 800;
   line-height: 1;
   white-space: nowrap;
 }
 
 .set-quick-button.decrease {
-  color: #527064;
-  background: #edf5ef;
+  color: var(--app-muted);
+  background: var(--app-input-bg);
 }
 
 .set-quick-button:active {
@@ -307,21 +411,22 @@
 .set-check {
   grid-area: check;
   display: grid;
-  width: 40px;
-  height: 72px;
+  width: 34px;
+  height: 34px;
   place-items: center;
-  border-radius: 18px;
-  color: #ffffff;
-  background: #cfd9d2;
+  border-radius: var(--radius-pill);
+  color: var(--app-surface);
+  background: var(--app-line);
 }
 
 .set-row.is-done .set-check {
-  background: #4b83ff;
+  color: var(--app-accent-text);
+  background: var(--app-accent);
 }
 
-.set-row.is-done .set-input-control,
 .set-row.is-done .set-number {
-  background: #eaf4ff;
+  color: var(--app-accent-text);
+  background: var(--app-accent);
 }
 
 .workout-note-field {
@@ -330,22 +435,22 @@
 }
 
 .workout-note-field span {
-  color: var(--app-green-dark);
+  color: var(--app-subtle);
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .workout-note-field textarea {
   width: 100%;
   min-height: 72px;
   border: 1px solid var(--app-line);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 14px;
   color: var(--app-text);
-  background: #f6fcf8;
+  background: var(--app-input-bg);
   outline: 0;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.45;
 }
 
@@ -353,30 +458,82 @@
   margin-top: 2px;
 }
 
+/* Docked above the floating nav and always on screen. Kept deliberately
+   compact — label, clock and progress share one row — because it now costs
+   permanent vertical space on every tab. */
 .rest-timer-card {
+  position: fixed;
+  right: 0;
+  bottom: calc(80px + env(safe-area-inset-bottom));
+  left: 0;
+  z-index: 9;
   display: grid;
-  gap: 12px;
-  margin-top: 16px;
-  padding: 16px;
+  width: min(calc(100% - 20px), 420px);
+  margin: 0 auto;
+  gap: 9px;
+  padding: 11px 14px 12px;
   border: 1px solid var(--app-line);
-  border-radius: 22px;
-  background: linear-gradient(135deg, #ffffff, #e9f8ed);
-  box-shadow: var(--app-soft-shadow);
+  border-radius: var(--radius-lg);
+  background: var(--app-nav-bg);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--app-shadow);
+}
+
+.rest-timer-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Idle: collapse to the single head row. The buttons stay reachable the moment
+   a rest starts, and the docked bar stops eating ~40px on every tab. */
+.rest-timer-card.is-idle {
+  padding-bottom: 11px;
+}
+
+.rest-timer-card.is-idle .rest-timer-actions {
+  display: none;
+}
+
+.rest-timer-card.is-idle .rest-progress {
+  display: none;
+}
+
+.rest-timer-card.is-idle .rest-timer-head {
+  justify-content: center;
+}
+
+/* Idle state needs a way back in — 시작 버튼 shows only when collapsed. */
+.rest-timer-start {
+  display: none;
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  color: var(--app-button-text);
+  background: var(--app-button-bg);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.rest-timer-card.is-idle .rest-timer-start {
+  display: inline-flex;
+  align-items: center;
 }
 
 .rest-timer-card strong {
-  display: block;
-  margin-top: 4px;
-  color: var(--app-green-dark);
-  font-size: 30px;
+  color: var(--app-text);
+  font-size: 21px;
+  font-weight: 800;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .rest-progress {
-  height: 9px;
-  border-radius: 999px;
+  height: 8px;
+  flex: 1;
+  border-radius: var(--radius-pill);
   overflow: hidden;
-  background: #dcefe2;
+  background: var(--app-mint-strong);
 }
 
 .rest-progress span {
@@ -384,7 +541,7 @@
   width: 0%;
   height: 100%;
   border-radius: inherit;
-  background: var(--app-green);
+  background: var(--app-accent);
   transition: width 180ms ease;
 }
 
@@ -395,12 +552,13 @@
 }
 
 .rest-timer-actions button {
-  min-height: 44px;
-  border-radius: 14px;
-  color: var(--app-green-dark);
-  background: #ffffff;
+  min-height: 38px;
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-sm);
+  color: var(--app-subtle);
+  background: var(--app-surface);
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .exercise-picker {
@@ -417,7 +575,7 @@
 .exercise-picker-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(23, 53, 31, 0.28);
+  background: rgba(20, 21, 26, 0.35);
 }
 
 .exercise-picker-sheet {
@@ -431,7 +589,7 @@
   gap: 16px;
   margin: 0 auto;
   padding: 10px 18px 24px;
-  border-radius: 28px 28px 0 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   overflow: auto;
 }
 
@@ -439,8 +597,9 @@
   width: 42px;
   height: 5px;
   margin: 0 auto;
-  border-radius: 999px;
-  background: #c7dbc8;
+  border-radius: var(--radius-pill);
+  background: var(--app-muted);
+  opacity: 0.4;
 }
 
 .exercise-search {
@@ -450,7 +609,7 @@
   gap: 9px;
   min-height: 54px;
   border: 1px solid var(--app-line);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 0 14px;
   background: var(--app-mint);
 }
@@ -458,7 +617,7 @@
 .exercise-search svg {
   width: 20px;
   height: 20px;
-  fill: var(--app-green-dark);
+  fill: var(--app-subtle);
 }
 
 .exercise-search input {
@@ -468,7 +627,7 @@
   color: var(--app-text);
   background: transparent;
   font-size: 17px;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .picker-section {
@@ -489,12 +648,12 @@
   gap: 6px;
   justify-items: center;
   border: 1px solid var(--app-line);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 12px 10px;
-  color: var(--app-green-dark);
-  background: #ffffff;
+  color: var(--app-subtle);
+  background: var(--app-surface);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .exercise-list {
@@ -509,16 +668,17 @@
   gap: 11px;
   min-height: 68px;
   border: 1px solid var(--app-line);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 10px;
   color: var(--app-text);
-  background: #ffffff;
+  background: var(--app-surface);
   text-align: left;
 }
 
 .exercise-option strong {
   display: block;
   font-size: 16px;
+  font-weight: 700;
 }
 
 .exercise-option small {
@@ -526,20 +686,20 @@
   margin-top: 4px;
   color: var(--app-muted);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .exercise-option > svg {
   width: 22px;
   height: 22px;
-  fill: var(--app-green-dark);
+  fill: var(--app-subtle);
 }
 
 .exercise-empty {
   padding: 18px;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   color: var(--app-muted);
   background: var(--app-mint);
-  font-weight: 900;
+  font-weight: 800;
   text-align: center;
 }

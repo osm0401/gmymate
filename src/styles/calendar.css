@@ -7,7 +7,7 @@
   grid-template-columns: repeat(7, 1fr);
   gap: 8px;
   padding: 12px;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
 }
 
 .week-strip button,
@@ -15,23 +15,23 @@
   display: grid;
   aspect-ratio: 1;
   place-items: center;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   color: var(--app-muted);
   background: var(--app-mint);
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .week-strip .done,
 .calendar-grid .checked {
-  color: #ffffff;
-  background: var(--app-green);
+  color: var(--app-accent-text);
+  background: var(--app-accent);
 }
 
 .week-strip .today,
 .calendar-grid .today {
-  color: var(--app-green-dark);
-  outline: 2px solid var(--app-green);
-  background: #ffffff;
+  color: var(--app-text);
+  outline: 2px solid var(--app-accent);
+  background: var(--app-surface);
 }
 
 .calendar-grid {
@@ -39,7 +39,7 @@
   grid-template-columns: repeat(7, 1fr);
   gap: 8px;
   padding: 12px;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
 }
 
 .history-list {
@@ -54,15 +54,16 @@
   gap: 12px;
   padding: 14px;
   border: 1px solid var(--app-line);
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   background: var(--app-surface);
   box-shadow: var(--app-soft-shadow);
 }
 
 .history-card strong {
   display: block;
-  color: var(--app-green-dark);
+  color: var(--app-text);
   font-size: 16px;
+  font-weight: 800;
 }
 
 .history-card span,
@@ -71,7 +72,7 @@
   margin-top: 4px;
   color: var(--app-muted);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .history-card > div:last-child {
@@ -82,6 +83,6 @@
   margin: 0;
   padding: 18px;
   border: 1px solid var(--app-line);
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   background: var(--app-surface);
 }

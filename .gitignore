@@ -2,9 +2,26 @@
 Thumbs.db
 .DS_Store
 .vscode/
+.env
+.venv/
+.venv-crewai/
+__pycache__/
+.coverage
 
 # Local legacy and cleanup files that are not used by the app
 cleanup-files.mjs
 src/app.legacy.js
 src/script.js
 src/style.css
+
+# Real DB credentials — copy api/config.example.php to api/config.php locally
+api/config.php
+
+# Real music provider credentials
+api/music/spotify-config.php
+api/music/apple-config.php
+api/music/youtube-config.php
+api/music/google-config.php
+
+# Real FTP credentials — copy deploy/deploy.env.example to deploy/deploy.env locally
+deploy/deploy.env

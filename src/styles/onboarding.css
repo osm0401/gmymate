@@ -21,7 +21,7 @@
 
 .onboarding-screen .intro-section h1 {
   max-width: 420px;
-  font-size: 36px;
+  font-size: clamp(28px, 9vw, 36px);
   line-height: 1.1;
 }
 
@@ -47,8 +47,8 @@
 .step-progress-bar {
   height: 8px;
   overflow: hidden;
-  border-radius: 999px;
-  background: #ddf0e2;
+  border-radius: var(--radius-pill);
+  background: var(--app-mint);
 }
 
 .step-progress-fill {
@@ -56,16 +56,16 @@
   width: 14%;
   height: 100%;
   border-radius: inherit;
-  background: var(--app-green);
+  background: var(--app-accent);
   transition: width 180ms ease;
 }
 
 .step-progress-text {
   display: block;
   margin-top: 10px;
-  color: var(--app-green-dark);
+  color: var(--app-subtle);
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .onboarding-screen .field {
@@ -90,7 +90,7 @@
   color: var(--app-text);
   font-size: 32px;
   line-height: 1.16;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .field-help {
@@ -109,10 +109,10 @@
   border-bottom: 3px solid var(--app-line);
   border-radius: 0;
   outline: 0;
-  color: var(--app-green-dark);
+  color: var(--app-subtle);
   background: transparent;
   font-size: 44px;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .onboarding-screen .field select {
@@ -121,16 +121,40 @@
 
 .onboarding-screen .field input:focus,
 .onboarding-screen .field select:focus {
-  border-color: var(--app-green);
+  border-color: var(--app-accent);
 }
 
 .onboarding-screen .field small {
   position: absolute;
   right: 0;
   bottom: 62px;
-  color: var(--app-green-dark);
+  color: var(--app-subtle);
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 800;
+}
+
+.chip-select-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.chip-select-group button {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-pill);
+  color: var(--app-subtle);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.chip-select-group button.selected {
+  color: var(--app-button-text);
+  background: var(--app-button-bg);
+  border-color: var(--app-button-bg);
 }
 
 .form-note {
@@ -155,27 +179,27 @@
 .step-button,
 .auth-button {
   min-height: 58px;
-  border-radius: 16px;
-  font-weight: 900;
+  border-radius: var(--radius-md);
+  font-weight: 800;
 }
 
 .step-button,
 .auth-button {
-  color: var(--app-green-dark);
-  background: rgba(255, 255, 255, 0.95);
+  color: var(--app-subtle);
+  background: var(--app-surface);
   border: 1px solid var(--app-line);
   box-shadow: var(--app-soft-shadow);
 }
 
 .step-button.primary {
-  color: #ffffff;
-  background: var(--app-green);
-  box-shadow: 0 16px 30px rgba(25, 169, 87, 0.22);
+  color: var(--app-button-text);
+  background: var(--app-button-bg);
+  box-shadow: var(--app-shadow);
 }
 
 .step-button:disabled {
-  color: #9ab9a2;
-  background: #edf7ef;
+  color: var(--app-muted);
+  background: var(--app-mint);
   box-shadow: none;
   cursor: default;
 }
@@ -201,7 +225,32 @@
   height: 26px;
   place-items: center;
   border-radius: 50%;
-  color: #ffffff;
-  background: var(--app-green);
+  color: var(--app-accent-text);
+  background: var(--app-accent);
   font-size: 13px;
 }
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.auth-field input {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-icon);
+  outline: 0;
+  font-size: 16px;
+  font-weight: 600;
+  background: var(--app-surface);
+}
+
+.auth-field input:focus {
+  border-color: var(--app-accent);
+}
+

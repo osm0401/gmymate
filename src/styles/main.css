@@ -1,12 +1,59 @@
+/* Clears the floating nav (~72px) plus the docked rest timer (~96px). */
 .main-screen {
-  padding-bottom: 106px;
+  padding-bottom: calc(200px + env(safe-area-inset-bottom));
+}
+
+.home-greeting {
+  margin: 18px 0 0;
+  color: var(--app-muted);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.home-greeting b {
+  color: var(--app-text);
+  font-weight: 800;
+}
+
+.ad-slot {
+  margin: 20px 0;
+}
+
+/* Parked at the end of a view, fenced off from the content above it. */
+.ad-slot.is-footer {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--app-line);
+}
+
+.ad-slot-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--app-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ad-slot-frame {
+  width: 100%;
+  max-width: 320px;
+  min-height: 50px;
+  margin: 0 auto;
+}
+
+.profile-footer-links {
+  margin-top: 12px;
+  text-align: center;
 }
 
 .profile-button {
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
-  color: var(--app-green-dark);
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-icon);
+  color: var(--app-subtle);
   background: var(--app-mint);
 }
 
@@ -19,43 +66,115 @@
 }
 
 .today-hero {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 22px;
-  margin-top: 24px;
-  padding: 24px;
-  border: 1px solid var(--app-line);
-  border-radius: 24px;
-  background: var(--app-surface);
+  margin-top: 20px;
+  padding: 26px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  color: #f2f4ec;
+  background: #14151a;
   box-shadow: var(--app-shadow);
+  text-align: center;
+}
+
+.today-hero > div {
+  width: 100%;
+}
+
+.today-hero .screen-label {
+  color: var(--app-accent);
+}
+
+.today-hero h1 {
+  color: #ffffff;
+}
+
+.today-hero p {
+  color: rgba(242, 244, 236, 0.7);
+}
+
+.today-hero .primary-action {
+  background: var(--app-accent);
+  color: var(--app-accent-text);
 }
 
 .today-hero h1 {
   max-width: 320px;
-  margin: 0;
-  font-size: 32px;
+  margin: 0 auto;
+  font-size: clamp(26px, 8vw, 32px);
   line-height: 1.12;
+  font-weight: 800;
 }
 
 .today-hero p {
-  margin: 14px 0 0;
+  max-width: 300px;
+  margin: 14px auto 0;
   font-size: 15px;
   line-height: 1.55;
 }
 
+/* Vertical rhythm: the greeting/hero/summary/goal-line form one intro group
+   with tight 12-16px steps; every .content-section below is a flat 28px apart. */
 .summary-panel {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
-  margin-top: 18px;
+  margin-top: 12px;
   border: 0;
   background: transparent;
   box-shadow: none;
 }
 
+#profileEmptyState {
+  margin-top: 12px;
+}
+
+/* Every 3-across stat tile centres its own icon/label/value stack, so the
+   three columns line up on a shared axis instead of ragging left. */
+.summary-panel div,
+.daily-metrics div,
+.calendar-stats div,
+.info-list div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+}
+
 .summary-panel div {
   min-height: 88px;
   padding: 14px 10px;
-  border-radius: 18px;
+  border-radius: var(--radius-md);
+}
+
+.stat-panel-card {
+  padding: 18px;
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-lg);
+  background: var(--app-surface);
+  box-shadow: var(--app-soft-shadow);
+}
+
+/* 오늘 현황 folds the bar and the three stats into one card, so the stats drop
+   their own card chrome — otherwise it reads as cards inside a card and every
+   block on the page carries the same visual weight. */
+.stat-panel-card .daily-metrics {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--app-line);
+}
+
+.stat-panel-card .daily-metrics div {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .daily-metrics,
@@ -69,14 +188,15 @@
 .calendar-stats div {
   min-height: 86px;
   padding: 14px 10px;
-  border-radius: 18px;
+  border-radius: var(--radius-md);
 }
 
 .daily-metrics strong,
 .calendar-stats strong {
   display: block;
-  color: var(--app-green-dark);
-  font-size: 18px;
+  color: var(--app-text);
+  font-size: 20px;
+  font-weight: 800;
   line-height: 1.1;
 }
 
@@ -86,29 +206,43 @@
   margin-top: 20px;
 }
 
+/* Stacked and centred rather than text-left / button-right, so the card sits
+   on the same vertical axis as everything else on the screen. */
 .routine-card {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 20px;
-  border: 1px solid #bfe5ca;
-  border-radius: 24px;
+  gap: 16px;
+  padding: 22px 20px;
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-lg);
   color: var(--app-text);
-  background: linear-gradient(135deg, #ffffff, #dff5e5);
+  background: linear-gradient(135deg, var(--app-surface), var(--app-mint));
   box-shadow: var(--app-soft-shadow);
+  text-align: center;
+}
+
+.routine-card > div {
+  width: 100%;
+}
+
+.routine-card p {
+  max-width: 280px;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .routine-type {
-  color: var(--app-green-dark);
+  color: var(--app-subtle);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .routine-card h3 {
   margin: 8px 0;
   font-size: 24px;
   line-height: 1.1;
+  font-weight: 800;
 }
 
 .routine-card p {
@@ -123,28 +257,9 @@
   width: 54px;
   height: 54px;
   place-items: center;
-  border-radius: 16px;
-  color: #ffffff;
-  background: var(--app-green);
-}
-
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.quick-actions button {
-  min-height: 84px;
-  padding: 14px;
-  border-radius: 18px;
-  text-align: left;
-}
-
-.quick-actions strong {
-  display: block;
-  font-size: 16px;
-  line-height: 1.25;
+  border-radius: var(--radius-pill);
+  color: var(--app-accent-text);
+  background: var(--app-accent);
 }
 
 .habit-list,
@@ -155,7 +270,7 @@
 
 .habit-list {
   padding: 14px;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
 }
 
 .habit-list label,
@@ -166,19 +281,69 @@
   justify-content: space-between;
   gap: 12px;
   color: var(--app-text);
-  font-weight: 800;
+  font-weight: 700;
 }
 
-.habit-list input,
-.settings-list input {
-  width: 22px;
-  height: 22px;
-  accent-color: var(--app-green);
+/* Circular lime check to match the reference checklist rows. Scoped to
+   [type=checkbox] so the number inputs in 운동 설정 keep their own styling. */
+.habit-list input[type="checkbox"],
+.settings-list input[type="checkbox"] {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  place-items: center;
+  margin: 0;
+  border: 2px solid var(--app-line);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 140ms ease-out, border-color 140ms ease-out;
+}
+
+.habit-list input[type="checkbox"]::after,
+.settings-list input[type="checkbox"]::after {
+  content: "";
+  width: 11px;
+  height: 6px;
+  border-bottom: 2.4px solid var(--app-accent-text);
+  border-left: 2.4px solid var(--app-accent-text);
+  opacity: 0;
+  transform: rotate(-45deg) translate(1px, -1px);
+  transition: opacity 120ms ease-out;
+}
+
+.habit-list input[type="checkbox"]:checked,
+.settings-list input[type="checkbox"]:checked {
+  border-color: var(--app-accent);
+  background: var(--app-accent);
+}
+
+.habit-list input[type="checkbox"]:checked::after,
+.settings-list input[type="checkbox"]:checked::after {
+  opacity: 1;
+}
+
+/* Markup is <input><span>, but the reference puts the label left and the check
+   right — flip the visual order instead of touching the DOM. */
+.habit-list label {
+  flex-direction: row-reverse;
+}
+
+.habit-list label span {
+  flex: 1;
+}
+
+.habit-list label:has(input:checked) span {
+  color: var(--app-muted);
+  text-decoration: line-through;
 }
 
 .settings-list label {
   padding: 14px;
-  border-radius: 18px;
+  border-radius: var(--radius-md);
 }
 
 .settings-controls {
@@ -198,11 +363,11 @@
   width: 100%;
   min-height: 42px;
   border: 1px solid var(--app-line);
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   padding: 0 12px;
   color: var(--app-text);
-  background: #f6fcf8;
-  font-weight: 900;
+  background: var(--app-input-bg);
+  font-weight: 700;
   text-align: right;
 }
 
@@ -214,7 +379,7 @@
 
 .settings-actions .text-button {
   min-height: 44px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   padding: 0 12px;
   background: var(--app-mint);
 }
@@ -223,36 +388,125 @@
   color: var(--app-danger);
 }
 
+.inbody-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.inbody-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--app-muted);
+}
+
+.inbody-field input {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-sm);
+  color: var(--app-text);
+  background: var(--app-input-bg);
+  font-weight: 700;
+}
+
+.inbody-form button {
+  grid-column: 1 / -1;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--app-mint);
+}
+
+.inbody-charts {
+  display: grid;
+  gap: 14px;
+}
+
+.inbody-metric {
+  padding: 14px;
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-md);
+  background: var(--app-surface);
+  box-shadow: var(--app-soft-shadow);
+}
+
+.inbody-metric-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.inbody-metric-head strong {
+  color: var(--app-text);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.inbody-sparkline {
+  display: block;
+  width: 100%;
+  height: 60px;
+}
+
 .info-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
+.badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badge-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-pill);
+  color: var(--app-muted);
+  background: var(--app-input-bg);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.badge-chip.is-unlocked {
+  color: var(--app-subtle);
+  background: var(--app-mint);
+}
+
 .info-list div {
   min-height: 84px;
   padding: 14px;
-  border-radius: 18px;
+  border-radius: var(--radius-md);
 }
 
 .toast {
   position: fixed;
   right: 16px;
-  bottom: 94px;
+  bottom: calc(184px + env(safe-area-inset-bottom));
   left: 16px;
   z-index: 20;
   width: min(calc(100% - 32px), 408px);
   margin: 0 auto;
   padding: 14px 16px;
-  border-radius: 18px;
-  color: #ffffff;
-  background: var(--app-green-dark);
+  border-radius: var(--radius-md);
+  color: var(--app-button-text);
+  background: var(--app-button-bg);
   box-shadow: var(--app-shadow);
-  font-weight: 900;
+  font-weight: 800;
   opacity: 0;
   transform: translateY(12px);
   pointer-events: none;
-  transition: opacity 160ms ease, transform 160ms ease;
+  transition: opacity 200ms ease-out, transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .toast.show {
@@ -260,46 +514,62 @@
   transform: translateY(0);
 }
 
+/* Floating pill nav. Every tab is labelled — the icons alone weren't
+   distinguishable enough (기록 vs 루틴 especially), so all six stack
+   icon-over-label and the active one just gains the filled pill. */
 .bottom-nav {
   position: fixed;
   right: 0;
-  bottom: 0;
+  bottom: calc(12px + env(safe-area-inset-bottom));
   left: 0;
   z-index: 10;
-  width: min(100%, 440px);
-  margin: 0 auto;
   display: flex;
-  justify-content: space-around;
-  gap: 4px;
-  padding: 10px 8px 12px;
-  border-top: 1px solid var(--app-line);
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 -14px 34px rgba(28, 112, 61, 0.08);
+  width: min(calc(100% - 20px), 420px);
+  margin: 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-pill);
+  background: var(--app-nav-bg);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 16px 40px rgba(20, 21, 26, 0.16);
 }
 
 .nav-item {
   display: flex;
-  min-width: 58px;
-  min-height: 56px;
+  /* 6 labelled tabs have to clear a 320px screen: 6x42 + gaps + pill padding
+     still fits inside the 300px pill. flex:1 lets them spread on wider phones. */
+  min-width: 42px;
+  min-height: 48px;
+  flex: 1;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  flex-direction: column;
-  border-radius: 16px;
+  gap: 3px;
+  padding: 0 2px;
+  border-radius: var(--radius-pill);
   color: var(--app-muted);
   background: transparent;
-  font-size: 11px;
-  font-weight: 900;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .nav-item svg {
-  width: 21px;
-  height: 21px;
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
   fill: currentColor;
 }
 
+.nav-item span {
+  white-space: nowrap;
+}
+
 .nav-item.active {
-  color: var(--app-green-dark);
-  background: var(--app-mint);
+  color: var(--app-button-text);
+  background: var(--app-button-bg);
+  font-weight: 800;
 }

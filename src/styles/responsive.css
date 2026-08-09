@@ -4,12 +4,6 @@
     padding-left: 14px;
   }
 
-  .onboarding-screen .intro-section h1,
-  .today-hero h1,
-  .page-heading h1 {
-    font-size: 30px;
-  }
-
   .onboarding-screen .field span {
     font-size: 28px;
   }
@@ -19,12 +13,23 @@
     font-size: 34px;
   }
 
-  .quick-actions,
   .mini-inputs,
-  .daily-metrics,
   .calendar-stats,
   .workout-insight-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* .daily-metrics used to be three separate cards and needed stacking here.
+     It now lives inside the 오늘 현황 card as plain compact columns, which
+     still fit across at 320px — stacking just made the card needlessly tall. */
+  .daily-metrics {
+    gap: 6px;
+  }
+
+  .daily-metrics .stat-icon {
+    width: 26px;
+    height: 26px;
+    margin-bottom: 8px;
   }
 
   .rest-timer-actions {
@@ -49,5 +54,34 @@
 
   .set-check {
     width: 38px;
+  }
+}
+
+/* Tablet/desktop: the app stays a fixed-width mobile layout (.phone-screen
+   caps at 440px, see base.css), but bare side margins read as broken rather
+   than intentional — frame it as a card floating over a decorated backdrop
+   instead of just centering it in empty space. */
+@media (min-width: 768px) {
+  body {
+    background:
+      radial-gradient(560px circle at 12% 15%, rgba(56, 148, 84, 0.10), transparent 60%),
+      radial-gradient(480px circle at 88% 85%, rgba(56, 148, 84, 0.08), transparent 60%),
+      var(--app-body-gradient);
+    padding: 48px 24px;
+  }
+
+  /* login/onboarding screens intentionally go full-width with their own
+     internal card, so this frame only applies to the main app shell. */
+  .phone-screen.main-screen {
+    border: 1px solid var(--app-line);
+    border-radius: 32px;
+    background: var(--app-surface);
+    box-shadow: var(--app-shadow);
+  }
+
+  .bottom-nav {
+    border-right: 1px solid var(--app-line);
+    border-left: 1px solid var(--app-line);
+    border-radius: 0 0 32px 32px;
   }
 }

@@ -1,25 +1,68 @@
+/* ---------------------------------------------------------------------------
+   Press interaction
+   Oripio / Apple Fitness tone: a restrained scale-down while held, easing back
+   out on release. Pure CSS :active does the work; the JS in
+   features/tap-effects.js only adds .is-tapping so the effect still fires on
+   touch devices, where :active can drop out mid-gesture.
+
+   .press-effect is the reusable utility — put it on anything that should feel
+   pressable but isn't matched by the element selectors below.
+   --------------------------------------------------------------------------- */
+.press-effect,
+button,
+a.text-button,
+a.icon-button,
+a.brand,
+.exercise-option,
+.exercise-chip,
+.empty-log-card,
+.habit-list label,
+.settings-list label,
+.remember-toggle {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 130ms ease-out, box-shadow 160ms ease-out,
+    background-color 160ms ease-out, border-color 160ms ease-out, opacity 160ms ease-out;
+}
+
+/* Ripple hosts need their own stacking/clipping context. Kept off the label
+   and anchor selectors above so wrapping labels don't clip their controls. */
 button,
 .exercise-option,
 .exercise-chip,
 .empty-log-card {
   position: relative;
   overflow: hidden;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
   transform: translateZ(0);
-  transition: transform 120ms ease, box-shadow 160ms ease, background-color 160ms ease, border-color 160ms ease, opacity 160ms ease;
 }
 
-button:active,
+.press-effect:not(:disabled):not([aria-disabled="true"]):active,
+button:not(:disabled):not([aria-disabled="true"]):active,
+a.text-button:active,
+a.icon-button:active,
+a.brand:active,
 .exercise-option:active,
 .exercise-chip:active,
 .empty-log-card:active,
-.is-tapping {
-  transform: scale(0.97);
+.habit-list label:active,
+.settings-list label:active,
+.remember-toggle:active,
+.is-tapping:not(:disabled):not([aria-disabled="true"]) {
+  transform: scale(0.96);
 }
 
-button:disabled {
+button:disabled,
+button[aria-disabled="true"] {
   cursor: default;
+}
+
+/* Belt and braces: if .is-tapping ever lands on a disabled control, it stays put. */
+button:disabled:active,
+button:disabled.is-tapping,
+button[aria-disabled="true"]:active,
+button[aria-disabled="true"].is-tapping {
+  transform: none;
 }
 
 .tap-ripple {
@@ -27,11 +70,11 @@ button:disabled {
   z-index: 0;
   width: 18px;
   height: 18px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.42);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.3);
   pointer-events: none;
   transform: translate(-50%, -50%) scale(0);
-  animation: tap-ripple 520ms ease-out forwards;
+  animation: tap-ripple 460ms ease-out forwards;
 }
 
 .exercise-option .tap-ripple,
@@ -41,11 +84,21 @@ button:disabled {
 .nav-item .tap-ripple,
 .text-button .tap-ripple,
 .set-count-row .tap-ripple {
-  background: rgba(25, 169, 87, 0.16);
+  background: rgba(20, 21, 26, 0.08);
+}
+
+:root[data-theme="dark"] .exercise-option .tap-ripple,
+:root[data-theme="dark"] .exercise-chip .tap-ripple,
+:root[data-theme="dark"] .empty-log-card .tap-ripple,
+:root[data-theme="dark"] .icon-button .tap-ripple,
+:root[data-theme="dark"] .nav-item .tap-ripple,
+:root[data-theme="dark"] .text-button .tap-ripple,
+:root[data-theme="dark"] .set-count-row .tap-ripple {
+  background: rgba(242, 244, 236, 0.12);
 }
 
 .set-check .tap-ripple {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.42);
 }
 
 button > :not(.tap-ripple),
@@ -56,18 +109,31 @@ button > :not(.tap-ripple),
   z-index: 1;
 }
 
-.step-button.primary:active,
-.primary-action:active,
-.add-exercise-button:active,
-.step-button.primary.is-tapping,
-.primary-action.is-tapping,
-.add-exercise-button.is-tapping {
-  box-shadow: 0 8px 18px rgba(25, 169, 87, 0.2);
+/* Large primary actions read better with a shallower press. */
+.step-button.primary:not(:disabled):active,
+.primary-action:not(:disabled):active,
+.add-exercise-button:not(:disabled):active,
+.step-button.primary.is-tapping:not(:disabled),
+.primary-action.is-tapping:not(:disabled),
+.add-exercise-button.is-tapping:not(:disabled) {
+  transform: scale(0.975);
 }
 
-.nav-item:active,
-.nav-item.is-tapping {
-  transform: translateY(2px) scale(0.94);
+/* Small icon targets need a touch more travel to register as pressed. */
+.icon-button:not(:disabled):active,
+.circle-button:not(:disabled):active,
+.profile-button:not(:disabled):active,
+.set-check:not(:disabled):active,
+.icon-button.is-tapping:not(:disabled),
+.circle-button.is-tapping:not(:disabled),
+.profile-button.is-tapping:not(:disabled),
+.set-check.is-tapping:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.nav-item:not(:disabled):active,
+.nav-item.is-tapping:not(:disabled) {
+  transform: scale(0.93);
 }
 
 .exercise-option:active,
@@ -76,18 +142,13 @@ button > :not(.tap-ripple),
 .exercise-chip.is-tapping,
 .empty-log-card:active,
 .empty-log-card.is-tapping {
-  border-color: #a9dfb7;
-  background: #f8fef9;
+  border-color: var(--app-accent);
+  background: var(--app-mint);
 }
 
 .icon-button:active,
 .icon-button.is-tapping {
   background: var(--app-mint-strong);
-}
-
-.set-check:active,
-.set-check.is-tapping {
-  transform: scale(0.9);
 }
 
 .set-row.is-done .set-check svg {
@@ -108,6 +169,137 @@ button > :not(.tap-ripple),
 
 .exercise-picker.show .exercise-picker-sheet {
   animation: sheet-up 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* ---------------------------------------------------------------------------
+   Motion accents
+   Press = shrink (above). These supply the other half: things that pop OUT
+   when they succeed or become active, plus hover lift on pointer devices.
+   Overshoot curve is cubic-bezier(0.34, 1.56, 0.64, 1) throughout so the whole
+   app springs the same way.
+   --------------------------------------------------------------------------- */
+
+/* Stat numbers pulse when the value actually changes — driven by setText()
+   in core/storage.js, so every stat in the app gets it. */
+.value-pop {
+  animation: value-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Checking a habit / setting pops the circle out. */
+.habit-list input[type="checkbox"]:checked,
+.settings-list input[type="checkbox"]:checked {
+  animation: check-bounce 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Switching tabs eases the incoming view up. No fill-mode: the transform must
+   be released once it finishes, or .app-view becomes a containing block for
+   its position:sticky/fixed descendants. */
+.app-view.active {
+  animation: view-in 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.nav-item.active {
+  animation: nav-pill-in 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.exercise-picker.show .part-icon,
+.badge-chip.is-unlocked {
+  animation: value-pop 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Hover states are gated to real pointers so touch devices never get a stuck
+   hover after a tap. :not(:active) keeps the press-shrink winning on press. */
+@media (hover: hover) and (pointer: fine) {
+  .routine-card,
+  .exercise-option,
+  .exercise-chip,
+  .music-playlist-card,
+  .history-card {
+    transition: transform 180ms ease-out, box-shadow 180ms ease-out,
+      border-color 180ms ease-out, background-color 180ms ease-out;
+  }
+
+  .routine-card:hover:not(:active),
+  .exercise-option:hover:not(:active),
+  .exercise-chip:hover:not(:active),
+  .music-playlist-card:hover:not(:active) {
+    transform: translateY(-2px);
+    box-shadow: var(--app-shadow);
+  }
+
+  .primary-action:hover:not(:active),
+  .add-exercise-button:hover:not(:active),
+  .step-button.primary:hover:not(:active) {
+    transform: translateY(-1px);
+  }
+
+  .circle-button:hover:not(:active) {
+    transform: scale(1.07);
+  }
+
+  .icon-button:hover:not(:active),
+  .profile-button:hover:not(:active),
+  .nav-item:hover:not(:active):not(.active) {
+    background: var(--app-mint-strong);
+  }
+
+  .set-check:hover:not(:active) {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes value-pop {
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.14);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes check-bounce {
+  0% {
+    transform: scale(0.8);
+  }
+
+  50% {
+    transform: scale(1.18);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes view-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes nav-pill-in {
+  0% {
+    transform: scale(0.86);
+  }
+
+  60% {
+    transform: scale(1.04);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes tap-ripple {
@@ -181,16 +373,45 @@ button > :not(.tap-ripple),
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .press-effect,
   button,
+  a.text-button,
+  a.icon-button,
+  a.brand,
   .exercise-option,
   .exercise-chip,
   .empty-log-card,
+  .habit-list label,
+  .settings-list label,
+  .remember-toggle,
   .toast {
     transition: none;
   }
 
   .tap-ripple,
-  .set-row.is-done .set-check svg {
+  .set-row.is-done .set-check svg,
+  .exercise-log-card,
+  .set-row.is-done,
+  .value-pop,
+  .habit-list input[type="checkbox"]:checked,
+  .settings-list input[type="checkbox"]:checked,
+  .app-view.active,
+  .nav-item.active,
+  .exercise-picker.show .part-icon,
+  .badge-chip.is-unlocked {
     animation: none;
+  }
+
+  /* Hover lift is motion too — drop the travel, keep the colour feedback. */
+  .routine-card:hover:not(:active),
+  .exercise-option:hover:not(:active),
+  .exercise-chip:hover:not(:active),
+  .music-playlist-card:hover:not(:active),
+  .primary-action:hover:not(:active),
+  .add-exercise-button:hover:not(:active),
+  .step-button.primary:hover:not(:active),
+  .circle-button:hover:not(:active),
+  .set-check:hover:not(:active) {
+    transform: none;
   }
 }

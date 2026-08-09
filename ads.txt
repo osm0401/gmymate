@@ -1,0 +1,5 @@
+# Kakao AdFit ads.txt
+# 정확한 값은 카카오 애드핏 대시보드 > 광고 관리 > ads.txt 안내 메뉴에서 확인해서
+# 아래 한 줄을 계정 전용 값으로 교체해주세요. 이 파일은 형식 예시일 뿐,
+# 실제 발급된 값을 넣기 전까지는 유효하지 않습니다.
+kakao.com,DAN-OiYotfmOeEQPSWzn , DIRECT
