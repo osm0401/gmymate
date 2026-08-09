@@ -1,6 +1,7 @@
 import { setupOnboarding } from "./features/onboarding.js";
 import { setupLogin } from "./features/login.js";
 import { setupMain } from "./features/main.js";
+import { setupWeeklyVolumeTrend } from "./features/weekly-volume-trend.js";
 import { setupWorkoutLog } from "./features/workout-log.js";
 import { setupInBody } from "./features/inbody.js";
 import { setupMusic } from "./features/music.js";
@@ -58,6 +59,7 @@ if (document.querySelector(".main-screen")) {
     await pullSync();
 
     setupMain(user);
+    setupWeeklyVolumeTrend();
     setupWorkoutLog();
     setupInBody();
     setupMusic();
