@@ -9,8 +9,11 @@ const SYNCED_KEYS = [
   "gmymateWorkoutNote",
   "gmymateRecentExercises",
   "gmymateInBodyLogs",
-  "gmymateBadges"
+  "gmymateBadges",
+  "gmymateCustomRoutines"
 ];
+
+const OWNER_KEY = "gmymateSyncOwner";
 
 let pushTimer = null;
 let syncEnabled = false;
@@ -34,7 +37,13 @@ function pushSyncNow() {
   });
 }
 
-export async function pullSync() {
+export async function pullSync(username = null) {
+  const previousOwner = localStorage.getItem(OWNER_KEY);
+
+  if (username && previousOwner && previousOwner !== username) {
+    SYNCED_KEYS.forEach((key) => localStorage.removeItem(key));
+  }
+
   try {
     const response = await fetch("./api/sync.php", { credentials: "same-origin" });
     const result = await response.json();
@@ -50,7 +59,16 @@ export async function pullSync() {
     // offline — keep whatever's already in localStorage
   }
 
+  if (username) {
+    localStorage.setItem(OWNER_KEY, username);
+  }
+
   syncEnabled = true;
+}
+
+export function clearSyncedData() {
+  SYNCED_KEYS.forEach((key) => localStorage.removeItem(key));
+  localStorage.removeItem(OWNER_KEY);
 }
 
 window.addEventListener("gmymate:data-changed", (event) => {

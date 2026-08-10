@@ -1,5 +1,6 @@
 import { exerciseCatalog } from "../core/data.js";
 import { partIcon } from "../core/part-icons.js";
+import { planRoutineStart } from "../core/routines.js";
 import { escapeHtml, getDateKey, getWorkoutStats, readJson, setText, showToast, writeJson } from "../core/storage.js";
 
 export function setupWorkoutLog() {
@@ -582,32 +583,39 @@ export function setupWorkoutLog() {
   }
 
   function startRoutine(ids) {
-    const existingIds = new Set(workouts.map((workout) => workout.exerciseId));
-    const toAdd = ids.filter((id) => exerciseCatalog.some((exercise) => exercise.id === id) && !existingIds.has(id));
+    const { toAdd, skippedCount } = planRoutineStart({
+      existingExerciseIds: workouts.map((workout) => workout.exerciseId),
+      routineExerciseIds: ids,
+      exerciseCatalog
+    });
 
     if (toAdd.length === 0) {
       showToast(ids.length ? "이미 오늘 기록에 있어요." : "루틴 정보를 찾을 수 없어요.");
       return;
     }
 
-    toAdd.forEach((id) => {
+    const newEntries = toAdd.map((id) => {
       const exercise = getExercise(id);
-      workouts.unshift({
+      return {
         id: `${exercise.id}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
         exerciseId: exercise.id,
         name: exercise.name,
         category: exercise.category,
         sets: makeSets(exercise)
-      });
-      recentExerciseIds = [exercise.id, ...recentExerciseIds.filter((recentId) => recentId !== exercise.id)].slice(0, 6);
+      };
     });
 
-    workouts = workouts.slice(0, 12);
+    workouts = [...workouts, ...newEntries];
+    recentExerciseIds = [...toAdd, ...recentExerciseIds.filter((id) => !toAdd.includes(id))].slice(0, 6);
     saveWorkouts();
     saveRecentExercises();
     renderLogs();
     notifyWorkoutsChanged();
-    showToast(`루틴 운동 ${toAdd.length}개를 추가했어요.`);
+    showToast(
+      skippedCount > 0
+        ? `루틴 운동 ${toAdd.length}개를 추가했어요. ${skippedCount}개는 오늘 기록 한도로 제외했어요.`
+        : `루틴 운동 ${toAdd.length}개를 추가했어요.`
+    );
   }
 
   window.addEventListener("gmymate:start-routine", (event) => {

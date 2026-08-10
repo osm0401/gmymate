@@ -139,49 +139,8 @@ function setupNavigation() {
       }
 
       activateTab("log");
-      return;
-    }
-
-    const deleteButton = event.target.closest("[data-delete-routine]");
-
-    if (deleteButton) {
-      const routines = readJson("gmymateCustomRoutines", [])
-        .filter((routine) => routine.id !== deleteButton.dataset.deleteRoutine);
-      writeJson("gmymateCustomRoutines", routines);
-      renderMyRoutines();
-      showToast("루틴을 삭제했어요.");
     }
   });
-}
-
-function renderMyRoutines() {
-  const section = document.querySelector("#myRoutineSection");
-  const list = document.querySelector("#myRoutineList");
-
-  if (!section || !list) {
-    return;
-  }
-
-  const routines = readJson("gmymateCustomRoutines", []);
-  section.hidden = routines.length === 0;
-
-  list.innerHTML = routines.map((routine) => `
-    <article class="routine-card">
-      <div>
-        <span class="routine-type">${escapeHtml(routine.type || "내 루틴")}</span>
-        <h3>${escapeHtml(routine.name)}</h3>
-        <p>${escapeHtml(routine.exerciseNames.join(", "))}</p>
-      </div>
-      <div class="routine-card-actions">
-        <button class="circle-button" type="button" data-start-workout data-routine="${escapeHtml(routine.exerciseIds.join(","))}" aria-label="${escapeHtml(routine.name)} 시작">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>
-        </button>
-        <button class="icon-button" type="button" data-delete-routine="${escapeHtml(routine.id)}" aria-label="${escapeHtml(routine.name)} 삭제">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4Zm-3 6h12l-1 12H7Z"/></svg>
-        </button>
-      </div>
-    </article>
-  `).join("");
 }
 
 function setupHabits() {

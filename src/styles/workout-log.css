@@ -146,6 +146,25 @@
   font-weight: 800;
 }
 
+.save-routine-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.save-routine-form input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  color: var(--app-text);
+  background: var(--app-input-bg);
+  outline: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
 .empty-log-card span,
 .log-help {
   margin: 0;
