@@ -68,6 +68,7 @@
         <div class="section-title">
           <h2>이번 주 목표</h2>
           <span class="soft-label" id="weeklyGaugeCaption" hidden></span>
+          <button class="text-button" type="button" data-open-goal-form>목표 수정</button>
         </div>
 
         <div class="arc-gauge-card" id="weeklyGaugeCard">
@@ -87,8 +88,47 @@
           </span>
           <strong>주간 목표를 설정해보세요</strong>
           <p>일주일에 몇 번 운동할지 정하면 달성률을 보여드릴게요.</p>
-          <a class="empty-state-action press-effect" href="./onboarding.html">목표 설정하기</a>
+          <button class="empty-state-action press-effect" type="button" data-open-goal-form>목표 설정하기</button>
         </div>
+
+        <form class="goal-edit-form" id="goalEditForm" hidden novalidate aria-label="목표 수정">
+          <div class="goal-field" data-goal-field="goal">
+            <span>목표</span>
+            <input type="hidden" name="goal">
+            <div class="chip-select-group">
+              <button type="button" data-value="fat-loss">체지방 감량</button>
+              <button type="button" data-value="muscle-gain">근육 증가</button>
+              <button type="button" data-value="strength">근력 향상</button>
+              <button type="button" data-value="habit">운동 습관 만들기</button>
+            </div>
+            <small class="field-error" data-error-for="goal"></small>
+          </div>
+
+          <label class="setting-field goal-field" data-goal-field="targetWeight">
+            <span>목표 몸무게(kg)</span>
+            <input name="targetWeight" type="number" inputmode="decimal" min="30" max="250" step="0.1">
+            <small class="field-error" data-error-for="targetWeight"></small>
+          </label>
+
+          <div class="goal-field" data-goal-field="weeklyWorkout">
+            <span>주간 운동 횟수</span>
+            <input type="hidden" name="weeklyWorkout">
+            <div class="chip-select-group">
+              <button type="button" data-value="2">주 2회</button>
+              <button type="button" data-value="3">주 3회</button>
+              <button type="button" data-value="4">주 4회</button>
+              <button type="button" data-value="5">주 5회+</button>
+            </div>
+            <small class="field-error" data-error-for="weeklyWorkout"></small>
+          </div>
+
+          <p class="form-note" id="goalEditNote"></p>
+
+          <div class="settings-actions">
+            <button class="text-button" type="button" data-close-goal-form>취소</button>
+            <button class="text-button" type="submit">저장</button>
+          </div>
+        </form>
       </section>
 
       <section class="content-section">
@@ -491,6 +531,26 @@
             <span>운동 시작 알림</span>
             <input id="workoutAlertSetting" type="checkbox">
           </label>
+          <div class="reminder-settings">
+            <label class="setting-field">
+              <span>알림 시각</span>
+              <input id="workoutAlertTimeSetting" type="time" step="60">
+            </label>
+            <div class="alert-day-picker">
+              <span>알림 요일</span>
+              <div class="chip-select-group">
+                <button type="button" data-alert-day="0">일</button>
+                <button type="button" data-alert-day="1">월</button>
+                <button type="button" data-alert-day="2">화</button>
+                <button type="button" data-alert-day="3">수</button>
+                <button type="button" data-alert-day="4">목</button>
+                <button type="button" data-alert-day="5">금</button>
+                <button type="button" data-alert-day="6">토</button>
+              </div>
+            </div>
+            <p class="field-help">앱을 열어두거나 화면을 다시 켤 때만 확인해서 알려드려요. 앱이 완전히 꺼져 있으면 알림이 오지 않아요.</p>
+            <p class="form-note" id="workoutAlertNote"></p>
+          </div>
           <label>
             <span>초보자 모드</span>
             <input id="beginnerModeSetting" type="checkbox" checked>

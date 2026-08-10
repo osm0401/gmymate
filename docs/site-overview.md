@@ -35,6 +35,7 @@
 ### 2.1 홈 (`data-view="home"`)
 - **오늘 운동 히어로**: "운동 시작" 버튼 → 기록 탭으로 이동 + 토스트
 - **목표 요약 패널**: 현재 몸무게 / 목표 몸무게 / 주간 계획 횟수 (프로필 데이터 표시)
+- **목표 수정**: "이번 주 목표" 섹션의 "목표 수정" 버튼(목표 미설정 시엔 빈 상태의 "목표 설정하기")을 누르면 인라인 폼(`#goalEditForm`)이 열려 목표 유형·목표 몸무게·주간 운동 횟수를 로그인 상태에서 바로 수정할 수 있다. 저장은 `gmymateProfile`을 그대로 갱신하므로 별도 회원가입 API를 호출하지 않고, 저장 즉시 요약 패널·주간 게이지가 다시 렌더된다. 담당: `src/core/goals.js`(검증/정규화) + `src/features/goals.js`(폼). 키/나이/경력 등 나머지 프로필 항목은 여전히 "내정보" 탭의 "수정" 링크(`onboarding.html`, 기존 버그 있음 — 12번 섹션 참고)로만 바꿀 수 있다.
 - **오늘 현황**: 완료 세트(`x/y`), 운동 볼륨(kg), 연속 운동일
 - **오늘 할 일**: 추천 루틴 카드 1개(고정 텍스트: "상체 가볍게 시작")
 - **빠른 기록**: 운동/몸무게/달력 바로가기 3버튼
@@ -61,7 +62,7 @@
 
 ### 2.6 내정보 (`data-view="profile"`)
 - 기본 정보(키/나이/경력/목표) 표시 + "수정" → `onboarding.html`로 이동
-- 설정: 쉬운 말로 보기 / 운동 시작 알림 / 초보자 모드 / 큰 버튼 모드 / 무게 조절 단위(k) / 휴식 시간(초)
+- 설정: 쉬운 말로 보기 / 운동 시작 알림(시각·요일 지정, ⚠**앱이 열려 있거나 화면을 다시 켤 때만 확인해서 알려주는 방식** — 앱이 완전히 종료된 상태의 백그라운드 푸시는 아님) / 초보자 모드 / 큰 버튼 모드 / 무게 조절 단위(k) / 휴식 시간(초)
 - 데이터 복사(클립보드로 JSON 내보내기) / 데이터 붙여넣기(클립보드에서 JSON 가져와 복원) / 오늘 기록 초기화 / 로그아웃
 - 인바디 기록: 날짜/몸무게/골격근량/체지방률 입력 폼 + 지표별 꺾은선 그래프(SVG 직접 구현, 라이브러리 없음)
 
@@ -106,8 +107,9 @@
 
 | 키 | 내용 |
 |---|---|
-| `gmymateProfile` | 키/나이/몸무게/목표몸무게/경력/목표/주간계획/username |
-| `gmymateSettings` | weightStepKg, restSeconds, largeTouch, easyWords, workoutAlert, beginnerMode |
+| `gmymateProfile` | 키/나이/몸무게/목표몸무게/경력/목표/주간계획/username (목표 3필드는 홈 화면 "목표 수정" 폼으로 수정 가능) |
+| `gmymateSettings` | weightStepKg, restSeconds, largeTouch, easyWords, workoutAlert, workoutAlertTime(`"HH:mm"`, 기본 `18:00`), workoutAlertDays(0=일~6=토 배열, 기본 매일), beginnerMode |
+| `gmymateReminderLastShown` | 운동 알림을 마지막으로 띄운 기기 로컬 날짜(`YYYY-MM-DD`). **동기화되지 않는 기기 전용 키**(4.2의 서버 동기화 대상 아님), 로그아웃·계정 전환 시 함께 삭제됨 |
 | `gmymateHabits` | 습관별 체크 상태(protein/water/stretch) |
 | `gmymateWorkoutLogsV2` | 오늘 진행 중인 운동 세트 기록 |
 | `gmymateWorkoutLogs` | (구버전, 첫 로드 시 V2로 자동 마이그레이션) |
@@ -190,6 +192,12 @@
 ### `src/core/data.js`
 `profileLabels`, `weeklyLabels`, `onboardingRules`, `exerciseCatalog` 상수만 export(함수 없음)
 
+### `src/core/goals.js`
+DOM 무관 순수 로직. `normalizeGoalSettings({goal, targetWeight, weeklyWorkout})` — 목표 유형(4종)/목표 몸무게(30~250, 소수 첫째 자리)/주간 횟수(2~5)를 검증·정규화해 `{ok:true, values}` 또는 첫 실패 필드를 담은 `{ok:false, field, reason}`을 반환. `mergeGoalIntoProfile(profile, values)` — 목표 3필드만 병합하고 나머지 프로필은 그대로 보존.
+
+### `src/core/reminders.js`
+DOM 무관 순수 로직. `normalizeReminderSettings(rawSettings)` — `workoutAlertTime`/`workoutAlertDays` 검증(레거시 `workoutAlert:true`만 있는 데이터는 매일 18:00로 보정). `shouldShowWorkoutReminder({settings, completedDateKeys, todayWorkouts, weeklyTarget, lastShownDateKey}, referenceDate)` — 알림 on/off, 선택 요일·시각, 오늘 완료 여부(히스토리+진행중 세트), 주간 목표 달성 여부, 오늘 이미 알렸는지를 한 번에 판정.
+
 ### `src/core/music-player.js`
 - `onTrackEnded(callback)` — 곡 종료 콜백 등록(자동 이어재생용)
 - `playYouTube(videoId, mountId)` / `toggleYouTube()`
@@ -204,7 +212,13 @@
 - `setupOnboarding()` — 마법사 단계 진행, 유효성 검사, `POST /api/signup.php` 호출 후 프로필 localStorage 저장
 
 ### `src/features/main.js` (가장 큰 파일, 함수 19개)
-`setupMain()`이 `setupProfile()`, `setupNavigation()`, `setupHabits()`, `setupSettings()`, `renderAppStats()`를 호출. 그 외 설정 저장(`getSettings`/`saveSettings`/`applySettings`/`bindSettingToggle`), 데이터 내보내기/가져오기(`exportData`/`importData`), 통계 계산(`getCompletedDateKeys`/`getStreak`/`getMonthCount`), 렌더링(`renderWeekStrip`/`renderMonthGrid`/`renderHistory`), 포맷팅(`formatHistoryDate`/`formatNumber`)
+`setupMain()`이 `setupProfile()`, `setupNavigation()`, `setupHabits()`, `setupSettings()`, `renderAppStats()`를 호출하고, `gmymate:data-changed` 이벤트의 `detail.key === "gmymateProfile"`을 구독해 목표 수정 직후 `setupProfile()`+`renderAppStats()`를 다시 실행한다. 그 외 설정 저장(`getSettings`/`saveSettings`/`applySettings`/`bindSettingToggle`), 데이터 내보내기/가져오기(`exportData`/`importData`), 통계 계산(`getCompletedDateKeys`/`getStreak`/`getMonthCount`), 렌더링(`renderWeekStrip`/`renderMonthGrid`/`renderHistory`), 포맷팅(`formatHistoryDate`/`formatNumber`)
+
+### `src/features/goals.js`
+- `setupGoals()` — 홈 화면 목표 수정 폼(`#goalEditForm`) 초기화. "목표 수정"/"목표 설정하기" 버튼으로 열고, 제출 시 `src/core/goals.js`로 검증 후 필드 옆에 오류 표시+포커스 이동, 통과 시 `writeJson("gmymateProfile", ...)`로 저장(기존 `gmymate:data-changed` 동기화 이벤트 재사용).
+
+### `src/features/reminders.js`
+- `setupReminders()` — "운동 시작 알림" 설정(시각/요일) 초기화. 토글을 켜는 클릭 안에서만 `Notification.requestPermission()`을 호출(거부 시 토글 원복+안내), 페이지 초기화·`focus`·`visibilitychange`·화면이 보이는 동안의 60초 간격 재평가로 `src/core/reminders.js`의 판정 결과에 따라 알림을 띄운다. 중복 방지 키(`gmymateReminderLastShown`)는 기기 로컬 전용(동기화 안 됨).
 
 ### `src/features/workout-log.js`
 `setupWorkoutLog()` 하나가 세트 추가/삭제/수정, 운동 선택 시트, 휴식 타이머, 완료 처리를 전부 담당(클로저 내부 함수들)

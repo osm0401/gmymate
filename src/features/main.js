@@ -59,31 +59,15 @@ export function setupMain(user = null) {
   setupHabits();
   setupSettings();
   renderAppStats();
-  maybeShowWorkoutReminder();
 
   window.addEventListener("gmymate:workouts-changed", renderAppStats);
   window.addEventListener("gmymate:settings-changed", renderAppStats);
-}
-
-function maybeShowWorkoutReminder() {
-  const settings = getSettings();
-
-  if (!settings.workoutAlert || typeof Notification === "undefined" || Notification.permission !== "granted") {
-    return;
-  }
-
-  if (new Date().getHours() < 18) {
-    return;
-  }
-
-  const todayStats = getWorkoutStats(readJson("gmymateWorkoutLogsV2", []));
-
-  if (todayStats.doneSets > 0 || sessionStorage.getItem("gmymateReminderShown")) {
-    return;
-  }
-
-  sessionStorage.setItem("gmymateReminderShown", "1");
-  new Notification("gmymate", { body: "오늘 아직 운동 시작 전이에요. 지금 가볍게 시작해볼까요?" });
+  window.addEventListener("gmymate:data-changed", (event) => {
+    if (event.detail?.key === "gmymateProfile") {
+      setupProfile();
+      renderAppStats();
+    }
+  });
 }
 
 function setupProfile() {
@@ -182,7 +166,6 @@ function setupSettings() {
   const restInput = document.querySelector("#restTimerSetting");
   const largeTouchInput = document.querySelector("#largeTouchSetting");
   const easyWordsInput = document.querySelector("#easyWordsSetting");
-  const workoutAlertInput = document.querySelector("#workoutAlertSetting");
   const beginnerModeInput = document.querySelector("#beginnerModeSetting");
   const darkModeInput = document.querySelector("#darkModeSetting");
   const exportButton = document.querySelector("[data-export-data]");
@@ -230,7 +213,6 @@ function setupSettings() {
 
   bindSettingToggle(largeTouchInput, "largeTouch");
   bindSettingToggle(easyWordsInput, "easyWords");
-  bindSettingToggle(workoutAlertInput, "workoutAlert");
   bindSettingToggle(beginnerModeInput, "beginnerMode");
   bindThemeToggle(darkModeInput);
   applySettings(settings);
@@ -258,11 +240,6 @@ function bindSettingToggle(input, key) {
     const nextSettings = getSettings();
     nextSettings[key] = input.checked;
     saveSettings(nextSettings);
-
-    if (key === "workoutAlert" && input.checked && typeof Notification !== "undefined") {
-      Notification.requestPermission();
-    }
-
     showToast(input.checked ? "설정을 켰어요." : "설정을 껐어요.");
   });
 }
