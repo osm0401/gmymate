@@ -453,6 +453,12 @@ ${cycle.flags.map((f) => `  - 반복 이슈(3회+): ${f}`).join("\n")}
 `;
   writeDaily(summary);
   saveRecord(`${id} 실행 기록`, `${summary}\n## 작업 지시서\n\n${order}`);
+  backToBase();
+}
+
+// 사이클이 feature 브랜치에 체크아웃된 채 끝나면 다음 작업 커밋이 거기로 흘러들어간다
+function backToBase() {
+  try { sh(`git checkout ${base}`); } catch { /* 브랜치가 이미 삭제됐거나 더티하면 그대로 둔다 */ }
 }
 
 // ---------------------------------------------------------------- 진입점
@@ -466,6 +472,7 @@ if (args[0] === "--report") {
     const summary = `\n## 실패 — ${args.join(" ")}\n- 사유: ${e.message}\n`;
     writeDaily(summary);
     saveRecord("사이클 실패 기록", summary);
+    backToBase();
     process.exit(1);
   });
 } else if (process.argv[1] === fileURLToPath(import.meta.url)) {
