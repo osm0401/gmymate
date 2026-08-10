@@ -461,7 +461,8 @@ async function runCycle(command) {
     writeFileSync(bodyFile, `## 작업 지시서 요약\n\n${order.split("\n").slice(0, 30).join("\n")}\n\n## Gemini 리뷰 결과\n\nAPPROVE\n\n${feedback ?? ""}`);
     const url = sh(`gh pr create --base ${base} --head ${branch} --title "${id}: ${command.replace(/"/g, "'")}" --body-file "${bodyFile}"`);
     log(`PR 생성: ${url}`);
-    sh(`gh pr merge ${branch} --squash --delete-branch --admin`);
+    // --admin은 쓰지 않는다. 브랜치 보호 규칙을 자동 에이전트가 우회하면 규칙이 무의미해진다.
+    sh(`gh pr merge ${branch} --squash --delete-branch`);
     result = `머지 완료 — ${url.split("\n").pop()}`;
     log("머지 완료 — Vercel/배포 파이프라인이 이어받음");
   }
