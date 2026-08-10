@@ -226,6 +226,12 @@
   width: 100%;
 }
 
+.routine-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .routine-card p {
   max-width: 280px;
   margin-right: auto;

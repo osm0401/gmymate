@@ -1,6 +1,7 @@
 import { setupOnboarding } from "./features/onboarding.js";
 import { setupLogin } from "./features/login.js";
 import { setupMain } from "./features/main.js";
+import { setupRoutines } from "./features/routines.js";
 import { setupWorkoutLog } from "./features/workout-log.js";
 import { setupInBody } from "./features/inbody.js";
 import { setupMusic } from "./features/music.js";
@@ -55,9 +56,10 @@ if (document.querySelector(".main-screen")) {
       return;
     }
 
-    await pullSync();
+    await pullSync(user.username);
 
     setupMain(user);
+    setupRoutines();
     setupWorkoutLog();
     setupInBody();
     setupMusic();
