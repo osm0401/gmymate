@@ -252,9 +252,7 @@ const REVIEW_CHECKLIST = `- 기능 요구사항: 지시서의 수용 기준을 �
 - 성능: 불필요한 반복 호출, N+1 쿼리 등 명백한 성능 이슈`;
 
 export async function reviewer(order, diff) {
-  const text = await geminiHold(
-    reviewModel,
-    `당신은 코드 리뷰어다. 아래 작업 지시서와 diff를 체크리스트 기준으로 검토하라.
+  const prompt = `당신은 코드 리뷰어다. 아래 작업 지시서와 diff를 체크리스트 기준으로 검토하라.
 
 # 작업 지시서
 ${order}
@@ -266,12 +264,19 @@ ${REVIEW_CHECKLIST}
 ${diff.slice(0, 400_000)}
 
 첫 줄에 판정만 단독으로 출력하라: APPROVE 또는 REQUEST_CHANGES
-반려 시 둘째 줄부터 "파일:라인 — 문제 — 수정 방향" 형식으로 지적하라.`,
-  );
-  return parseReview(text);
+반려 시 둘째 줄부터 "파일:라인 — 문제 — 수정 방향" 형식으로 지적하라.`;
+
+  // gemini CLI가 간헐적으로 도구 권한에 걸려 판정 없이 끝난다. 그 출력을 리뷰 피드백으로
+  // 넘기면 코더가 없는 지적을 쫓으므로, 판정이 안 읽히면 한 번 더 부르고 그래도 없으면 던진다.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const parsed = parseReview(await geminiHold(reviewModel, prompt));
+    if (parsed.found) return parsed;
+    log(`리뷰어가 판정을 내지 않았다 (${attempt}/2): ${parsed.feedback.slice(0, 200)}`);
+  }
+  throw new Error("리뷰어가 두 번 모두 판정을 내지 못했다 — 리뷰 없이는 진행하지 않는다");
 }
 
-// 판정을 못 읽으면 통과시키지 않는다 (fail-closed)
+// 판정을 못 읽으면 통과시키지 않는다 (fail-closed). found로 "판정 없음"을 구분한다.
 // 리뷰어를 부르기 전에 문법 검사부터 통과시킨다.
 // 린트에서 걸릴 코드를 Gemini에게 보내는 건 무료 한도 낭비다 — 바로 코더에게 되돌린다.
 function runCheck() {
@@ -291,7 +296,7 @@ function runCheck() {
 export function parseReview(text) {
   const m = String(text).match(/REQUEST[_ ]CHANGES|APPROVE/i);
   const verdict = m && /APPROVE/i.test(m[0]) ? "APPROVE" : "REQUEST_CHANGES";
-  return { verdict, feedback: String(text).trim() };
+  return { verdict, found: Boolean(m), feedback: String(text).trim() };
 }
 
 // 같은 지적이 3회 이상 반복되면 플래그만 세운다 (자동 정지는 하지 않음 — 계획서 4)

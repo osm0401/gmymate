@@ -15,6 +15,11 @@ assert.equal(parseReview("APPROVE\n문제 없음").verdict, "APPROVE");
 assert.equal(parseReview("REQUEST_CHANGES\napi 키 하드코딩").verdict, "REQUEST_CHANGES");
 assert.equal(parseReview("REQUEST CHANGES: 테스트 없음").verdict, "REQUEST_CHANGES");
 assert.equal(parseReview("판정 없는 잡담").verdict, "REQUEST_CHANGES");
+// 판정을 못 읽은 경우는 반려와 구분돼야 한다 — reviewer()가 이걸 보고 재시도한다
+assert.equal(parseReview("판정 없는 잡담").found, false);
+assert.equal(parseReview("jetski: no output produced — a tool required permission").found, false);
+assert.equal(parseReview("APPROVE\n문제 없음").found, true);
+assert.equal(parseReview("REQUEST_CHANGES\n테스트 없음").found, true);
 // APPROVE가 뒤에 섞여 나와도 첫 판정을 따른다
 assert.equal(parseReview("REQUEST_CHANGES\n수정하면 APPROVE 가능").verdict, "REQUEST_CHANGES");
 
