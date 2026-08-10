@@ -389,6 +389,16 @@ async function runCycle(command) {
   const dirty = sh("git status --porcelain");
   if (dirty) throw new Error(`작업 트리에 커밋되지 않은 변경 ${dirty.split("\n").length}건 — 먼저 커밋/스태시 후 실행하라`);
 
+  // 기준 브랜치가 원격에 없으면 gh pr create가 "Base ref must be a branch"로 죽는다.
+  // 25분짜리 작업을 다 끝낸 뒤 마지막 단계에서 알게 되면 늦다.
+  if (!sh(`git ls-remote --heads origin ${base}`)) {
+    throw new Error(
+      `기준 브랜치 '${base}'가 원격에 없어 PR을 만들 수 없다.\n` +
+      `  먼저 올리거나(git push -u origin ${base}) BASE_BRANCH를 원격에 있는 브랜치로 바꿔라.\n` +
+      `  주의: 이 저장소는 공개이므로 브랜치를 올리면 공개된다.`,
+    );
+  }
+
   sh(`git checkout ${base}`);
   sh(`git pull --ff-only || true`);
   sh(`git checkout -b ${branch}`);
