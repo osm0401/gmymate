@@ -15,6 +15,10 @@ const SYNCED_KEYS = [
 
 const OWNER_KEY = "gmymateSyncOwner";
 
+// 알림 중복 방지 상태는 기기 로컬 전용이라 SYNCED_KEYS에 넣지 않지만,
+// 계정 경계(로그아웃/전환)에서는 이전 계정 상태가 남지 않도록 함께 지운다.
+const LOCAL_ONLY_KEYS = ["gmymateReminderLastShown"];
+
 let pushTimer = null;
 let syncEnabled = false;
 
@@ -42,6 +46,7 @@ export async function pullSync(username = null) {
 
   if (username && previousOwner && previousOwner !== username) {
     SYNCED_KEYS.forEach((key) => localStorage.removeItem(key));
+    LOCAL_ONLY_KEYS.forEach((key) => localStorage.removeItem(key));
   }
 
   try {
@@ -68,6 +73,7 @@ export async function pullSync(username = null) {
 
 export function clearSyncedData() {
   SYNCED_KEYS.forEach((key) => localStorage.removeItem(key));
+  LOCAL_ONLY_KEYS.forEach((key) => localStorage.removeItem(key));
   localStorage.removeItem(OWNER_KEY);
 }
 

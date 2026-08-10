@@ -1,6 +1,8 @@
 import { setupOnboarding } from "./features/onboarding.js";
 import { setupLogin } from "./features/login.js";
 import { setupMain } from "./features/main.js";
+import { setupGoals } from "./features/goals.js";
+import { setupReminders } from "./features/reminders.js";
 import { setupRoutines } from "./features/routines.js";
 import { setupWorkoutLog } from "./features/workout-log.js";
 import { setupInBody } from "./features/inbody.js";
@@ -59,6 +61,8 @@ if (document.querySelector(".main-screen")) {
     await pullSync(user.username);
 
     setupMain(user);
+    setupGoals();
+    setupReminders();
     setupRoutines();
     setupWorkoutLog();
     setupInBody();

@@ -377,6 +377,57 @@
   text-align: right;
 }
 
+.goal-edit-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--app-line);
+}
+
+.goal-field {
+  display: grid;
+  gap: 6px;
+}
+
+.goal-field > span {
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.field-error {
+  min-height: 16px;
+  color: var(--app-danger);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.setting-field.goal-field .field-error {
+  grid-column: 1 / -1;
+}
+
+.reminder-settings {
+  display: grid;
+  gap: 10px;
+  padding: 0 14px 4px;
+}
+
+.alert-day-picker {
+  display: grid;
+  gap: 6px;
+}
+
+.alert-day-picker > span {
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.reminder-settings input:disabled,
+.reminder-settings button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .settings-actions {
   display: flex;
   justify-content: space-between;
