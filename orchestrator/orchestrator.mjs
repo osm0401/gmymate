@@ -408,7 +408,8 @@ async function runCycle(command) {
       feedback = `자동 검사(scripts/check)가 실패했다. 리뷰 이전에 아래를 먼저 고쳐라.\n\n${check.output.slice(0, 20_000)}`;
       history.push(feedback);
       cycle.flags = repeatFlag(history);
-      log("검사 실패 — Gemini 리뷰를 건너뛰고 코더에게 반려");
+      // 실패 사유를 로그에 남긴다 — 안 남기면 나중에 손으로 재현해야 한다
+      log(`검사 실패 — Gemini 리뷰를 건너뛰고 코더에게 반려\n${check.output.split("\n").slice(-25).join("\n")}`);
       continue;
     }
     log("검사 통과");

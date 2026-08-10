@@ -28,7 +28,14 @@ echo "== Tests (tests/) =="
 if ! command -v node >/dev/null 2>&1; then
   echo "SKIP  node not found - skipping tests"
 elif [ -d "$root/tests" ]; then
-  if ! node --test "$root/tests"; then fail=1; echo "FAIL  node --test"; fi
+  # node --test에 디렉터리를 넘기면 그걸 테스트 파일로 로드하려다 죽는다. 파일을 직접 나열한다.
+  files=()
+  while IFS= read -r f; do files+=("$f"); done < <(find "$root/tests" -type f -regex '.*\.test\.[mc]?js')
+  if [ "${#files[@]}" -eq 0 ]; then
+    echo "SKIP  no *.test.js files under tests/"
+  elif ! node --test "${files[@]}"; then
+    fail=1; echo "FAIL  node --test"
+  fi
 else
   echo "SKIP  tests/ not found"
 fi

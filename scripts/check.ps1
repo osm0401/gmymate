@@ -30,8 +30,17 @@ $tests = Join-Path $root 'tests'
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
   Write-Host 'SKIP  node not found - skipping tests'
 } elseif (Test-Path $tests) {
-  & node --test $tests
-  if ($LASTEXITCODE -ne 0) { $fail = 1; Write-Host 'FAIL  node --test' }
+  # node --test에 디렉터리를 넘기면 그걸 테스트 파일로 로드하려다 MODULE_NOT_FOUND로 죽는다.
+  # 파일을 직접 나열해서 넘긴다.
+  $files = @(Get-ChildItem -Path $tests -Recurse -File |
+             Where-Object { $_.Name -match '\.test\.(m|c)?js$' } |
+             ForEach-Object { $_.FullName })
+  if ($files.Count -eq 0) {
+    Write-Host 'SKIP  no *.test.js files under tests/'
+  } else {
+    & node --test @files
+    if ($LASTEXITCODE -ne 0) { $fail = 1; Write-Host 'FAIL  node --test' }
+  }
 } else {
   Write-Host 'SKIP  tests/ not found'
 }
