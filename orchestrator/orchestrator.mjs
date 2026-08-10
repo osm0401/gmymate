@@ -251,7 +251,7 @@ const REVIEW_CHECKLIST = `- 기능 요구사항: 지시서의 수용 기준을 �
 - 코드 품질: 스타일 일관성, 불필요한 복잡도, 가독성
 - 성능: 불필요한 반복 호출, N+1 쿼리 등 명백한 성능 이슈`;
 
-async function reviewer(order, diff) {
+export async function reviewer(order, diff) {
   const text = await geminiHold(
     reviewModel,
     `당신은 코드 리뷰어다. 아래 작업 지시서와 diff를 체크리스트 기준으로 검토하라.
