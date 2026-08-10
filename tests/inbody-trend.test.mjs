@@ -90,6 +90,11 @@ test("selectTrendPoints: negative values are excluded", () => {
   assert.deepEqual(selectTrendPoints(logs, "bodyFat"), []);
 });
 
+test("selectTrendPoints: whitespace-only string values are excluded, not coerced to 0", () => {
+  const logs = [{ date: "2026-01-01", bodyFat: "   " }];
+  assert.deepEqual(selectTrendPoints(logs, "bodyFat"), []);
+});
+
 test("selectTrendPoints: invalid dates (bad format or nonexistent calendar day) are excluded", () => {
   const logs = [
     { date: "2026-13-01", muscleMass: 1 },
