@@ -3,6 +3,8 @@
 한 줄 명령 → ChatGPT(지휘) → Claude Code(코딩) → Gemini(리뷰) → 자동 머지 → 보고서.
 한도 소진 시 Gemini가 역할을 대행하는 **AGY 모드**로 자동 전환된다.
 
+> 처음 쓴다면 [GUIDE.md](GUIDE.md)를 봐라 — 준비물, 단계별 동작, 문제 해결, 알려진 제약까지 정리돼 있다.
+
 ## 준비
 
 1. `codex` CLI 로그인 (`codex login`) — 지휘자. ChatGPT 구독 인증
