@@ -24,4 +24,13 @@ else
   echo "SKIP  node not found - skipping JS syntax check"
 fi
 
+echo "== Tests (tests/) =="
+if ! command -v node >/dev/null 2>&1; then
+  echo "SKIP  node not found - skipping tests"
+elif [ -d "$root/tests" ]; then
+  if ! node --test "$root/tests"; then fail=1; echo "FAIL  node --test"; fi
+else
+  echo "SKIP  tests/ not found"
+fi
+
 if [ "$fail" -ne 0 ]; then echo "CHECK: FAIL"; exit 1; else echo "CHECK: PASS"; exit 0; fi

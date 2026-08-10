@@ -25,4 +25,15 @@ if (Get-Command node -ErrorAction SilentlyContinue) {
   Write-Host 'SKIP  node not found - skipping JS syntax check'
 }
 
+Write-Host '== Tests (tests/) =='
+$tests = Join-Path $root 'tests'
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+  Write-Host 'SKIP  node not found - skipping tests'
+} elseif (Test-Path $tests) {
+  & node --test $tests
+  if ($LASTEXITCODE -ne 0) { $fail = 1; Write-Host 'FAIL  node --test' }
+} else {
+  Write-Host 'SKIP  tests/ not found'
+}
+
 if ($fail -ne 0) { Write-Host 'CHECK: FAIL'; exit 1 } else { Write-Host 'CHECK: PASS'; exit 0 }
