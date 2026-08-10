@@ -7,7 +7,7 @@
 //   node orchestrator.mjs "운동 기록 기능 추가해줘"
 //   node orchestrator.mjs --report weekly
 
-import { execSync, execFileSync } from "node:child_process";
+import { execSync, execFileSync, spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync, appendFileSync, mkdirSync, readdirSync, existsSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -59,13 +59,20 @@ function bin(name) {
 // Node 20+는 CVE-2024-27980 패치 이후 .cmd/.bat을 shell 없이 띄우지 못한다(EINVAL).
 // npm 전역 CLI는 .cmd라서 그 경우만 shell을 켜고 인자를 직접 인용한다.
 const quoteArg = (a) => (/[\s"&|<>^()]/.test(a) ? `"${String(a).replace(/"/g, '""')}"` : a);
+// stdout과 stderr를 함께 돌려준다. 종료 코드가 0인데 stdout이 비는 CLI가 있어서
+// (agy가 도구 권한에 걸리면 stderr에만 사유를 쓴다) stderr를 버리면 원인 추적이 불가능하다.
 function run(name, args, opts = {}) {
   const exe = bin(name);
   const o = { cwd: repo, encoding: "utf8", maxBuffer: 64e6, ...opts };
   // args 배열 + shell:true 조합은 DEP0190 경고를 내므로 명령줄을 직접 조립해 넘긴다.
-  return /\.(cmd|bat)$/i.test(exe)
-    ? execSync([exe, ...args].map(quoteArg).join(" "), o)
-    : execFileSync(exe, args, o);
+  const r = /\.(cmd|bat)$/i.test(exe)
+    ? spawnSync([exe, ...args].map(quoteArg).join(" "), { ...o, shell: true })
+    : spawnSync(exe, args, o);
+  if (r.error) throw r.error;
+  const stdout = r.stdout ?? "";
+  const stderr = r.stderr ?? "";
+  if (r.status !== 0) throw new Error(`${name} exit ${r.status}: ${(stderr || stdout).slice(0, 3000)}`);
+  return { stdout, stderr };
 }
 
 function log(msg) {
@@ -109,7 +116,10 @@ function gemini(model, prompt) {
   const f = path.join(tmpdir(), `orch-${Date.now()}-${Math.random().toString(36).slice(2)}.md`);
   writeFileSync(f, prompt);
   try {
-    return run("gemini", ["--model", model, "-p", `@${f}`]).trim();
+    const { stdout, stderr } = run("gemini", ["--model", model, "-p", `@${f}`]);
+    // 종료 코드는 0인데 출력이 비면 도구 권한에 걸린 것이다 — 사유를 남겨야 추적된다
+    if (!stdout.trim() && stderr.trim()) throw new Error(`gemini ${model}: 출력 없음 — ${stderr.trim().slice(0, 500)}`);
+    return stdout.trim();
   } catch (e) {
     throw new Error(`gemini ${model}: ${e.stderr || e.stdout || e.message}`);
   } finally {
@@ -158,11 +168,11 @@ function codex(prompt) {
 // Claude Code CLI를 헤드리스로 실행. CLI가 직접 파일을 수정하고 결과 요약을 돌려준다.
 function claudeCode(prompt) {
   try {
-    const out = run(
+    const { stdout } = run(
       "claude",
       ["-p", prompt, "--output-format", "json", "--permission-mode", process.env.CLAUDE_PERMISSION_MODE || "acceptEdits"],
     );
-    const j = JSON.parse(out);
+    const j = JSON.parse(stdout);
     if (j.is_error) throw new Error(j.result || "claude code 실패");
     return j.result ?? "";
   } catch (e) {
@@ -252,7 +262,12 @@ const REVIEW_CHECKLIST = `- 기능 요구사항: 지시서의 수용 기준을 �
 - 성능: 불필요한 반복 호출, N+1 쿼리 등 명백한 성능 이슈`;
 
 export async function reviewer(order, diff) {
+  // 리뷰어 CLI는 헤드리스라 도구 권한 요청이 자동 거부되고, 그러면 출력 없이 끝난다.
+  // 판정에 필요한 건 전부 아래에 들어 있으니 도구를 쓰지 말라고 못박는다.
   const prompt = `당신은 코드 리뷰어다. 아래 작업 지시서와 diff를 체크리스트 기준으로 검토하라.
+
+중요: 아래 제공된 텍스트만으로 판정하라. 파일 읽기·검색·셸 명령 등 어떤 도구도 사용하지 마라.
+저장소를 직접 열어볼 필요 없다 — 판단에 필요한 diff 전문이 아래에 있다. 곧바로 판정문을 출력하라.
 
 # 작업 지시서
 ${order}
