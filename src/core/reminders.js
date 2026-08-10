@@ -1,9 +1,18 @@
-import { getDateKey } from "./storage.js";
-
 export const DAYS_IN_WEEK = [0, 1, 2, 3, 4, 5, 6];
 export const DEFAULT_ALERT_TIME = "18:00";
 
 const TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+// storage.js에서 import하지 않는 이유: 이 모듈은 DOM/localStorage와 무관한
+// 순수 판정 로직이어야 하고, 같은 파일의 다른 함수(writeJson 등)까지 끌려오면
+// 커버리지 측정에서 이 모듈과 무관한 코드가 섞인다. 날짜 키 포맷은 storage.js의
+// getDateKey와 동일하게 유지해야 한다.
+function getDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 export function isValidAlertTime(value) {
   return typeof value === "string" && TIME_PATTERN.test(value);
