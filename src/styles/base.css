@@ -255,6 +255,42 @@ textarea {
   color: var(--app-muted);
 }
 
+.injury-general-notice {
+  color: var(--app-danger);
+}
+
+.pain-area-fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.consent-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: var(--app-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.consent-field input {
+  flex-shrink: 0;
+  margin-top: 2px;
+  accent-color: var(--app-action);
+}
+
+.settings-list input[type="checkbox"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.settings-list label:has(input:disabled) {
+  opacity: 0.6;
+}
+
 .page-heading {
   margin-top: 24px;
   text-align: center;

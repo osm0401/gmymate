@@ -69,3 +69,60 @@ test("recovery check-in and exercise replacement update real app state", async (
   await page.getByRole("button", { name: "바꾸기", exact: true }).click();
   await expect(page.locator(".exercise-log-card").first().locator(".exercise-title-block strong")).toHaveText("체스트프레스");
 });
+
+test("injury profile consent gates the warning, then the badge appears and clears live without blocking logging", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "샘플 데이터로 체험하기" }).click();
+
+  await page.getByRole("button", { name: "내정보", exact: true }).click();
+  const shoulderInput = page.locator('#injuryProfileForm input[name="injuryAreas"][value="shoulder"]');
+  await expect(shoulderInput).toBeDisabled();
+
+  await page.locator("#injuryHealthDataConsent").check();
+  await expect(shoulderInput).toBeEnabled();
+  await shoulderInput.check();
+  await page.getByRole("button", { name: "부상 프로필 저장", exact: true }).click();
+  await expect(page.getByText("부상 프로필을 저장했어요.")).toBeVisible();
+
+  await page.getByRole("button", { name: "기록", exact: true }).click();
+  await page.getByRole("button", { name: "운동 추가", exact: true }).click();
+  await page.getByPlaceholder("운동 검색").fill("체스트프레스");
+  const option = page.locator(".exercise-option").filter({ hasText: "체스트프레스" }).first();
+  await expect(option.locator(".injury-warning-badge")).toContainText("어깨");
+  await option.click();
+
+  const card = page.locator(".exercise-log-card").filter({ hasText: "체스트프레스" }).first();
+  await expect(card.locator(".injury-warning-badge")).toContainText("어깨");
+
+  // 경고는 세트 기록을 막지 않는다.
+  await card.locator("[data-toggle-set]").first().click();
+  await expect(card.locator(".set-row").first()).toHaveClass(/is-done/);
+
+  // 부위를 해제하면 새로고침 없이 즉시 경고가 사라진다.
+  await page.getByRole("button", { name: "내정보", exact: true }).click();
+  await shoulderInput.uncheck();
+  await page.getByRole("button", { name: "부상 프로필 저장", exact: true }).click();
+  await expect(card.locator(".injury-warning-badge")).toHaveCount(0);
+});
+
+test("an 'other' injury area shows a general caution banner instead of per-exercise badges and never blocks adding exercises", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "샘플 데이터로 체험하기" }).click();
+
+  await page.getByRole("button", { name: "내정보", exact: true }).click();
+  await page.locator("#injuryHealthDataConsent").check();
+  await page.locator('#injuryProfileForm input[name="injuryAreas"][value="other"]').check();
+  await page.getByRole("button", { name: "부상 프로필 저장", exact: true }).click();
+
+  await page.getByRole("button", { name: "기록", exact: true }).click();
+  await expect(page.locator("#workoutLogInjuryNotice")).toBeVisible();
+
+  await page.getByRole("button", { name: "운동 추가", exact: true }).click();
+  await expect(page.locator("#exercisePickerInjuryNotice")).toBeVisible();
+  await page.getByPlaceholder("운동 검색").fill("체스트프레스");
+  const option = page.locator(".exercise-option").filter({ hasText: "체스트프레스" }).first();
+  await expect(option.locator(".injury-warning-badge")).toHaveCount(0);
+  await option.click();
+
+  await expect(page.locator(".exercise-log-card").filter({ hasText: "체스트프레스" }).first()).toBeVisible();
+});

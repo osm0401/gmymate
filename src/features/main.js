@@ -1,6 +1,7 @@
 import { profileLabels, weeklyLabels } from "../core/data.js";
 import { escapeHtml, getDateKey, getProfile, getWorkoutStats, readJson, setText, showToast, writeJson } from "../core/storage.js";
 import { logout } from "../core/auth.js";
+import { clearCheckinPainAreas, hasHealthDataConsent, normalizeRecoveryCheckins, withdrawHealthDataConsent } from "../core/recovery.js";
 
 const DEFAULT_SETTINGS = {
   weightStepKg: 1,
@@ -268,6 +269,7 @@ async function exportData() {
     history: readJson("gmymateWorkoutHistory", []),
     settings: getSettings(),
     habits: readJson("gmymateHabits", {}),
+    recovery: readJson("gmymateRecoveryCheckins", []),
     exportedAt: new Date().toISOString()
   };
   const text = JSON.stringify(data, null, 2);
@@ -308,11 +310,21 @@ async function importData() {
     return;
   }
 
-  writeJson("gmymateProfile", data.profile || {});
+  let profile = data.profile || {};
+  let recovery = normalizeRecoveryCheckins(data.recovery || []);
+
+  /* 백업에 별도 건강정보 동의 기록이 없으면 통증·부상 값을 활성화하지 않는다. */
+  if (!hasHealthDataConsent(profile)) {
+    profile = withdrawHealthDataConsent(profile);
+    recovery = clearCheckinPainAreas(recovery);
+  }
+
+  writeJson("gmymateProfile", profile);
   writeJson("gmymateWorkoutLogsV2", data.today || []);
   writeJson("gmymateWorkoutHistory", data.history || []);
   writeJson("gmymateSettings", data.settings || {});
   writeJson("gmymateHabits", data.habits || {});
+  writeJson("gmymateRecoveryCheckins", recovery);
   showToast("데이터를 불러왔어요.");
   window.setTimeout(() => window.location.reload(), 600);
 }
