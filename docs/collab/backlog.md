@@ -23,6 +23,20 @@
   - 잠금화면 알림 본문에 사용자명·체중·목표 수치 노출 금지. UI/문서에 "앱이 열려 있을 때만 동작"함을 명시.
   - Service Worker, 서버 Web Push, VAPID, cron/queue, `api/**` 변경 전부 비범위.
 
+## 부상 인지 운동 경고 MVP
+
+- [REVIEW] FE-5 · [FE] · Claude — 부상 인지 운동 경고 MVP (`fe/injury-awareness-mvp`)
+  - `src/core/recovery.js`: 허용 부위 상수(`shoulder|lower-back|knee|other`)와 `normalizeBodyAreas`, `painAreas`/`injuryAreas` 정규화·병합, 운동-부상 교집합, 건강정보 별도 동의(`gmymateProfile.healthDataConsent`) 헬퍼 추가. 통증이 있으면 "평소 계획대로" 문구가 단독으로 나가지 않도록 안전 문구를 덧붙이되 점수 계산식은 그대로 둔다. `tests/recovery.test.mjs` 확장.
+  - `src/core/data.js`의 26개 운동에 `warningAreas`(shoulder/lower-back/knee만, `other` 없음) 명시 — **PM/운동 전문가 승인 전 임시 매핑**, 병합 전 반드시 승인 필요.
+  - `main.html`: 회복 폼에 "오늘 통증 위치" 체크박스+별도 동의, 내 정보 화면에 "부상 프로필" 편집 영역(체크박스+동의+철회 버튼) 추가. 두 곳 모두 동의 전에는 부위 체크박스가 `disabled`라서 `FormData`에 값 자체가 잡히지 않는다.
+  - `src/features/recovery.js`: 체크박스 복원/저장/동의 게이팅/철회(부상 데이터만 삭제, 회복 수치는 보존) 처리.
+  - `src/features/workout-log.js`: 최근 운동·전체 목록·대체 운동 옵션·활성 카드·루틴 시작 토스트에 경고 배지(색상+텍스트) 노출, `other`는 선택기/기록 화면 일반 배너로만 표시. `gmymate:data-changed`(`gmymateProfile`) 구독으로 새로고침 없이 즉시 갱신. 경고는 추가·시작·세트 완료를 막지 않음.
+  - `src/features/main.js`: 내보내기/가져오기에 `gmymateRecoveryCheckins` 포함, 가져온 프로필에 유효한 동의 기록이 없으면 `painAreas`/`injuryAreas`를 비활성화(정규화 유틸 재사용).
+  - `privacy.html`에 통증·부상 정보(건강정보) 별도 동의/목적/보관/삭제 문구 추가.
+  - `api/**`, `schema.sql`, npm 의존성 변경 없음. 새 JS/CSS 파일 없음(`src/core/recovery.js`·`src/features/recovery.js`·`src/features/workout-log.js`·`src/features/main.js`·`src/styles/base.css`·`src/styles/workout-log.css`만 수정).
+  - **병합 전 필수**: (1) `warningAreas` 매핑표 운동 전문가/PM 승인, (2) 건강정보 동의 문구·보관/삭제 방식 법무 검토.
+  - **테스트 실행 미확인**: 이 세션 샌드박스 권한상 `node --test`/`scripts/check.ps1`/`npm run test:e2e`/`npm audit`를 직접 실행하지 못했다(이전 FE-3/FE-4와 동일한 제약, `handoffs.md` 참고). 로직은 테스트 케이스별로 수동 대조 검증했지만 병합 전 반드시 아래 명령을 실행해 통과·커버리지 80%를 확인해야 한다.
+
 ## 백로그 (파일럿 이후)
 
 - [TODO] IDEA · [FE/BE] · — gmymate 기능 개선 아이디어를 여기에 쌓는다(기획=Claude가 태그·분해).

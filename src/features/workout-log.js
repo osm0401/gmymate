@@ -1,7 +1,36 @@
 import { exerciseCatalog, getExerciseReplacements } from "../core/data.js";
 import { partIcon } from "../core/part-icons.js";
 import { planRoutineStart } from "../core/routines.js";
+import { BODY_AREA_LABELS, getExerciseWarningAreas, getInjuryAreas, hasGeneralInjuryNotice } from "../core/recovery.js";
 import { escapeHtml, getDateKey, getWorkoutStats, readJson, setText, showToast, writeJson } from "../core/storage.js";
+
+function getCurrentInjuryAreas() {
+  return getInjuryAreas(readJson("gmymateProfile", {}));
+}
+
+function warningAreaLabel(exercise, injuryAreas) {
+  const areas = getExerciseWarningAreas(exercise, injuryAreas);
+  return areas.length ? areas.map((area) => BODY_AREA_LABELS[area]).join("·") : "";
+}
+
+/* 색상만으로 경고를 전달하지 않도록 아이콘+부위명 텍스트를 함께 넣는다(WCAG 2.2 Use of Color). */
+function warningBadgeHtml(exercise, injuryAreas) {
+  const label = warningAreaLabel(exercise, injuryAreas);
+  return label ? `<span class="injury-warning-badge">⚠️ 등록한 ${escapeHtml(label)} 부위와 관련된 운동</span>` : "";
+}
+
+function warningOptionSuffix(exercise, injuryAreas) {
+  const label = warningAreaLabel(exercise, injuryAreas);
+  return label ? ` (${label} 주의)` : "";
+}
+
+function renderInjuryNotices(injuryAreas) {
+  const showGeneral = hasGeneralInjuryNotice(injuryAreas);
+  const pickerNotice = document.querySelector("#exercisePickerInjuryNotice");
+  const logNotice = document.querySelector("#workoutLogInjuryNotice");
+  if (pickerNotice) pickerNotice.hidden = !showGeneral;
+  if (logNotice) logNotice.hidden = !showGeneral;
+}
 
 export function setupWorkoutLog() {
   const list = document.querySelector("#logList");
@@ -381,10 +410,12 @@ export function setupWorkoutLog() {
       return "";
     }
 
+    const injuryAreas = getCurrentInjuryAreas();
+
     return `
       <div class="exercise-replacement-row" data-replacement-row="${escapeHtml(workout.id)}" hidden>
         <select aria-label="${escapeHtml(workout.name)} 대체 운동 선택">
-          ${replacements.map((exercise) => `<option value="${escapeHtml(exercise.id)}">${escapeHtml(exercise.name)}</option>`).join("")}
+          ${replacements.map((exercise) => `<option value="${escapeHtml(exercise.id)}">${escapeHtml(exercise.name)}${escapeHtml(warningOptionSuffix(exercise, injuryAreas))}</option>`).join("")}
         </select>
         <button type="button" data-apply-replacement="${escapeHtml(workout.id)}">바꾸기</button>
       </div>
@@ -438,6 +469,9 @@ export function setupWorkoutLog() {
     setSummary();
     renderWorkoutMetrics();
 
+    const injuryAreas = getCurrentInjuryAreas();
+    renderInjuryNotices(injuryAreas);
+
     if (workouts.length === 0) {
       list.innerHTML = `
         <button class="empty-log-card" type="button" data-open-exercise-picker>
@@ -460,6 +494,7 @@ export function setupWorkoutLog() {
               <strong>${escapeHtml(workout.name)}</strong>
               <span>${escapeHtml(getLastText(workout))}</span>
               ${workout.supersetWith ? `<span class="superset-badge">🔗 슈퍼세트</span>` : ""}
+              ${warningBadgeHtml(getExercise(workout.exerciseId), injuryAreas)}
             </div>
           </div>
           <div class="exercise-actions">
@@ -544,12 +579,15 @@ export function setupWorkoutLog() {
       const haystack = `${exercise.name} ${exercise.category}`.toLowerCase();
       return haystack.includes(keyword);
     });
+    const injuryAreas = getCurrentInjuryAreas();
+    renderInjuryNotices(injuryAreas);
 
     recentSection.hidden = keyword.length > 0 || recentExercises.length === 0;
     recentList.innerHTML = recentExercises.map((exercise) => `
       <button class="exercise-chip" type="button" data-select-exercise="${exercise.id}">
         ${partIcon(exercise.category)}
         <span>${escapeHtml(exercise.name)}</span>
+        ${warningBadgeHtml(exercise, injuryAreas)}
       </button>
     `).join("");
 
@@ -559,6 +597,7 @@ export function setupWorkoutLog() {
         <span>
           <strong>${escapeHtml(exercise.name)}</strong>
           <small>${escapeHtml(exercise.category)} · 기본 ${exercise.weight ? `${exercise.weight}kg` : "맨몸"} · ${exercise.reps}${repsUnit(exercise.id)}</small>
+          ${warningBadgeHtml(exercise, injuryAreas)}
         </span>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7-1.4-1.4 5.6-5.6-5.6-5.6Z"/></svg>
       </button>
@@ -642,10 +681,16 @@ export function setupWorkoutLog() {
     saveRecentExercises();
     renderLogs();
     notifyWorkoutsChanged();
+
+    const injuryAreas = getCurrentInjuryAreas();
+    const hasWarning = hasGeneralInjuryNotice(injuryAreas)
+      || newEntries.some((entry) => getExerciseWarningAreas(getExercise(entry.exerciseId), injuryAreas).length > 0);
+
     showToast(
-      skippedCount > 0
+      (skippedCount > 0
         ? `루틴 운동 ${toAdd.length}개를 추가했어요. ${skippedCount}개는 오늘 기록 한도로 제외했어요.`
-        : `루틴 운동 ${toAdd.length}개를 추가했어요.`
+        : `루틴 운동 ${toAdd.length}개를 추가했어요.`)
+      + (hasWarning ? " ⚠️ 등록한 부위와 관련된 운동이 포함돼 있어요." : "")
     );
   }
 
@@ -707,6 +752,18 @@ export function setupWorkoutLog() {
   window.addEventListener("gmymate:settings-changed", () => {
     renderLogs();
     renderRestTimer();
+  });
+
+  window.addEventListener("gmymate:data-changed", (event) => {
+    if (event.detail?.key !== "gmymateProfile") {
+      return;
+    }
+
+    renderLogs();
+
+    if (picker.classList.contains("show")) {
+      renderExercisePicker();
+    }
   });
 
   list.addEventListener("click", (event) => {

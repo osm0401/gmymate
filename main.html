@@ -94,6 +94,19 @@
               <input name="soreness" type="range" min="1" max="5" value="3">
               <output data-recovery-output="soreness">3</output>
             </label>
+            <fieldset class="pain-area-fieldset">
+              <legend>오늘 통증 위치</legend>
+              <label class="consent-field">
+                <input type="checkbox" id="healthDataConsent">
+                <span>통증·부상 정보를 저장하는 데 동의해요. 건강정보이며 언제든 철회할 수 있어요.</span>
+              </label>
+              <div class="settings-list">
+                <label><span>어깨</span><input type="checkbox" name="painAreas" value="shoulder" disabled></label>
+                <label><span>허리</span><input type="checkbox" name="painAreas" value="lower-back" disabled></label>
+                <label><span>무릎</span><input type="checkbox" name="painAreas" value="knee" disabled></label>
+                <label><span>기타</span><input type="checkbox" name="painAreas" value="other" disabled></label>
+              </div>
+            </fieldset>
             <button class="text-button" type="submit">회복 상태 저장</button>
           </form>
         </details>
@@ -374,6 +387,8 @@
           </button>
         </div>
 
+        <p class="field-help injury-general-notice" id="workoutLogInjuryNotice" hidden>등록한 부상 부위와 관련이 있을 수 있는 운동이 있어요. 통증이 있거나 악화되면 중단하고 의료 전문가와 상담하세요.</p>
+
         <div class="active-workouts" id="logList" aria-live="polite"></div>
 
         <label class="workout-note-field">
@@ -413,6 +428,8 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 12.6 12.6-1.4 1.4L5 6.4Zm12.6 1.4L6.4 19 5 17.6 17.6 5Z"/></svg>
           </button>
         </div>
+
+        <p class="field-help injury-general-notice" id="exercisePickerInjuryNotice" hidden>등록한 부상 부위와 관련이 있을 수 있는 운동이 있어요. 통증이 있거나 악화되면 중단하고 의료 전문가와 상담하세요.</p>
 
         <label class="exercise-search">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 4a6.5 6.5 0 0 1 5.2 10.4l4 4-1.4 1.4-4-4A6.5 6.5 0 1 1 10.5 4Zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z"/></svg>
@@ -567,6 +584,27 @@
           <div><span>경력</span><strong id="experienceValue">미입력</strong></div>
           <div><span>목표</span><strong id="goalValue">미입력</strong></div>
         </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-title">
+          <h2>부상 프로필</h2>
+        </div>
+        <p class="field-help">지속적으로 주의할 부위를 등록하면 관련 운동에 경고를 표시해드려요. 진단이나 치료를 대신하지 않으니 통증이 있거나 악화되면 의료 전문가와 상담하세요.</p>
+        <form id="injuryProfileForm">
+          <label class="consent-field">
+            <input type="checkbox" id="injuryHealthDataConsent">
+            <span>통증·부상 정보를 저장하는 데 동의해요. 건강정보이며 언제든 철회할 수 있어요.</span>
+          </label>
+          <div class="settings-list">
+            <label><span>어깨</span><input type="checkbox" name="injuryAreas" value="shoulder" disabled></label>
+            <label><span>허리</span><input type="checkbox" name="injuryAreas" value="lower-back" disabled></label>
+            <label><span>무릎</span><input type="checkbox" name="injuryAreas" value="knee" disabled></label>
+            <label><span>기타</span><input type="checkbox" name="injuryAreas" value="other" disabled></label>
+          </div>
+          <button class="text-button" type="submit">부상 프로필 저장</button>
+        </form>
+        <button class="text-button danger-text" type="button" data-withdraw-health-consent>동의 철회 및 통증·부상 데이터 삭제</button>
       </section>
 
       <section class="content-section">
