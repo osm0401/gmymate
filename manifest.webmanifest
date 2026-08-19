@@ -1,0 +1,19 @@
+{
+  "name": "GAINMUSCLE 운동 기록",
+  "short_name": "GAINMUSCLE",
+  "description": "헬스장에서 빠르게 운동과 몸의 변화를 기록하는 모바일 앱",
+  "lang": "ko",
+  "start_url": "./main.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7fbf8",
+  "theme_color": "#078844",
+  "icons": [
+    {
+      "src": "./assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

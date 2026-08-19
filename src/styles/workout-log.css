@@ -242,6 +242,34 @@
   gap: 7px;
 }
 
+.exercise-replacement-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.exercise-replacement-row select,
+.exercise-replacement-row button {
+  min-height: 42px;
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-sm);
+  color: var(--app-text);
+  background: var(--app-input-bg);
+}
+
+.exercise-replacement-row select {
+  min-width: 0;
+  padding: 0 10px;
+}
+
+.exercise-replacement-row button {
+  padding: 0 14px;
+  color: var(--app-button-text);
+  border-color: var(--app-button-bg);
+  background: var(--app-button-bg);
+  font-weight: 800;
+}
+
 .set-count-row {
   display: grid;
   width: 114px;

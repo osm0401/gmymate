@@ -9,9 +9,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $body = readJsonBody();
-$username = trim((string)($body['username'] ?? ''));
-$password = (string)($body['password'] ?? '');
+$username = is_string($body['username'] ?? null) ? trim($body['username']) : '';
+$password = is_string($body['password'] ?? null) ? $body['password'] : '';
 $remember = !empty($body['remember']);
+
+startAppSession($remember);
+
+if (loginRateLimitExceeded()) {
+    jsonResponse(429, ['error' => '로그인 시도가 너무 많아요. 잠시 후 다시 시도해주세요.']);
+}
 
 $pdo = getPdo();
 $stmt = $pdo->prepare('SELECT id, username, password_hash FROM users WHERE username = ?');
@@ -19,10 +25,11 @@ $stmt->execute([$username]);
 $user = $stmt->fetch();
 
 if (!$user || !password_verify($password, $user['password_hash'])) {
+    recordLoginFailure();
     jsonResponse(401, ['error' => '아이디 또는 비밀번호가 올바르지 않아요.']);
 }
 
-startAppSession($remember);
+resetLoginFailures();
 setRememberCookie($remember);
 session_regenerate_id(true);
 

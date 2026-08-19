@@ -1,4 +1,4 @@
-# Operating-system and editor files
+# Operating-system, editor, and generated files
 Thumbs.db
 .DS_Store
 .vscode/
@@ -7,24 +7,28 @@ Thumbs.db
 .venv-crewai/
 __pycache__/
 .coverage
+node_modules/
+test-results/
+playwright-report/
 
-# Local legacy and cleanup files that are not used by the app
+# Local legacy files not used by the app
 cleanup-files.mjs
 src/app.legacy.js
 src/script.js
 src/style.css
 
-# Real DB credentials — copy api/config.example.php to api/config.php locally
+# Real DB credentials - copy api/config.example.php to api/config.php locally
 api/config.php
+api/config/gemini.php
 
-# Real music provider credentials
+# Real provider credentials
 api/music/spotify-config.php
 api/music/apple-config.php
 api/music/youtube-config.php
 api/music/google-config.php
 
-# Real FTP credentials — copy deploy/deploy.env.example to deploy/deploy.env locally
+# Real FTP credentials - copy deploy/deploy.env.example to deploy/deploy.env locally
 deploy/deploy.env
 
-# Word가 문서를 열면 만드는 잠금 파일 — 보고서를 열어둔 채 파이프라인을 돌릴 수 있어야 한다
+# Temporary Office lock files
 ~$*

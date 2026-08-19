@@ -1,4 +1,5 @@
 import { onboardingRules } from "../core/data.js";
+import { markPendingSync } from "../core/sync.js";
 import { getProfile, writeJson } from "../core/storage.js";
 
 export function setupOnboarding() {
@@ -237,6 +238,7 @@ export function setupOnboarding() {
     }
 
     delete profile.password;
+    markPendingSync(username);
     writeJson("gmymateProfile", profile);
     window.location.href = "./main.html";
   }

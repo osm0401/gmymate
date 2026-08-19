@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 const REMEMBER_COOKIE = 'gmymate_remember';
 const REMEMBER_SECONDS = 60 * 60 * 24 * 30;
+const MAX_JSON_BODY_BYTES = 128 * 1024;
+const LOGIN_MAX_FAILED_ATTEMPTS = 8;
+const LOGIN_WINDOW_SECONDS = 10 * 60;
+const RATE_LIMITS_SESSION_KEY = 'gmymate_rate_limits';
 
 // startAppSession() is called on every request, and PHP resends Set-Cookie
 // on every session_start() using whatever lifetime this call configures —
@@ -53,6 +57,29 @@ function setRememberCookie(bool $remember): void
     }
 }
 
+function destroyAppSession(): void
+{
+    $_SESSION = [];
+
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', [
+                'expires' => time() - 3600,
+                'path' => $params['path'] ?: '/',
+                'domain' => $params['domain'] ?? '',
+                'secure' => (bool)$params['secure'],
+                'httponly' => (bool)$params['httponly'],
+                'samesite' => $params['samesite'] ?? 'Lax',
+            ]);
+        }
+
+        session_destroy();
+    }
+
+    setRememberCookie(false);
+}
+
 function jsonResponse(int $status, array $data): void
 {
     // dothome's Apache silently discards the PHP-CGI response body for any
@@ -70,7 +97,158 @@ function jsonResponse(int $status, array $data): void
 
 function readJsonBody(): array
 {
-    $raw = file_get_contents('php://input');
+    if (isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > MAX_JSON_BODY_BYTES) {
+        jsonResponse(413, ['error' => '요청 본문이 너무 커요.']);
+    }
+
+    $raw = file_get_contents('php://input', false, null, 0, MAX_JSON_BODY_BYTES + 1);
+
+    if ($raw === false || strlen($raw) > MAX_JSON_BODY_BYTES) {
+        jsonResponse(413, ['error' => '요청 본문이 너무 커요.']);
+    }
+
     $data = json_decode($raw, true);
-    return is_array($data) ? $data : [];
+
+    if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
+        jsonResponse(400, ['error' => '요청 본문이 올바르지 않아요.']);
+    }
+
+    return $data;
+}
+
+function recentRateLimitAttempts($attempts, int $windowSeconds): array
+{
+    if (!is_array($attempts)) {
+        return [];
+    }
+
+    $cutoff = time() - $windowSeconds;
+    return array_values(array_filter($attempts, static function ($timestamp) use ($cutoff): bool {
+        return is_int($timestamp) && $timestamp > $cutoff;
+    }));
+}
+
+function sessionRateLimitExceeded(string $key, int $maxAttempts, int $windowSeconds): bool
+{
+    $limits = $_SESSION[RATE_LIMITS_SESSION_KEY] ?? [];
+    $limits = is_array($limits) ? $limits : [];
+    $attempts = recentRateLimitAttempts($limits[$key] ?? [], $windowSeconds);
+    $limits[$key] = $attempts;
+    $_SESSION[RATE_LIMITS_SESSION_KEY] = $limits;
+
+    return count($attempts) >= $maxAttempts;
+}
+
+function recordSessionRateLimitAttempt(string $key, int $windowSeconds): void
+{
+    $limits = $_SESSION[RATE_LIMITS_SESSION_KEY] ?? [];
+    $limits = is_array($limits) ? $limits : [];
+    $attempts = recentRateLimitAttempts($limits[$key] ?? [], $windowSeconds);
+    $limits[$key] = array_merge($attempts, [time()]);
+    $_SESSION[RATE_LIMITS_SESSION_KEY] = $limits;
+}
+
+function resetSessionRateLimit(string $key): void
+{
+    $limits = $_SESSION[RATE_LIMITS_SESSION_KEY] ?? [];
+
+    if (!is_array($limits)) {
+        unset($_SESSION[RATE_LIMITS_SESSION_KEY]);
+        return;
+    }
+
+    unset($limits[$key]);
+    $_SESSION[RATE_LIMITS_SESSION_KEY] = $limits;
+}
+
+function loginRateLimitKey(): string
+{
+    return 'login:' . hash('sha256', (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+}
+
+function updateSharedRateLimitAttempts(string $key, string $operation, int $windowSeconds): array
+{
+    // ponytail: one locked temp file fits one shared host; move these buckets
+    // to a shared cache if traffic or server count grows materially.
+    $path = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'gmymate-rate-limits-' . substr(hash('sha256', __DIR__), 0, 16) . '.json';
+    $handle = @fopen($path, 'c+');
+
+    if ($handle === false || !@flock($handle, LOCK_EX)) {
+        if (is_resource($handle)) {
+            fclose($handle);
+        }
+        return [];
+    }
+
+    try {
+        @chmod($path, 0600);
+        @rewind($handle);
+        $stored = json_decode((string)@stream_get_contents($handle), true);
+        $stored = is_array($stored) ? $stored : [];
+        $buckets = [];
+
+        foreach ($stored as $storedKey => $attempts) {
+            $recent = recentRateLimitAttempts($attempts, 24 * 60 * 60);
+            if ($recent !== []) {
+                $buckets[(string)$storedKey] = $recent;
+            }
+        }
+
+        $attempts = recentRateLimitAttempts($buckets[$key] ?? [], $windowSeconds);
+
+        if ($operation === 'record') {
+            $attempts[] = time();
+            $buckets[$key] = $attempts;
+        } elseif ($operation === 'reset') {
+            unset($buckets[$key]);
+            $attempts = [];
+        } elseif ($attempts === []) {
+            unset($buckets[$key]);
+        } else {
+            $buckets[$key] = $attempts;
+        }
+
+        @rewind($handle);
+        @ftruncate($handle, 0);
+        @fwrite($handle, (string)json_encode($buckets));
+        @fflush($handle);
+
+        return $attempts;
+    } finally {
+        @flock($handle, LOCK_UN);
+        fclose($handle);
+    }
+}
+
+function sharedRateLimitExceeded(string $key, int $maxAttempts, int $windowSeconds): bool
+{
+    return count(updateSharedRateLimitAttempts($key, 'read', $windowSeconds)) >= $maxAttempts;
+}
+
+function recordSharedRateLimitAttempt(string $key, int $windowSeconds): void
+{
+    updateSharedRateLimitAttempts($key, 'record', $windowSeconds);
+}
+
+function resetSharedRateLimit(string $key, int $windowSeconds): void
+{
+    updateSharedRateLimitAttempts($key, 'reset', $windowSeconds);
+}
+
+function loginRateLimitExceeded(): bool
+{
+    return sessionRateLimitExceeded(loginRateLimitKey(), LOGIN_MAX_FAILED_ATTEMPTS, LOGIN_WINDOW_SECONDS)
+        || sharedRateLimitExceeded(loginRateLimitKey(), LOGIN_MAX_FAILED_ATTEMPTS, LOGIN_WINDOW_SECONDS);
+}
+
+function recordLoginFailure(): void
+{
+    recordSessionRateLimitAttempt(loginRateLimitKey(), LOGIN_WINDOW_SECONDS);
+    recordSharedRateLimitAttempt(loginRateLimitKey(), LOGIN_WINDOW_SECONDS);
+}
+
+function resetLoginFailures(): void
+{
+    resetSessionRateLimit(loginRateLimitKey());
+    resetSharedRateLimit(loginRateLimitKey(), LOGIN_WINDOW_SECONDS);
 }

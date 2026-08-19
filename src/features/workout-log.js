@@ -1,4 +1,4 @@
-import { exerciseCatalog } from "../core/data.js";
+import { exerciseCatalog, getExerciseReplacements } from "../core/data.js";
 import { partIcon } from "../core/part-icons.js";
 import { planRoutineStart } from "../core/routines.js";
 import { escapeHtml, getDateKey, getWorkoutStats, readJson, setText, showToast, writeJson } from "../core/storage.js";
@@ -366,6 +366,31 @@ export function setupWorkoutLog() {
     `;
   }
 
+  function replacementOptions(workout) {
+    return getExerciseReplacements(
+      workout.exerciseId,
+      workouts.map((item) => item.exerciseId),
+      exerciseCatalog
+    );
+  }
+
+  function renderReplacementRow(workout) {
+    const replacements = replacementOptions(workout);
+
+    if (replacements.length === 0) {
+      return "";
+    }
+
+    return `
+      <div class="exercise-replacement-row" data-replacement-row="${escapeHtml(workout.id)}" hidden>
+        <select aria-label="${escapeHtml(workout.name)} 대체 운동 선택">
+          ${replacements.map((exercise) => `<option value="${escapeHtml(exercise.id)}">${escapeHtml(exercise.name)}</option>`).join("")}
+        </select>
+        <button type="button" data-apply-replacement="${escapeHtml(workout.id)}">바꾸기</button>
+      </div>
+    `;
+  }
+
   function toggleCardioTimer(workoutId) {
     const existing = cardioTimers.get(workoutId);
 
@@ -441,6 +466,11 @@ export function setupWorkoutLog() {
             <button class="icon-button" type="button" data-move-workout="${escapeHtml(workout.id)}:up" aria-label="위로 이동" ${workoutIndex === 0 ? "disabled" : ""}>↑</button>
             <button class="icon-button" type="button" data-move-workout="${escapeHtml(workout.id)}:down" aria-label="아래로 이동" ${workoutIndex === workouts.length - 1 ? "disabled" : ""}>↓</button>
             <button class="icon-button" type="button" data-toggle-superset="${escapeHtml(workout.id)}" aria-label="슈퍼세트로 묶기">🔗</button>
+            ${replacementOptions(workout).length ? `
+              <button class="icon-button" type="button" data-show-replacement="${escapeHtml(workout.id)}" aria-label="${escapeHtml(workout.name)} 운동 대체">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 3-3-1.4-1.4L3.2 8l5.4 5.4L10 12 7 9h10V7Zm10 8H7v2h10l-3 3 1.4 1.4 5.4-5.4-5.4-5.4L14 12Z"/></svg>
+              </button>
+            ` : ""}
             <button class="icon-button" type="button" data-add-set="${escapeHtml(workout.id)}" aria-label="세트 추가">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6Z"/></svg>
             </button>
@@ -451,6 +481,7 @@ export function setupWorkoutLog() {
         </header>
 
         ${renderCardioTimer(workout)}
+        ${renderReplacementRow(workout)}
 
         <div class="set-count-row">
           <button type="button" data-remove-set="${escapeHtml(workout.id)}">-</button>
@@ -689,6 +720,8 @@ export function setupWorkoutLog() {
     const toggleSupersetButton = event.target.closest("[data-toggle-superset]");
     const toggleSetTypeButton = event.target.closest("[data-toggle-set-type]");
     const cardioToggleButton = event.target.closest("[data-cardio-toggle]");
+    const showReplacementButton = event.target.closest("[data-show-replacement]");
+    const applyReplacementButton = event.target.closest("[data-apply-replacement]");
 
     if (openPickerButton) {
       openPicker();
@@ -697,6 +730,54 @@ export function setupWorkoutLog() {
 
     if (cardioToggleButton) {
       toggleCardioTimer(cardioToggleButton.dataset.cardioToggle);
+      return;
+    }
+
+    if (showReplacementButton) {
+      const row = list.querySelector(`[data-replacement-row="${showReplacementButton.dataset.showReplacement}"]`);
+      if (row) {
+        row.hidden = !row.hidden;
+        if (!row.hidden) row.querySelector("select")?.focus();
+      }
+      return;
+    }
+
+    if (applyReplacementButton) {
+      const workoutId = applyReplacementButton.dataset.applyReplacement;
+      const workout = workouts.find((item) => item.id === workoutId);
+      const row = applyReplacementButton.closest("[data-replacement-row]");
+      const replacement = getExercise(row?.querySelector("select")?.value);
+
+      if (!workout || !replacement) {
+        return;
+      }
+
+      if (workout.sets.some((set) => set.done)) {
+        showToast("완료한 세트를 해제한 뒤 운동을 바꿔주세요.");
+        return;
+      }
+
+      const activeCardio = cardioTimers.get(workout.id);
+      if (activeCardio) window.clearInterval(activeCardio.intervalId);
+      cardioTimers.delete(workout.id);
+      const defaults = makeSets(replacement);
+      const sets = Array.from({ length: workout.sets.length }, (_, index) => ({
+        ...(defaults[index] || defaults.at(-1)),
+        done: false
+      }));
+      workouts = workouts.map((item) => item.id === workout.id ? {
+        ...item,
+        exerciseId: replacement.id,
+        name: replacement.name,
+        category: replacement.category,
+        sets
+      } : item);
+      recentExerciseIds = [replacement.id, ...recentExerciseIds.filter((id) => id !== replacement.id)].slice(0, 6);
+      saveWorkouts();
+      saveRecentExercises();
+      renderLogs();
+      notifyWorkoutsChanged();
+      showToast(`${replacement.name}(으)로 바꿨어요.`);
       return;
     }
 

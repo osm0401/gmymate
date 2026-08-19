@@ -1,6 +1,7 @@
 ﻿[CmdletBinding()]
 param(
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$NoPause
 )
 
 $ErrorActionPreference = "Stop"
@@ -42,6 +43,7 @@ try {
     $ftpHost = $settings["FTP_HOST"]
     $ftpUser = $settings["FTP_USER"]
     $remoteDir = if ($settings.ContainsKey("FTP_REMOTE_DIR")) { $settings["FTP_REMOTE_DIR"].Trim("/") } else { "" }
+    $siteUrl = if ($settings.ContainsKey("SITE_URL")) { $settings["SITE_URL"].TrimEnd("/") } else { "" }
 
     if ($ftpHost -notmatch '^[A-Za-z0-9.-]+(?::[0-9]{1,5})?$') {
         throw "FTP_HOST에는 ftp:// 없이 호스트명과 선택적 포트만 입력하세요."
@@ -52,13 +54,16 @@ try {
     if ($remoteDir -match '(^|/)\.\.(/|$)' -or $remoteDir -notmatch '^[A-Za-z0-9._/-]*$') {
         throw "FTP_REMOTE_DIR 값이 올바르지 않습니다."
     }
+    if ($siteUrl -and $siteUrl -notmatch '^https://[A-Za-z0-9.-]+(?::[0-9]{1,5})?(?:/[A-Za-z0-9._~!$&''()*+,;=:@%/-]*)?$') {
+        throw "SITE_URL에는 https://로 시작하는 공개 사이트 주소를 입력하세요."
+    }
 
     if ($hasStoredPassword) {
         Write-Warning "deploy.env의 FTP_PASS는 사용하지 않습니다. 해당 줄을 지워도 됩니다."
     }
 
-    $topFiles = @("index.html", "main.html", "onboarding.html", "privacy.html", ".htaccess", "ads.txt")
-    $directories = @("src", "api")
+    $topFiles = @("index.html", "main.html", "onboarding.html", "privacy.html", "offline.html", "manifest.webmanifest", "service-worker.js", ".htaccess", "ads.txt")
+    $directories = @("src", "api", "assets")
     $deployFiles = @(
         foreach ($name in $topFiles) {
             $path = Join-Path $rootDir $name
@@ -182,10 +187,10 @@ try {
         # Ftp readback would just prove the FTP server accepted the write, not
         # that the public site is serving it — so verify over plain HTTPS instead.
         $checkFile = $topFiles | Where-Object { Test-Path (Join-Path $rootDir $_) } | Select-Object -First 1
-        if ($checkFile) {
+        if ($checkFile -and $siteUrl) {
             try {
                 $bust = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
-                $liveUrl = "https://$ftpHost/$checkFile" + "?cachebust=$bust"
+                $liveUrl = "$siteUrl/$checkFile" + "?cachebust=$bust"
                 $liveResponse = Invoke-WebRequest -Uri $liveUrl -UseBasicParsing -TimeoutSec 15
                 $localBytes = [System.IO.File]::ReadAllBytes((Join-Path $rootDir $checkFile))
                 $liveBytes = $liveResponse.Content
@@ -194,7 +199,7 @@ try {
                 }
 
                 if ($liveBytes.Length -eq $localBytes.Length) {
-                    Write-Host "[검증 OK] https://$ftpHost/$checkFile 크기가 로컬 파일과 일치해요 ($($localBytes.Length) byte)." -ForegroundColor Green
+                    Write-Host "[검증 OK] $siteUrl/$checkFile 크기가 로컬 파일과 일치해요 ($($localBytes.Length) byte)." -ForegroundColor Green
                 }
                 else {
                     Write-Host "[검증 실패] https://$ftpHost/$checkFile 이(가) 로컬 파일과 크기가 달라요 (로컬 $($localBytes.Length) byte / 서버 $($liveBytes.Length) byte). 반영이 안 된 것 같아요." -ForegroundColor Red
@@ -205,6 +210,9 @@ try {
                 Write-Host "[검증 실패] $checkFile 을(를) https로 확인하지 못했어요: $($_.Exception.Message)" -ForegroundColor Yellow
             }
         }
+        elseif (-not $siteUrl) {
+            Write-Host "SITE_URL이 비어 있어 공개 사이트 확인은 건너뜁니다." -ForegroundColor Yellow
+        }
     }
 }
 catch {
@@ -214,7 +222,9 @@ catch {
 }
 finally {
     Write-Host ""
-    Read-Host "Enter 키를 누르면 창이 닫혀요"
+    if (-not $NoPause -and [Environment]::UserInteractive) {
+        Read-Host "Enter 키를 누르면 창이 닫혀요"
+    }
 }
 
 exit $exitCode

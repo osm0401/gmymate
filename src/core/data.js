@@ -54,3 +54,16 @@ export const exerciseCatalog = [
   { id: "high-row", name: "하이로우", category: "등", weight: 35, reps: 10, sets: 3 },
   { id: "fly", name: "플라이", category: "가슴", weight: 15, reps: 12, sets: 3 }
 ];
+
+export function getExerciseReplacements(exerciseId, usedIds = [], catalog = exerciseCatalog) {
+  const source = catalog.find((exercise) => exercise.id === exerciseId);
+
+  if (!source) {
+    return [];
+  }
+
+  const excluded = new Set([exerciseId, ...(Array.isArray(usedIds) ? usedIds : [])]);
+  return catalog
+    .filter((exercise) => exercise.category === source.category && !excluded.has(exercise.id))
+    .map((exercise) => ({ ...exercise }));
+}

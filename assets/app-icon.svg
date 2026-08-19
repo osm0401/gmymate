@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="GAINMUSCLE">
+  <rect width="512" height="512" rx="96" fill="#078844"/>
+  <path fill="#fff" d="M256 92c-91 0-164 73-164 164s73 164 164 164c61 0 114-33 142-82V236H246v72h72c-17 24-39 36-70 36-50 0-88-38-88-88s38-88 96-88c28 0 53 10 73 29l48-55c-32-32-74-50-121-50Z"/>
+  <path fill="#65e89d" d="M193 238h126v36H193zM157 224h26v64h-26zM329 224h26v64h-26z"/>
+</svg>

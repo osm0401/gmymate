@@ -4,6 +4,12 @@ Required:
 - index.html
 - onboarding.html
 - main.html
+- privacy.html
+- offline.html
+- manifest.webmanifest
+- service-worker.js
+- assets/
+- api/
 - src/app.css
 - src/app.js
 - src/core/

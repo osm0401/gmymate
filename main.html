@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#078844">
   <title>GAINMUSCLE - 메인</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/app-icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
   <link rel="stylesheet" href="./src/app.css">
 </head>
@@ -63,6 +66,38 @@
         <p>키·몸무게·목표를 입력하면 목표까지 얼마나 남았는지 계산해드릴게요.</p>
         <a class="empty-state-action press-effect" href="./onboarding.html">정보 입력하기</a>
       </div>
+
+      <section class="content-section recovery-section">
+        <div class="section-title">
+          <h2>오늘 회복 상태</h2>
+          <span class="soft-label" id="recoveryStatus">아직 입력 전</span>
+        </div>
+        <div class="recovery-result" id="recoveryResult">
+          <strong id="recoveryScore">--</strong>
+          <p id="recoveryRecommendation">수면, 에너지, 근육 상태를 입력하면 오늘 운동 강도를 추천해드려요.</p>
+        </div>
+        <details class="recovery-checkin" id="recoveryCheckin">
+          <summary>오늘 상태 입력·수정</summary>
+          <form id="recoveryForm">
+            <label class="recovery-field">
+              <span>수면 만족도</span>
+              <input name="sleep" type="range" min="1" max="5" value="3">
+              <output data-recovery-output="sleep">3</output>
+            </label>
+            <label class="recovery-field">
+              <span>에너지</span>
+              <input name="energy" type="range" min="1" max="5" value="3">
+              <output data-recovery-output="energy">3</output>
+            </label>
+            <label class="recovery-field">
+              <span>근육 뻐근함</span>
+              <input name="soreness" type="range" min="1" max="5" value="3">
+              <output data-recovery-output="soreness">3</output>
+            </label>
+            <button class="text-button" type="submit">회복 상태 저장</button>
+          </form>
+        </details>
+      </section>
 
       <section class="content-section">
         <div class="section-title">
@@ -171,6 +206,24 @@
           <p>운동을 추가하고 세트를 체크하면 여기에 바로 쌓여요.</p>
           <button class="empty-state-action press-effect" type="button" data-tab="log">운동 추가하기</button>
         </div>
+      </section>
+
+      <section class="content-section analytics-panel" id="portfolioAnalytics">
+        <div class="section-title">
+          <h2>운동 분석</h2>
+          <span class="soft-label">최근 기록을 한눈에 봐요</span>
+        </div>
+        <div class="analytics-summary" aria-label="운동 분석 요약">
+          <div><span>7일 운동</span><strong id="analyticsSessions">0회</strong></div>
+          <div><span>7일 볼륨</span><strong id="analyticsVolume">0kg</strong></div>
+          <div><span>최고 연속</span><strong id="analyticsStreak">0일</strong></div>
+        </div>
+        <div class="weekly-volume-chart" id="weeklyVolumeChart" aria-label="최근 7일 운동 볼륨"></div>
+        <label class="setting-field analytics-exercise-field">
+          <span>종목별 성장</span>
+          <select id="analyticsExerciseSelect" aria-label="성장을 확인할 운동"></select>
+        </label>
+        <div class="exercise-progress-chart" id="exerciseProgressChart"></div>
       </section>
 
       <section class="content-section">
@@ -472,6 +525,18 @@
         </article>
       </div>
 
+      <section class="content-section exercise-guide-section">
+        <div class="section-title">
+          <h2>운동 가이드</h2>
+          <span class="soft-label">동작과 주의점을 확인해요</span>
+        </div>
+        <label class="guide-search">
+          <span class="visually-hidden">운동 가이드 검색</span>
+          <input id="exerciseGuideSearch" type="search" placeholder="운동 이름 검색">
+        </label>
+        <div class="exercise-guide-list" id="exerciseGuideList"></div>
+      </section>
+
       <!-- Kakao AdFit — ad unit ID is fetched at runtime from api/adfit.php (see src/core/adfit.js). -->
       <div class="ad-slot">
         <span class="ad-slot-label">광고</span>
@@ -585,6 +650,7 @@
           <button class="text-button" type="button" data-import-data>데이터 붙여넣기</button>
           <button class="text-button danger-text" type="button" data-reset-today>오늘 기록 초기화</button>
           <button class="text-button danger-text" type="button" data-logout>로그아웃</button>
+          <button class="text-button danger-text" type="button" data-open-delete-account>계정과 데이터 삭제</button>
         </div>
       </section>
 
@@ -731,6 +797,75 @@
       </div>
     </section>
 
+    <dialog class="app-dialog exercise-guide-dialog" id="exerciseGuideDialog" aria-labelledby="exerciseGuideTitle">
+      <div class="dialog-header">
+        <div>
+          <span class="soft-label" id="exerciseGuideCategory"></span>
+          <h2 id="exerciseGuideTitle"></h2>
+        </div>
+        <button class="icon-button" type="button" data-close-guide aria-label="운동 가이드 닫기">✕</button>
+      </div>
+      <div class="guide-detail" id="exerciseGuideDetail"></div>
+    </dialog>
+
+    <dialog class="app-dialog delete-account-dialog" id="deleteAccountDialog" aria-labelledby="deleteAccountTitle">
+      <form id="deleteAccountForm" method="dialog">
+        <div class="dialog-header">
+          <div>
+            <span class="soft-label">계정 관리</span>
+            <h2 id="deleteAccountTitle">계정과 모든 데이터를 삭제할까요?</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-delete-account aria-label="계정 삭제 창 닫기">✕</button>
+        </div>
+        <p class="field-help">삭제하면 서버와 이 기기의 기록을 복구할 수 없어요.</p>
+        <label class="setting-field" data-delete-password-field>
+          <span>현재 비밀번호</span>
+          <input name="password" type="password" autocomplete="current-password" maxlength="200" required>
+        </label>
+        <p class="form-note" id="deleteAccountNote" role="status"></p>
+        <div class="dialog-actions">
+          <button class="text-button" type="button" data-close-delete-account>취소</button>
+          <button class="danger-action" type="submit">영구 삭제</button>
+        </div>
+      </form>
+    </dialog>
+
+    <section class="ai-chat-panel" id="aiChatPanel" aria-hidden="true">
+      <div class="ai-chat-backdrop" data-chat-close></div>
+      <div class="ai-chat-sheet" role="dialog" aria-modal="true" aria-labelledby="aiChatTitle" aria-describedby="aiChatDescription">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <header class="ai-chat-header">
+          <div class="ai-chat-identity">
+            <span class="ai-chat-avatar" aria-hidden="true">G</span>
+            <span>
+              <strong id="aiChatTitle">AI 코치</strong>
+              <small id="aiChatDescription">운동, 영양, 회복을 편하게 물어보세요</small>
+            </span>
+          </div>
+          <button class="icon-button" type="button" data-chat-close aria-label="AI 채팅 닫기">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.7 5.3 5.3 5.3 5.3-5.3 1.4 1.4-5.3 5.3 5.3 5.3-1.4 1.4-5.3-5.3-5.3 5.3-1.4-1.4 5.3-5.3-5.3-5.3Z"/></svg>
+          </button>
+        </header>
+        <div class="ai-chat-messages" id="aiChatMessages" aria-live="polite" aria-relevant="additions"></div>
+        <div class="ai-chat-prompts" aria-label="빠른 질문">
+          <button type="button" data-chat-prompt="오늘 할 수 있는 30분 전신 운동을 추천해줘.">오늘 운동</button>
+          <button type="button" data-chat-prompt="체스트프레스를 대신할 운동을 추천해줘.">운동 대체</button>
+          <button type="button" data-chat-prompt="운동 후 단백질 섭취 방법을 알려줘.">영양 질문</button>
+        </div>
+        <form class="ai-chat-composer" id="aiChatForm">
+          <label class="ai-chat-input-wrap" for="aiChatInput">
+            <span class="visually-hidden">메시지</span>
+            <textarea id="aiChatInput" rows="1" maxlength="2000" placeholder="궁금한 내용을 입력하세요" enterkeyhint="send" required></textarea>
+          </label>
+          <button class="ai-chat-send" type="submit" aria-label="메시지 보내기">
+            <svg class="ai-chat-send-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 4.5 21 12 3.5 19.5l1.8-6.1 8.1-1.4-8.1-1.4Zm3.1 9.8-.6 2 9.5-4.1-9.5-4.1.6 2 7.6 1.3v1.6Z"/></svg>
+            <svg class="ai-chat-stop-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10H7Z"/></svg>
+          </button>
+        </form>
+        <p class="ai-chat-note">통증이나 부상이 있다면 운동을 멈추고 전문가와 상담하세요.</p>
+      </div>
+    </section>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <nav class="bottom-nav" aria-label="하단 메뉴">
@@ -745,6 +880,12 @@
       <button class="nav-item" type="button" data-tab="log">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8v3H8Zm-2 2h2v2h8V5h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm2.6 8.4 1.9 1.9 4-4 1.4 1.4-5.4 5.4-3.3-3.3Z"/></svg>
         <span>기록</span>
+      </button>
+      <button class="nav-item chat-nav-item" type="button" data-chat-open aria-haspopup="dialog" aria-controls="aiChatPanel" aria-expanded="false">
+        <span class="chat-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16v12H9l-5 4Zm2 2v9.2L8.2 14H18V6Zm3 3h6v2H9Z"/></svg>
+        </span>
+        <span>AI</span>
       </button>
       <button class="nav-item" type="button" data-tab="routine">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 10h2v4H2Zm3-2h2.5v8H5Zm11.5 0H19v8h-2.5ZM20 10h2v4h-2ZM8.5 11h7v2h-7Z"/></svg>

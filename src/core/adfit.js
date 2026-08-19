@@ -3,7 +3,7 @@
 // so there's no benefit to hiding it behind a server round-trip.
 const ADFIT_UNITS = {
   home: "DAN-OiYotfmOeEQPSWzn",
-  routine: "DAN-OiYotfmOeEQPSWzn"
+  routine: ""
 };
 
 export function setupAdFit() {
@@ -16,6 +16,9 @@ export function setupAdFit() {
     if (unitId) {
       slot.dataset.adUnit = unitId;
       hasUnit = true;
+    } else {
+      slot.closest(".ad-slot")?.setAttribute("hidden", "");
+      slot.remove();
     }
   });
 
