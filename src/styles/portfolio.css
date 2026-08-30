@@ -56,6 +56,13 @@
   font-size: 13px;
   font-weight: 800;
   text-align: center;
+  /* 기본 <summary> 마커(▶)가 왼쪽 공간을 차지해 text-align:center가 틀어진다.
+     마커를 없애 텍스트가 실제로 가운데 오게 한다. */
+  list-style: none;
+}
+
+.recovery-checkin summary::-webkit-details-marker {
+  display: none;
 }
 
 .recovery-checkin form {
