@@ -69,7 +69,7 @@ export function setupAiChat(user = null) {
     messages.replaceChildren();
     append("assistant", user?.demo
       ? "샘플 모드입니다. AI 답변은 실제 계정으로 로그인하면 사용할 수 있어요."
-      : "안녕하세요. 운동, 영양, 회복이나 간단한 계산도 편하게 물어보세요.", false);
+      : "안녕하세요. 운동, 회복이나 간단한 계산도 편하게 물어보세요.", false);
     history.forEach((item) => append(item.role, item.text, false));
   }
 
