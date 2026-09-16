@@ -302,13 +302,47 @@
     <section class="app-view" data-view="routine">
       <section class="page-heading">
         <p class="screen-label">루틴</p>
-        <h1>어렵지 않은 루틴부터 시작해요.</h1>
+        <h1>내 루틴을 만들고 요일마다 돌려요.</h1>
       </section>
 
-      <section class="content-section" id="myRoutineSection" hidden>
+      <section class="content-section" id="routineScheduleSection">
+        <div class="section-title">
+          <h2>이번 주 루틴</h2>
+          <button class="text-button" type="button" data-clear-schedule hidden>비우기</button>
+        </div>
+        <p class="field-help" id="routineScheduleHelp">아래 내 루틴에서 <strong>스케줄에 추가</strong>를 누른 순서대로 월요일부터 돌아가며 배정돼요.</p>
+        <ol class="routine-schedule-order" id="routineScheduleOrder" aria-label="스케줄 순서"></ol>
+        <ul class="routine-week" id="routineWeek" aria-label="요일별 루틴"></ul>
+      </section>
+
+      <section class="content-section" id="myRoutineSection">
         <div class="section-title">
           <h2>내 루틴</h2>
+          <button class="text-button" type="button" data-open-routine-builder>+ 루틴 만들기</button>
         </div>
+
+        <form class="routine-builder" id="routineBuilderForm" hidden novalidate aria-label="루틴 만들기">
+          <label class="setting-field">
+            <span>루틴 이름</span>
+            <input name="name" type="text" maxlength="40" placeholder="예: 가슴·삼두" autocomplete="off">
+          </label>
+          <div class="routine-builder-picked">
+            <span class="soft-label">담은 운동 <b id="routineBuilderCount">0</b>/12 · 누르면 빠져요</span>
+            <div class="routine-builder-chips" id="routineBuilderPicked"></div>
+          </div>
+          <label class="guide-search">
+            <span class="visually-hidden">담을 운동 검색</span>
+            <input id="routineBuilderSearch" type="search" placeholder="운동 이름 검색">
+          </label>
+          <div class="routine-builder-catalog" id="routineBuilderCatalog"></div>
+          <p class="form-note" id="routineBuilderNote"></p>
+          <div class="settings-actions">
+            <button class="text-button" type="button" data-close-routine-builder>취소</button>
+            <button class="text-button" type="submit">저장</button>
+          </div>
+        </form>
+
+        <p class="field-help" id="myRoutineEmpty">아직 만든 루틴이 없어요. <strong>+ 루틴 만들기</strong>로 시작해보세요.</p>
         <div class="routine-list" id="myRoutineList"></div>
       </section>
 

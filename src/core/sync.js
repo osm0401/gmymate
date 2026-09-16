@@ -11,6 +11,7 @@ const SYNCED_KEYS = [
   "gmymateInBodyLogs",
   "gmymateBadges",
   "gmymateCustomRoutines",
+  "gmymateRoutineSchedule",
   "gmymateRecoveryCheckins"
 ];
 

@@ -2,8 +2,40 @@ export const ROUTINE_LIMITS = {
   maxRoutines: 30,
   minExercises: 1,
   maxExercises: 12,
-  maxNameLength: 40
+  maxNameLength: 40,
+  // 한 주는 7일이라 8번째 이후 항목은 어느 요일에도 배정되지 않는다.
+  maxScheduleEntries: 7
 };
+
+export const WEEKDAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
+
+// Date.getDay()는 일요일이 0이다. 스케줄은 월요일부터 세므로 월=0 … 일=6으로 바꾼다.
+export function mondayIndex(date) {
+  return (date.getDay() + 6) % 7;
+}
+
+// 저장된 스케줄에서 지워진 루틴을 걸러낸다. 같은 루틴을 여러 번 넣는 건 허용한다.
+export function normalizeSchedule(rawIds, routines) {
+  if (!Array.isArray(rawIds)) {
+    return [];
+  }
+
+  const existing = new Set(routines.map((routine) => routine.id));
+  return rawIds
+    .filter((id) => typeof id === "string" && existing.has(id))
+    .slice(0, ROUTINE_LIMITS.maxScheduleEntries);
+}
+
+// 등록 순서대로 요일에 돌려 배정한다: [A,B,C] → 월A 화B 수C 목A 금B 토C 일A.
+export function buildWeeklySchedule(rawIds, routines) {
+  const ids = normalizeSchedule(rawIds, routines);
+  const byId = new Map(routines.map((routine) => [routine.id, routine]));
+
+  return WEEKDAY_LABELS.map((label, index) => ({
+    label,
+    routine: ids.length > 0 ? byId.get(ids[index % ids.length]) : null
+  }));
+}
 
 function defaultIdFactory() {
   return `routine-${Date.now()}-${Math.random().toString(16).slice(2)}`;
