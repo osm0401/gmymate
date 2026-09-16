@@ -452,18 +452,26 @@ function checkBadges(history, streak) {
   return unlockedIds;
 }
 
+/* 잠긴 뱃지 목록을 미리 보여주면 "다음 목표"가 돼버린다. 기본적으로는 섹션 자체를
+   숨기고, 실제로 딴 뱃지가 하나라도 생기면(획득 시 토스트로 먼저 알린다) 그때만
+   보여준다 — 목록은 딴 것만 담는다, 자물쇠 칸은 없다. */
 function renderBadges(unlockedIds) {
+  const section = document.querySelector("#badgeSection");
   const badgeHost = document.querySelector("#badgeList");
 
   if (!badgeHost) {
     return;
   }
 
-  const unlockedSet = new Set(unlockedIds);
+  const unlocked = BADGE_DEFS.filter((badge) => unlockedIds.includes(badge.id));
 
-  badgeHost.innerHTML = BADGE_DEFS.map((badge) => `
-    <div class="badge-chip ${unlockedSet.has(badge.id) ? "is-unlocked" : ""}">
-      <span>${unlockedSet.has(badge.id) ? "🏅" : "🔒"}</span>
+  if (section) {
+    section.hidden = unlocked.length === 0;
+  }
+
+  badgeHost.innerHTML = unlocked.map((badge) => `
+    <div class="badge-chip is-unlocked">
+      <span>🏅</span>
       <span>${escapeHtml(badge.label)}</span>
     </div>
   `).join("");

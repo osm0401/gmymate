@@ -112,115 +112,6 @@
         </details>
       </section>
 
-      <section class="content-section">
-        <div class="section-title">
-          <h2>이번 주 목표</h2>
-          <span class="soft-label" id="weeklyGaugeCaption" hidden></span>
-          <button class="text-button" type="button" data-open-goal-form>목표 수정</button>
-        </div>
-
-        <div class="arc-gauge-card" id="weeklyGaugeCard">
-          <div class="arc-gauge" id="weeklyGauge" style="--pct: 0">
-            <div class="arc-gauge-dial" aria-hidden="true"></div>
-            <div class="arc-gauge-ticks" aria-hidden="true"></div>
-            <div class="arc-gauge-value">
-              <strong id="weeklyGaugePct">0%</strong>
-              <span>주간 달성률</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="empty-state" id="weeklyGoalEmptyState" hidden>
-          <span class="empty-state-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6"/></svg>
-          </span>
-          <strong>주간 목표를 설정해보세요</strong>
-          <p>일주일에 몇 번 운동할지 정하면 달성률을 보여드릴게요.</p>
-          <button class="empty-state-action press-effect" type="button" data-open-goal-form>목표 설정하기</button>
-        </div>
-
-        <form class="goal-edit-form" id="goalEditForm" hidden novalidate aria-label="목표 수정">
-          <div class="goal-field" data-goal-field="goal">
-            <span>목표</span>
-            <input type="hidden" name="goal">
-            <div class="chip-select-group">
-              <button type="button" data-value="fat-loss">체지방 감량</button>
-              <button type="button" data-value="muscle-gain">근육 증가</button>
-              <button type="button" data-value="strength">근력 향상</button>
-              <button type="button" data-value="habit">운동 습관 만들기</button>
-            </div>
-            <small class="field-error" data-error-for="goal"></small>
-          </div>
-
-          <label class="setting-field goal-field" data-goal-field="targetWeight">
-            <span>목표 몸무게(kg)</span>
-            <input name="targetWeight" type="number" inputmode="decimal" min="30" max="250" step="0.1">
-            <small class="field-error" data-error-for="targetWeight"></small>
-          </label>
-
-          <div class="goal-field" data-goal-field="weeklyWorkout">
-            <span>주간 운동 횟수</span>
-            <input type="hidden" name="weeklyWorkout">
-            <div class="chip-select-group">
-              <button type="button" data-value="2">주 2회</button>
-              <button type="button" data-value="3">주 3회</button>
-              <button type="button" data-value="4">주 4회</button>
-              <button type="button" data-value="5">주 5회+</button>
-            </div>
-            <small class="field-error" data-error-for="weeklyWorkout"></small>
-          </div>
-
-          <p class="form-note" id="goalEditNote"></p>
-
-          <div class="settings-actions">
-            <button class="text-button" type="button" data-close-goal-form>취소</button>
-            <button class="text-button" type="submit">저장</button>
-          </div>
-        </form>
-      </section>
-
-      <section class="content-section">
-        <div class="section-title">
-          <h2>오늘 현황</h2>
-          <button class="text-button" type="button" data-tab="log">기록하기</button>
-        </div>
-
-        <div class="stat-panel-card" id="todayStatCard">
-          <div class="daily-metrics">
-            <div>
-              <i class="stat-icon" data-tone="lime" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
-              </i>
-              <span>완료 세트</span>
-              <strong id="homeDoneSets">0/0</strong>
-            </div>
-            <div>
-              <i class="stat-icon" data-tone="blue" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M3 10v4M6 8v8M18 8v8M21 10v4M6 12h12"/></svg>
-              </i>
-              <span>운동 볼륨</span>
-              <strong id="homeVolume">0kg</strong>
-            </div>
-            <div>
-              <i class="stat-icon" data-tone="orange" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M12 21c3.9 0 6.5-2.4 6.5-6 0-3.7-3.2-5.9-4.4-9.6-.2-.6-1-.7-1.3-.1-1 1.8-1.3 3.4-2.6 4.9-.9-.6-1.2-1.6-1.3-2.6-.1-.6-.8-.8-1.2-.3C6.7 8.9 5.5 10.9 5.5 15c0 3.6 2.6 6 6.5 6Z"/></svg>
-              </i>
-              <span>연속 운동</span>
-              <strong id="homeStreak">0일</strong>
-            </div>
-          </div>
-        </div>
-
-        <div class="empty-state" id="todayEmptyState" hidden>
-          <span class="empty-state-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M6 4h12v16H6z"/><path d="M9.5 9.5h5M9.5 14h5"/></svg>
-          </span>
-          <strong>오늘 기록이 아직 없어요</strong>
-          <p>운동을 추가하고 세트를 체크하면 여기에 바로 쌓여요.</p>
-          <button class="empty-state-action press-effect" type="button" data-tab="log">운동 추가하기</button>
-        </div>
-      </section>
-
       <section class="content-section analytics-panel" id="portfolioAnalytics">
         <div class="section-title">
           <h2>운동 분석</h2>
@@ -237,48 +128,6 @@
           <select id="analyticsExerciseSelect" aria-label="성장을 확인할 운동"></select>
         </label>
         <div class="exercise-progress-chart" id="exerciseProgressChart"></div>
-      </section>
-
-      <section class="content-section">
-        <div class="section-title">
-          <h2>오늘 할 일</h2>
-          <button class="text-button" type="button" data-tab="routine">바꾸기</button>
-        </div>
-
-        <p class="field-help" id="balanceHintText"></p>
-
-        <article class="routine-card">
-          <div>
-            <span class="routine-type">초보도 쉬운 루틴</span>
-            <h3>상체 가볍게 시작</h3>
-            <p>체스트프레스, 숄더프레스, 오버헤드 익스텐션</p>
-          </div>
-          <button class="circle-button" type="button" data-start-workout data-routine="chest-press,shoulder-press,overhead-extension" data-bpm="110-130" aria-label="루틴 시작">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M8 5v14l11-7Z"/>
-            </svg>
-          </button>
-        </article>
-      </section>
-
-      <section class="content-section">
-        <div class="section-title">
-          <h2>작은 습관</h2>
-        </div>
-        <div class="habit-list">
-          <label>
-            <input type="checkbox" data-habit="protein">
-            <span>운동 후 단백질 챙기기</span>
-          </label>
-          <label>
-            <input type="checkbox" data-habit="water">
-            <span>물 2L 마시기</span>
-          </label>
-          <label>
-            <input type="checkbox" data-habit="stretch">
-            <span>스트레칭 5분 하기</span>
-          </label>
-        </div>
       </section>
 
       <!-- Kakao AdFit — ad unit ID is fetched at runtime from api/adfit.php (see src/core/adfit.js).
@@ -463,85 +312,6 @@
         <div class="routine-list" id="myRoutineList"></div>
       </section>
 
-      <section class="content-section">
-        <div class="section-title">
-          <h2>추천 루틴</h2>
-        </div>
-      </section>
-
-      <div class="routine-list">
-        <article class="routine-card">
-          <div>
-            <span class="routine-type">상체</span>
-            <h3>가볍게 밀기</h3>
-            <p>체스트프레스, 숄더프레스, 오버헤드 익스텐션</p>
-          </div>
-          <button class="circle-button" type="button" data-start-workout data-routine="chest-press,shoulder-press,overhead-extension" data-bpm="110-130" aria-label="상체 루틴 시작">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>
-          </button>
-        </article>
-        <article class="routine-card">
-          <div>
-            <span class="routine-type">등</span>
-            <h3>당기기 루틴</h3>
-            <p>렛풀다운, 시티드 로우, 암컬</p>
-          </div>
-          <button class="circle-button" type="button" data-start-workout data-routine="lat-pulldown,seated-row,arm-curl" data-bpm="110-130" aria-label="등 루틴 시작">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>
-          </button>
-        </article>
-        <article class="routine-card">
-          <div>
-            <span class="routine-type">하체</span>
-            <h3>무리 없는 하체</h3>
-            <p>스쿼트, 레그프레스, 힙 익스텐션</p>
-          </div>
-          <button class="circle-button" type="button" data-start-workout data-routine="squat,leg-press,hip-extension" data-bpm="130-999" aria-label="하체 루틴 시작">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>
-          </button>
-        </article>
-        <article class="routine-card">
-          <div>
-            <span class="routine-type">가슴</span>
-            <h3>가슴 집중</h3>
-            <p>체스트프레스, 인클라인 체스트프레스, 펙덱플라이</p>
-          </div>
-          <button class="circle-button" type="button" data-start-workout data-routine="chest-press,incline-chest-press,pec-deck-fly" data-bpm="110-130" aria-label="가슴 루틴 시작">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>
-          </button>
-        </article>
-        <article class="routine-card">
-          <div>
-            <span class="routine-type">어깨</span>
-            <h3>어깨 집중</h3>
-            <p>숄더프레스, 덤벨 프론트 레이즈, 리버스 펙덱플라이</p>
-          </div>
-          <button class="circle-button" type="button" data-start-workout data-routine="shoulder-press,dumbbell-front-raise,reverse-pec-deck-fly" data-bpm="110-130" aria-label="어깨 루틴 시작">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>
-          </button>
-        </article>
-        <article class="routine-card">
-          <div>
-            <span class="routine-type">코어</span>
-            <h3>코어 다지기</h3>
-            <p>인클라인 로테이션, 닐링 크런치</p>
-          </div>
-          <button class="circle-button" type="button" data-start-workout data-routine="incline-rotation,kneeling-crunch" data-bpm="90-110" aria-label="코어 루틴 시작">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>
-          </button>
-        </article>
-        <article class="routine-card">
-          <div>
-            <span class="routine-type">전신</span>
-            <h3>처음 온 날 루틴</h3>
-            <p>스쿼트, 체스트프레스, 렛풀다운, 사이클</p>
-          </div>
-          <button class="circle-button" type="button" data-start-workout data-routine="squat,chest-press,lat-pulldown,cycle" data-bpm="90-110" aria-label="전신 루틴 시작">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>
-          </button>
-        </article>
-      </div>
-
       <section class="content-section exercise-guide-section">
         <div class="section-title">
           <h2>운동 가이드</h2>
@@ -614,7 +384,7 @@
         <div class="history-list" id="prBoardList"></div>
       </section>
 
-      <section class="content-section">
+      <section class="content-section" id="badgeSection" hidden>
         <div class="section-title">
           <h2>뱃지</h2>
         </div>
@@ -662,6 +432,26 @@
             <span>다크 모드</span>
             <input id="darkModeSetting" type="checkbox">
           </label>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-title">
+          <h2>서비스 연결</h2>
+        </div>
+        <div class="music-provider-list">
+          <div class="music-provider-card">
+            <span>Spotify</span>
+            <button class="text-button" type="button" data-connect-provider="spotify">연결하기</button>
+          </div>
+          <div class="music-provider-card">
+            <span>Apple Music</span>
+            <button class="text-button" type="button" data-connect-provider="apple">연결하기</button>
+          </div>
+          <div class="music-provider-card">
+            <span>YouTube</span>
+            <button class="text-button" type="button" data-connect-provider="youtube">로그인</button>
+          </div>
         </div>
       </section>
 
@@ -729,38 +519,6 @@
       <section class="page-heading">
         <p class="screen-label">음악</p>
         <h1>운동할 때 들을 음악을 골라요.</h1>
-      </section>
-
-      <section class="content-section">
-        <div class="section-title">
-          <h2>서비스 연결</h2>
-        </div>
-        <div class="music-provider-list">
-          <div class="music-provider-card">
-            <span>Spotify</span>
-            <button class="text-button" type="button" data-connect-provider="spotify">연결하기</button>
-          </div>
-          <div class="music-provider-card">
-            <span>Apple Music</span>
-            <button class="text-button" type="button" data-connect-provider="apple">연결하기</button>
-          </div>
-          <div class="music-provider-card">
-            <span>YouTube</span>
-            <button class="text-button" type="button" data-connect-provider="youtube">로그인</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="content-section">
-        <div class="section-title">
-          <h2>운동 추천</h2>
-        </div>
-        <div class="music-recommend-list">
-          <button type="button" data-bpm-preset="90-110">웜업 · 90~110 BPM</button>
-          <button type="button" data-bpm-preset="110-130">중강도 · 110~130 BPM</button>
-          <button type="button" data-bpm-preset="130-999">고강도 · 130 BPM+</button>
-        </div>
-        <div class="music-recommend-results" id="musicRecommendResults"></div>
       </section>
 
       <section class="content-section">
