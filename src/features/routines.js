@@ -21,8 +21,37 @@ const ERROR_MESSAGES = {
 const PLAY_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7Z"/></svg>';
 const TRASH_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4Zm-3 6h12l-1 12H7Z"/></svg>';
 
+function getTodayWorkouts() {
+  return readJson("gmymateWorkoutLogsV2", []);
+}
+
 function getTodayExerciseIds() {
-  return readJson("gmymateWorkoutLogsV2", []).map((workout) => workout.exerciseId);
+  return getTodayWorkouts().map((workout) => workout.exerciseId);
+}
+
+/* 오늘 넣은 세트 수와 첫 세트의 무게·횟수를 그 운동의 목표치로 삼는다. */
+function getTodayTargets() {
+  return Object.fromEntries(getTodayWorkouts().map((workout) => {
+    const sets = Array.isArray(workout.sets) ? workout.sets : [];
+    const first = sets[0] || {};
+    return [workout.exerciseId, { sets: sets.length, weight: first.weight, reps: first.reps }];
+  }));
+}
+
+function exerciseById(id) {
+  return exerciseCatalog.find((exercise) => exercise.id === id);
+}
+
+function formatWeight(weight) {
+  return weight > 0 ? `${weight}kg` : "맨몸";
+}
+
+function targetSummary(routine) {
+  return routine.exerciseIds.map((id) => {
+    const name = exerciseById(id)?.name || id;
+    const target = routine.targets?.[id];
+    return target ? `${name} ${formatWeight(target.weight)}×${target.reps}회 ${target.sets}세트` : name;
+  });
 }
 
 function getRoutines() {
@@ -43,9 +72,9 @@ function save(key, value, failMessage) {
   }
 }
 
-function saveNewRoutine(name, exerciseIds) {
+function saveNewRoutine(name, exerciseIds, targets) {
   const routines = getRoutines();
-  const result = createRoutine({ name, exerciseIds, existingRoutines: routines, exerciseCatalog });
+  const result = createRoutine({ name, exerciseIds, targets, existingRoutines: routines, exerciseCatalog });
 
   if (!result.ok) {
     return result;
@@ -98,7 +127,7 @@ function setupSaveTodayAsRoutine(onSaved) {
 
   form?.addEventListener("submit", (event) => {
     event.preventDefault();
-    const result = saveNewRoutine(nameInput?.value, getTodayExerciseIds());
+    const result = saveNewRoutine(nameInput?.value, getTodayExerciseIds(), getTodayTargets());
 
     if (!result.ok) {
       if (result.reason !== "storage") {
@@ -129,6 +158,7 @@ function setupRoutineBuilder(onSaved) {
   const pickedHost = form.querySelector("#routineBuilderPicked");
   const countLabel = form.querySelector("#routineBuilderCount");
   const note = form.querySelector("#routineBuilderNote");
+  // [{ id, sets, weight, reps }] — 담은 순서가 곧 운동 순서다.
   let picked = [];
 
   function setNote(message) {
@@ -136,18 +166,39 @@ function setupRoutineBuilder(onSaved) {
     note.classList.toggle("is-error", Boolean(message));
   }
 
+  function numberField(item, field, label, unit, { min, max, step }) {
+    return `
+      <label class="routine-target-field">
+        <span>${label}</span>
+        <input type="number" inputmode="${step < 1 ? "decimal" : "numeric"}" min="${min}" max="${max}" step="${step}"
+          value="${item[field]}" data-target-id="${escapeHtml(item.id)}" data-target-field="${field}"
+          aria-label="${escapeHtml(exerciseById(item.id)?.name || "")} ${label}">
+        <small>${unit}</small>
+      </label>`;
+  }
+
   function renderBuilder() {
     const keyword = search.value.trim();
-    const pickedSet = new Set(picked);
+    const pickedSet = new Set(picked.map((item) => item.id));
     const matches = exerciseCatalog.filter((exercise) =>
       !keyword || exercise.name.includes(keyword) || exercise.category.includes(keyword));
+    const { maxSets, maxWeight, maxReps } = ROUTINE_LIMITS.target;
 
     countLabel.textContent = String(picked.length);
     pickedHost.innerHTML = picked.length
-      ? resolveExerciseNames(picked, exerciseCatalog).map((name, index) => `
-        <button type="button" class="routine-chip is-picked" data-unpick-exercise="${escapeHtml(picked[index])}">
-          <b>${index + 1}</b> ${escapeHtml(name)} <span aria-hidden="true">✕</span>
-        </button>`).join("")
+      ? picked.map((item, index) => `
+        <div class="routine-target-row">
+          <div class="routine-target-head">
+            <b>${index + 1}</b>
+            <strong>${escapeHtml(exerciseById(item.id)?.name || item.id)}</strong>
+            <button class="icon-button" type="button" data-unpick-exercise="${escapeHtml(item.id)}" aria-label="${escapeHtml(exerciseById(item.id)?.name || "")} 빼기">✕</button>
+          </div>
+          <div class="routine-target-inputs">
+            ${numberField(item, "sets", "세트", "세트", { min: 1, max: maxSets, step: 1 })}
+            ${numberField(item, "weight", "무게", "kg", { min: 0, max: maxWeight, step: 0.5 })}
+            ${numberField(item, "reps", "횟수", "회", { min: 1, max: maxReps, step: 1 })}
+          </div>
+        </div>`).join("")
       : '<p class="field-help">아래에서 운동을 눌러 담아주세요.</p>';
 
     catalogHost.innerHTML = matches.length
@@ -188,22 +239,58 @@ function setupRoutineBuilder(onSaved) {
       return;
     }
 
-    if (picked.includes(id)) {
-      picked = picked.filter((pickedId) => pickedId !== id);
+    if (picked.some((item) => item.id === id)) {
+      picked = picked.filter((item) => item.id !== id);
     } else if (picked.length >= ROUTINE_LIMITS.maxExercises) {
       setNote(`운동은 최대 ${ROUTINE_LIMITS.maxExercises}개까지 담을 수 있어요.`);
       return;
     } else {
-      picked = [...picked, id];
+      /* 기본값은 운동 카탈로그 값 — 기록 화면에서 운동을 추가할 때와 같다. */
+      const exercise = exerciseById(id);
+      picked = [...picked, { id, sets: exercise.sets, weight: exercise.weight, reps: exercise.reps }];
     }
 
     setNote("");
     renderBuilder();
   });
 
+  form.addEventListener("input", (event) => {
+    const input = event.target.closest("[data-target-field]");
+    const item = input && picked.find((entry) => entry.id === input.dataset.targetId);
+
+    if (item) {
+      item[input.dataset.targetField] = input.value;
+    }
+  });
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    const result = saveNewRoutine(nameInput.value, picked);
+
+    const { maxSets, maxWeight, maxReps } = ROUTINE_LIMITS.target;
+    const isValid = {
+      sets: (value) => Number.isInteger(Number(value)) && Number(value) >= 1 && Number(value) <= maxSets,
+      weight: (value) => String(value).trim() !== "" && Number(value) >= 0 && Number(value) <= maxWeight,
+      reps: (value) => Number.isInteger(Number(value)) && Number(value) >= 1 && Number(value) <= maxReps
+    };
+    let invalid = null;
+
+    for (const item of picked) {
+      const field = ["sets", "weight", "reps"].find((key) => !isValid[key](item[key]));
+      if (field) {
+        invalid = { item, field };
+        break;
+      }
+    }
+
+    /* 저장 단계에서 조용히 기본값으로 바꾸지 않고, 틀린 칸으로 보내서 고치게 한다. */
+    if (invalid) {
+      setNote(`${exerciseById(invalid.item.id)?.name}: 세트 1~${maxSets}, 무게 0~${maxWeight}kg, 횟수 1~${maxReps}회로 입력해주세요.`);
+      pickedHost.querySelector(`[data-target-id="${invalid.item.id}"][data-target-field="${invalid.field}"]`)?.focus();
+      return;
+    }
+
+    const targets = Object.fromEntries(picked.map((item) => [item.id, item]));
+    const result = saveNewRoutine(nameInput.value, picked.map((item) => item.id), targets);
 
     if (!result.ok) {
       if (result.reason === "no-exercises") {
@@ -293,10 +380,12 @@ function renderMyRoutines(routines) {
       <div>
         <span class="routine-type">내 루틴 · ${routine.exerciseIds.length}개</span>
         <h3>${escapeHtml(routine.name)}</h3>
-        <p>${escapeHtml(exerciseNames.join(", "))}</p>
+        ${routine.targets
+          ? `<ul class="routine-target-summary">${targetSummary(routine).map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>`
+          : `<p>${escapeHtml(exerciseNames.join(", "))}</p>`}
       </div>
       <div class="routine-card-actions">
-        <button class="circle-button" type="button" data-start-workout data-routine="${escapeHtml(routine.exerciseIds.join(","))}" aria-label="${escapeHtml(routine.name)} 시작">${PLAY_ICON}</button>
+        <button class="circle-button" type="button" data-start-workout data-routine="${escapeHtml(routine.exerciseIds.join(","))}" data-routine-id="${escapeHtml(routine.id)}" aria-label="${escapeHtml(routine.name)} 시작">${PLAY_ICON}</button>
         <button class="text-button" type="button" data-schedule-add="${escapeHtml(routine.id)}">스케줄에 추가</button>
         <button class="icon-button" type="button" data-delete-routine="${escapeHtml(routine.id)}" aria-label="${escapeHtml(routine.name)} 삭제">${TRASH_ICON}</button>
       </div>
@@ -344,7 +433,7 @@ function renderSchedule(routines, schedule) {
     <li class="routine-week-day${isToday ? " is-today" : ""}"${isToday ? ' aria-current="date"' : ""}>
       <span class="routine-week-label">${day.label}${isToday ? " · 오늘" : ""}</span>
       <strong>${letter ? `<b>${letter}</b> ` : ""}${day.routine ? escapeHtml(day.routine.name) : "-"}</strong>
-      ${isToday && day.routine ? `<button class="circle-button" type="button" data-start-workout data-routine="${escapeHtml(day.routine.exerciseIds.join(","))}" aria-label="오늘 루틴 ${escapeHtml(day.routine.name)} 시작">${PLAY_ICON}</button>` : ""}
+      ${isToday && day.routine ? `<button class="circle-button" type="button" data-start-workout data-routine="${escapeHtml(day.routine.exerciseIds.join(","))}" data-routine-id="${escapeHtml(day.routine.id)}" aria-label="오늘 루틴 ${escapeHtml(day.routine.name)} 시작">${PLAY_ICON}</button>` : ""}
     </li>
   `;
   }).join("");

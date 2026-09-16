@@ -4,8 +4,46 @@ export const ROUTINE_LIMITS = {
   maxExercises: 12,
   maxNameLength: 40,
   // 한 주는 7일이라 8번째 이후 항목은 어느 요일에도 배정되지 않는다.
-  maxScheduleEntries: 7
+  maxScheduleEntries: 7,
+  // 루틴에 저장하는 운동별 목표치. 범위를 벗어난 값은 잘라 맞추지 않고 기본값으로 되돌린다.
+  target: { maxSets: 10, maxWeight: 500, maxReps: 100 }
 };
+
+function toNumber(value) {
+  if (typeof value === "number") return value;
+  if (typeof value === "string" && value.trim() !== "") return Number(value);
+  return NaN;
+}
+
+// 운동 하나의 목표(세트·무게·횟수). 필드마다 따로 검사해서 틀린 것만 운동 기본값으로 채운다.
+export function normalizeRoutineTarget(raw, exercise) {
+  const { maxSets, maxWeight, maxReps } = ROUTINE_LIMITS.target;
+  const sets = toNumber(raw?.sets);
+  const weight = toNumber(raw?.weight);
+  const reps = toNumber(raw?.reps);
+
+  return {
+    sets: Number.isInteger(sets) && sets >= 1 && sets <= maxSets ? sets : exercise.sets,
+    weight: Number.isFinite(weight) && weight >= 0 && weight <= maxWeight ? Math.round(weight * 10) / 10 : exercise.weight,
+    reps: Number.isInteger(reps) && reps >= 1 && reps <= maxReps ? reps : exercise.reps
+  };
+}
+
+function normalizeTargets(rawTargets, exerciseIds, exerciseCatalog, { fillMissing }) {
+  const byId = new Map(exerciseCatalog.map((exercise) => [exercise.id, exercise]));
+  const hasRaw = rawTargets && typeof rawTargets === "object" && !Array.isArray(rawTargets);
+  const result = {};
+
+  exerciseIds.forEach((id) => {
+    const provided = hasRaw && Object.hasOwn(rawTargets, id);
+
+    if (provided || fillMissing) {
+      result[id] = normalizeRoutineTarget(provided ? rawTargets[id] : null, byId.get(id));
+    }
+  });
+
+  return result;
+}
 
 export const WEEKDAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
 
@@ -62,7 +100,7 @@ export function dedupeExerciseIds(exerciseIds, exerciseCatalog) {
   return result;
 }
 
-export function createRoutine({ name, exerciseIds, existingRoutines = [], exerciseCatalog, idFactory = defaultIdFactory }) {
+export function createRoutine({ name, exerciseIds, targets, existingRoutines = [], exerciseCatalog, idFactory = defaultIdFactory }) {
   const trimmedName = sanitizeRoutineName(name);
 
   if (trimmedName.length === 0 || trimmedName.length > ROUTINE_LIMITS.maxNameLength) {
@@ -79,10 +117,15 @@ export function createRoutine({ name, exerciseIds, existingRoutines = [], exerci
     return { ok: false, reason: "limit-reached" };
   }
 
-  return {
-    ok: true,
-    routine: { id: idFactory(), name: trimmedName, exerciseIds: cleanIds }
-  };
+  const routine = { id: idFactory(), name: trimmedName, exerciseIds: cleanIds };
+
+  // 목표치를 넘겼으면 담긴 운동 전부에 목표를 채운다. 안 넘겼으면 예전 모양 그대로 —
+  // 시작할 때 지난 기록/기본값을 쓴다.
+  if (targets !== undefined) {
+    routine.targets = normalizeTargets(targets, cleanIds, exerciseCatalog, { fillMissing: true });
+  }
+
+  return { ok: true, routine };
 }
 
 export function normalizeStoredRoutines(rawRoutines, exerciseCatalog) {
@@ -114,7 +157,14 @@ export function normalizeStoredRoutines(rawRoutines, exerciseCatalog) {
       continue;
     }
 
-    result.push({ id, name, exerciseIds });
+    const routine = { id, name, exerciseIds };
+    const targets = normalizeTargets(raw.targets, exerciseIds, exerciseCatalog, { fillMissing: false });
+
+    if (Object.keys(targets).length > 0) {
+      routine.targets = targets;
+    }
+
+    result.push(routine);
   }
 
   return result;

@@ -114,7 +114,9 @@ function setupNavigation() {
       const ids = (button.dataset.routine || "").split(",").map((id) => id.trim()).filter(Boolean);
 
       if (ids.length) {
-        window.dispatchEvent(new CustomEvent("gmymate:start-routine", { detail: { ids } }));
+        window.dispatchEvent(new CustomEvent("gmymate:start-routine", {
+          detail: { ids, routineId: button.dataset.routineId || null }
+        }));
 
         if (button.dataset.bpm) {
           sessionStorage.setItem("gmymatePendingBpm", button.dataset.bpm);

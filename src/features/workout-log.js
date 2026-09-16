@@ -1,6 +1,6 @@
 import { exerciseCatalog, getExerciseReplacements } from "../core/data.js";
 import { partIcon } from "../core/part-icons.js";
-import { planRoutineStart } from "../core/routines.js";
+import { normalizeStoredRoutines, planRoutineStart } from "../core/routines.js";
 import { BODY_AREA_LABELS, getExerciseWarningAreas, getInjuryAreas, hasGeneralInjuryNotice } from "../core/recovery.js";
 import { escapeHtml, getDateKey, getWorkoutStats, readJson, setText, showToast, writeJson } from "../core/storage.js";
 
@@ -125,7 +125,12 @@ export function setupWorkoutLog() {
     return lastSession?.workout.sets.find((set) => set.done) || null;
   }
 
-  function makeSets(exercise) {
+  /* 루틴에 목표치(target)가 저장돼 있으면 그대로 쓰고, 없으면 지난 기록 → 운동 기본값 순으로 채운다. */
+  function makeSets(exercise, target = null) {
+    if (target) {
+      return Array.from({ length: target.sets }, () => ({ weight: target.weight, reps: target.reps, done: false, type: "normal" }));
+    }
+
     const lastDoneSet = getLastDoneSet(exercise.id);
     const weight = lastDoneSet ? Number(lastDoneSet.weight) : exercise.weight;
     const reps = lastDoneSet ? Number(lastDoneSet.reps) : exercise.reps;
@@ -652,7 +657,11 @@ export function setupWorkoutLog() {
     showToast(overloadHint || `${exercise.name}을 추가했어요.`);
   }
 
-  function startRoutine(ids) {
+  function startRoutine(ids, routineId) {
+    const routine = routineId
+      ? normalizeStoredRoutines(readJson("gmymateCustomRoutines", []), exerciseCatalog).find((item) => item.id === routineId)
+      : null;
+    const targets = routine?.targets || {};
     const { toAdd, skippedCount } = planRoutineStart({
       existingExerciseIds: workouts.map((workout) => workout.exerciseId),
       routineExerciseIds: ids,
@@ -671,7 +680,7 @@ export function setupWorkoutLog() {
         exerciseId: exercise.id,
         name: exercise.name,
         category: exercise.category,
-        sets: makeSets(exercise)
+        sets: makeSets(exercise, targets[id])
       };
     });
 
@@ -695,7 +704,7 @@ export function setupWorkoutLog() {
   }
 
   window.addEventListener("gmymate:start-routine", (event) => {
-    startRoutine(event.detail?.ids || []);
+    startRoutine(event.detail?.ids || [], event.detail?.routineId);
   });
 
   document.querySelectorAll("[data-open-exercise-picker]").forEach((button) => {
