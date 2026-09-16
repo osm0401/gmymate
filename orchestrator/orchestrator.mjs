@@ -44,14 +44,53 @@ const sh = (cmd) => execSync(cmd, { cwd: repo, encoding: "utf8", maxBuffer: 64e6
 // execFile은 PATHEXT를 안 보므로 이름만 넘기면 ENOENT가 난다 — 실제 경로를 찾아 쓴다.
 const binCache = new Map();
 const binScore = (p) => (/\.exe$/i.test(p) ? 3 : /\.(cmd|bat)$/i.test(p) ? 2 : 1);
+
+// 후보 하나의 버전을 뽑아본다. 실패하면 null — 여러 설치본 중 죽은 것이 하나 있어도
+// 나머지로 계속 판단할 수 있어야 한다.
+function probeVersion(path) {
+  try {
+    const shell = /\.(cmd|bat)$/i.test(path);
+    const out = shell
+      ? execSync(`${quoteArg(path)} --version`, { encoding: "utf8", timeout: 10_000 })
+      : execFileSync(path, ["--version"], { encoding: "utf8", timeout: 10_000 });
+    const m = out.match(/(\d+(?:\.\d+){1,3})/);
+    return m ? m[1].split(".").map(Number) : null;
+  } catch {
+    return null;
+  }
+}
+
+function compareVersions(a, b) {
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const diff = (a[i] ?? 0) - (b[i] ?? 0);
+    if (diff) return diff;
+  }
+  return 0;
+}
+
+// 같은 이름의 CLI가 여러 개 설치돼 있으면(npm 전역판 + 네이티브 인스톨러판 등) 최신
+// 버전을 우선한다. gpt-6-astra급 최신 모델을 오래된 codex.exe가 거부하는 걸 겪었다 —
+// 확장자(.exe > .cmd)로만 고르면 구버전이 이길 수 있어서 버전을 직접 비교한다.
+// 버전을 못 읽으면(신뢰 못 할 후보) 확장자 우선순위로 되돌아간다.
 function bin(name) {
   if (binCache.has(name)) return binCache.get(name);
   const win = process.platform === "win32";
   let found;
   try { found = execFileSync(win ? "where" : "which", [name], { encoding: "utf8" }); }
   catch { throw new Error(`${name} CLI를 찾을 수 없다 — 설치/로그인 후 실행하라`); }
-  const paths = found.split("\n").map((s) => s.trim()).filter(Boolean);
-  const pick = win ? paths.sort((a, b) => binScore(b) - binScore(a))[0] : paths[0];
+  const paths = [...new Set(found.split("\n").map((s) => s.trim()).filter(Boolean))];
+
+  let pick;
+  if (paths.length === 1) {
+    pick = paths[0];
+  } else {
+    const versioned = paths.map((p) => ({ p, v: probeVersion(p) })).filter((c) => c.v);
+    if (versioned.length > 0) {
+      pick = versioned.sort((a, b) => compareVersions(b.v, a.v))[0].p;
+    } else {
+      pick = win ? paths.sort((a, b) => binScore(b) - binScore(a))[0] : paths[0];
+    }
+  }
   binCache.set(name, pick);
   return pick;
 }
