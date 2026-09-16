@@ -191,8 +191,10 @@ function codex(prompt) {
       ["exec", "--skip-git-repo-check", "-s", "read-only",
        "-c", "tools.web_search=true",                                    // 온라인 리서치 (계획서 3)
        ...(process.env.CODEX_MODEL ? ["-m", process.env.CODEX_MODEL] : []), // 기본 모델을 그대로 쓴다
-       "-o", out, prompt],
-      { cwd: repo, encoding: "utf8", maxBuffer: 64e6 },
+       "-o", out, "-"],
+      // 프롬프트는 stdin으로 넘긴다. codex가 .cmd 셔임으로 잡히면 cmd.exe를 거치는데,
+      // 인자로 넘긴 여러 줄 프롬프트는 첫 줄에서 잘려 지휘자가 빈 지시서를 낸다(실제로 겪음).
+      { cwd: repo, encoding: "utf8", maxBuffer: 64e6, input: prompt },
     );
     const order = existsSync(out) ? readFileSync(out, "utf8").trim() : "";
     if (!order) throw new Error("작업 지시서가 비어 있다");
